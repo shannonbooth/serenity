@@ -1,4 +1,5 @@
 #import <Streams/QueuingStrategyInit.idl>
+#import <WebIDL/Function.idl>
 
 // https://streams.spec.whatwg.org/#blqs-class-definition
 [Exposed=*]
@@ -7,5 +8,5 @@ interface ByteLengthQueuingStrategy {
 
     readonly attribute unrestricted double highWaterMark;
 
-    // FIXME: readonly attribute Function size;
+    readonly attribute Function size;
 };

@@ -18,6 +18,7 @@
 #include <LibWeb/HTML/MessagePort.h>
 #include <LibWeb/PerformanceTimeline/PerformanceEntry.h>
 #include <LibWeb/PerformanceTimeline/PerformanceEntryTuple.h>
+#include <LibWeb/WebIDL/CallbackType.h>
 
 namespace Web::HTML {
 
@@ -57,6 +58,9 @@ public:
     void set_count_queuing_strategy_size_function(JS::Handle<WebIDL::CallbackType> value) { m_count_queuing_strategy_size_function = move(value); }
     JS::Handle<WebIDL::CallbackType> count_queuing_strategy_size_function() const { return m_count_queuing_strategy_size_function; }
 
+    void set_byte_length_queuing_strategy_size_function(JS::Handle<WebIDL::CallbackType> value) { m_byte_length_queuing_strategy_size_function = move(value); }
+    JS::Handle<WebIDL::CallbackType> byte_length_queuing_strategy_size_function() const { return m_byte_length_queuing_strategy_size_function; }
+
 protected:
     JS::ThrowCompletionOr<void> initialize(JS::Realm&);
     void visit_edges(JS::Cell::Visitor&);
@@ -83,6 +87,9 @@ private:
 
     // https://streams.spec.whatwg.org/#count-queuing-strategy-size-function
     JS::Handle<WebIDL::CallbackType> m_count_queuing_strategy_size_function;
+
+    // https://streams.spec.whatwg.org/#byte-length-queuing-strategy-size-function
+    JS::Handle<WebIDL::CallbackType> m_byte_length_queuing_strategy_size_function;
 };
 
 }

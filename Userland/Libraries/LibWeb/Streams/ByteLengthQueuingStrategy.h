@@ -11,6 +11,7 @@
 #include <LibWeb/Bindings/PlatformObject.h>
 #include <LibWeb/Forward.h>
 #include <LibWeb/Streams/QueuingStrategyInit.h>
+#include <LibWeb/WebIDL/CallbackType.h>
 
 namespace Web::Streams {
 
@@ -31,11 +32,14 @@ public:
         return m_high_water_mark;
     }
 
+    WebIDL::CallbackType* size();
+
 private:
     explicit ByteLengthQueuingStrategy(JS::Realm&, double high_water_mark);
 
     virtual JS::ThrowCompletionOr<void> initialize(JS::Realm&) override;
 
+    // https://streams.spec.whatwg.org/#bytelengthqueuingstrategy-highwatermark
     double m_high_water_mark { 0 };
 };
 
