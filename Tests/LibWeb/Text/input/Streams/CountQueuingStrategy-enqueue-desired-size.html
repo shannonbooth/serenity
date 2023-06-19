@@ -1,0 +1,26 @@
+<script src="../include.js"></script>
+<script>
+    test(() => {
+        let controller;
+        const rs = new ReadableStream(
+            {
+                start(c) {
+                    controller = c;
+                }
+            },
+            new CountQueuingStrategy({ highWaterMark: 3 })
+        );
+
+        const reader = rs.getReader();
+
+        println(controller.desiredSize);
+        controller.enqueue('a');
+        println(controller.desiredSize);
+        controller.enqueue('b');
+        println(controller.desiredSize);
+        controller.enqueue('c');
+        println(controller.desiredSize);
+        controller.enqueue('d');
+        println(controller.desiredSize);
+    });
+</script>
