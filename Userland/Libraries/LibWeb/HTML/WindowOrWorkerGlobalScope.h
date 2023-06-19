@@ -54,6 +54,9 @@ public:
 
     ErrorOr<Vector<JS::Handle<PerformanceTimeline::PerformanceEntry>>> filter_buffer_map_by_name_and_type(Optional<String> name, Optional<String> type) const;
 
+    void set_count_queuing_strategy_size_function(JS::Handle<WebIDL::CallbackType> value) { m_count_queuing_strategy_size_function = move(value); }
+    JS::Handle<WebIDL::CallbackType> count_queuing_strategy_size_function() const { return m_count_queuing_strategy_size_function; }
+
 protected:
     JS::ThrowCompletionOr<void> initialize(JS::Realm&);
     void visit_edges(JS::Cell::Visitor&);
@@ -77,6 +80,9 @@ private:
     // a performance entry buffer map map, keyed on a DOMString, representing the entry type to which the buffer belongs. The map's value is the following tuple:
     // NOTE: See the PerformanceEntryTuple struct above for the map's value tuple.
     OrderedHashMap<FlyString, PerformanceTimeline::PerformanceEntryTuple> m_performance_entry_buffer_map;
+
+    // https://streams.spec.whatwg.org/#count-queuing-strategy-size-function
+    JS::Handle<WebIDL::CallbackType> m_count_queuing_strategy_size_function;
 };
 
 }
