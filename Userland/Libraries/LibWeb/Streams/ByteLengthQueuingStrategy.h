@@ -11,6 +11,7 @@
 #include <LibWeb/Bindings/PlatformObject.h>
 #include <LibWeb/Forward.h>
 #include <LibWeb/Streams/QueuingStrategyInit.h>
+#include <LibWeb/WebIDL/CallbackType.h>
 
 namespace Web::Streams {
 
@@ -30,6 +31,8 @@ public:
         // 1. Return this.[[highWaterMark]].
         return m_high_water_mark;
     }
+
+    WebIDL::CallbackType* size();
 
 private:
     explicit ByteLengthQueuingStrategy(JS::Realm&, double high_water_mark);
