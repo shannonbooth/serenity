@@ -65,7 +65,7 @@ public:
     template<typename type>
     void set_value(size_t byte_index, Value value, bool is_typed_array, Order, bool is_little_endian = true);
     template<typename T>
-    Value get_modify_set_value(size_t byte_index, Value value, ReadWriteModifyFunction operation, bool is_little_endian = true);
+    ThrowCompletionOr<Value> get_modify_set_value(size_t byte_index, Value value, ReadWriteModifyFunction operation, bool is_little_endian = true);
 
 private:
     ArrayBuffer(ByteBuffer buffer, Object& prototype);
@@ -261,7 +261,7 @@ void ArrayBuffer::set_value(size_t byte_index, Value value, [[maybe_unused]] boo
 
 // 25.1.2.13 GetModifySetValueInBuffer ( arrayBuffer, byteIndex, type, value, op [ , isLittleEndian ] ), https://tc39.es/ecma262/#sec-getmodifysetvalueinbuffer
 template<typename T>
-Value ArrayBuffer::get_modify_set_value(size_t byte_index, Value value, ReadWriteModifyFunction operation, bool is_little_endian)
+ThrowCompletionOr<Value> ArrayBuffer::get_modify_set_value(size_t byte_index, Value value, ReadWriteModifyFunction operation, bool is_little_endian)
 {
     auto& vm = this->vm();
 
@@ -269,8 +269,7 @@ Value ArrayBuffer::get_modify_set_value(size_t byte_index, Value value, ReadWrit
 
     // FIXME: Check for shared buffer
 
-    // FIXME: Propagate errors.
-    auto raw_bytes_read = MUST(buffer_impl().slice(byte_index, sizeof(T)));
+    auto raw_bytes_read = TRY_OR_THROW_OOM(vm, buffer_impl().slice(byte_index, sizeof(T)));
     auto raw_bytes_modified = operation(raw_bytes_read, raw_bytes);
     raw_bytes_modified.span().copy_to(buffer_impl().span().slice(byte_index));
 
