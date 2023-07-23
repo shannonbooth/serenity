@@ -1121,34 +1121,15 @@ ThrowCompletionOr<size_t> Value::to_length(VM& vm) const
 // 7.1.22 ToIndex ( argument ), https://tc39.es/ecma262/#sec-toindex
 ThrowCompletionOr<size_t> Value::to_index(VM& vm) const
 {
-    // 1. If value is undefined, then
-    if (is_undefined()) {
-        // a. Return 0.
-        return 0;
-    }
-
-    // 2. Else,
-    // a. Let integer be ? ToIntegerOrInfinity(value).
+    // 1. Let integer be ? ToIntegerOrInfinity(value).
     auto integer = TRY(to_integer_or_infinity(vm));
 
-    // OPTIMIZATION: If the value is negative, ToLength normalizes it to 0, and we fail the SameValue comparison below.
-    //               Bail out early instead.
-    if (integer < 0)
+    // 2. If integer is not in the inclusive interval from 0 to 25^3 - 1, throw a RangeError exception.
+    if (integer < 0 || integer > MAX_ARRAY_LIKE_INDEX)
         return vm.throw_completion<RangeError>(ErrorType::InvalidIndex);
 
-    // b. Let clamped be ! ToLength(𝔽(integer)).
-    auto clamped = MUST(Value(integer).to_length(vm));
-
-    // c. If SameValue(𝔽(integer), clamped) is false, throw a RangeError exception.
-    if (integer != clamped)
-        return vm.throw_completion<RangeError>(ErrorType::InvalidIndex);
-
-    // d. Assert: 0 ≤ integer ≤ 2^53 - 1.
-    VERIFY(0 <= integer && integer <= MAX_ARRAY_LIKE_INDEX);
-
-    // e. Return integer.
-    // NOTE: We return the clamped value here, which already has the right type.
-    return clamped;
+    // 3. Return integer.
+    return integer;
 }
 
 // 7.1.5 ToIntegerOrInfinity ( argument ), https://tc39.es/ecma262/#sec-tointegerorinfinity
