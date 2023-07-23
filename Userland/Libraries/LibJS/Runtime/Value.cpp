@@ -1076,33 +1076,28 @@ ThrowCompletionOr<u8> Value::to_u8_clamp(VM& vm) const
     if (number.is_nan())
         return 0;
 
+    // 3. Let mv be the extended mathematical value of number.
     double value = number.as_double();
 
-    // 3. If ℝ(number) ≤ 0, return +0𝔽.
-    if (value <= 0.0)
-        return 0;
+    // 4. Let clamped be the result of clamping mv between 0 and 255.
+    auto clamped = clamp(value, 0.0, 255.0);
 
-    // 4. If ℝ(number) ≥ 255, return 255𝔽.
-    if (value >= 255.0)
-        return 255;
+    // 5. Let f be floor(clamped).
+    auto int_val = floor(clamped);
 
-    // 5. Let f be floor(ℝ(number)).
-    auto int_val = floor(value);
-
-    // 6. If f + 0.5 < ℝ(number), return 𝔽(f + 1).
-    if (int_val + 0.5 < value)
-        return static_cast<u8>(int_val + 1.0);
-
-    // 7. If ℝ(number) < f + 0.5, return 𝔽(f).
-    if (value < int_val + 0.5)
+    // 6. If clamped < f + 0.5, return 𝔽(f).
+    if (clamped < value + 0.5)
         return static_cast<u8>(int_val);
 
-    // 8. If f is odd, return 𝔽(f + 1).
-    if (fmod(int_val, 2.0) == 1.0)
+    // 7. If clamped > f + 0.5, return 𝔽(f + 1).
+    if (clamped > int_val + 0.5)
         return static_cast<u8>(int_val + 1.0);
 
-    // 9. Return 𝔽(f).
-    return static_cast<u8>(int_val);
+    // 8. If f is even, return 𝔽(f). Otherwise, return 𝔽(f + 1).
+    if (fmod(int_val, 2.0) == 0.0)
+        return static_cast<u8>(int_val);
+    else
+        return static_cast<u8>(int_val + 1.0);
 }
 
 // 7.1.20 ToLength ( argument ), https://tc39.es/ecma262/#sec-tolength
