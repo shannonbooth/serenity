@@ -17,7 +17,7 @@ class ProcessingInstruction final : public CharacterData {
 public:
     virtual ~ProcessingInstruction() override = default;
 
-    virtual DeprecatedFlyString node_name() const override { return m_target; }
+    virtual FlyString node_name() const override { return FlyString::from_deprecated_fly_string(m_target).release_value(); }
 
     DeprecatedString const& target() const { return m_target; }
 

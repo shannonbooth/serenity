@@ -1160,10 +1160,10 @@ Messages::WebDriverClient::GetElementTextResponse WebDriverConnection::get_eleme
     auto* element = TRY(get_known_connected_element(element_id));
 
     // 4. Let rendered text be the result of performing implementation-specific steps whose result is exactly the same as the result of a Function.[[Call]](null, element) with bot.dom.getVisibleText as the this value.
-    auto rendered_text = element->text_content();
+    auto rendered_text = element->text_content().value_or(String {});
 
     // 5. Return success with data rendered text.
-    return rendered_text;
+    return rendered_text.to_deprecated_string();
 }
 
 // 12.4.6 Get Element Tag Name, https://w3c.github.io/webdriver/#dfn-get-element-tag-name

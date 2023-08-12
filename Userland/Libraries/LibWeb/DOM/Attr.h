@@ -24,7 +24,7 @@ public:
 
     virtual ~Attr() override = default;
 
-    virtual DeprecatedFlyString node_name() const override { return name(); }
+    virtual FlyString node_name() const override { return FlyString::from_deprecated_fly_string(name()).release_value(); }
 
     DeprecatedFlyString const& namespace_uri() const { return m_qualified_name.namespace_(); }
     DeprecatedFlyString const& prefix() const { return m_qualified_name.prefix(); }

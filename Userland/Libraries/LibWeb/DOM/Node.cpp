@@ -153,42 +153,42 @@ DeprecatedString Node::descendant_text_content() const
 }
 
 // https://dom.spec.whatwg.org/#dom-node-textcontent
-DeprecatedString Node::text_content() const
+Optional<String> Node::text_content() const
 {
     // The textContent getter steps are to return the following, switching on the interface this implements:
 
     // If DocumentFragment or Element, return the descendant text content of this.
     if (is<DocumentFragment>(this) || is<Element>(this))
-        return descendant_text_content();
+        return String::from_deprecated_string(descendant_text_content()).release_value();
 
     // If CharacterData, return this’s data.
     if (is<CharacterData>(this))
-        return static_cast<CharacterData const&>(*this).data();
+        return String::from_deprecated_string(static_cast<CharacterData const&>(*this).data()).release_value();
 
     // If Attr node, return this's value.
     if (is<Attr>(*this))
-        return static_cast<Attr const&>(*this).value();
+        return String::from_deprecated_string(static_cast<Attr const&>(*this).value()).release_value();
 
     // Otherwise, return null
     return {};
 }
 
 // https://dom.spec.whatwg.org/#ref-for-dom-node-textcontent%E2%91%A0
-void Node::set_text_content(DeprecatedString const& content)
+void Node::set_text_content(Optional<String> const& content)
 {
     // The textContent setter steps are to, if the given value is null, act as if it was the empty string instead,
     // and then do as described below, switching on the interface this implements:
 
     // If DocumentFragment or Element, string replace all with the given value within this.
     if (is<DocumentFragment>(this) || is<Element>(this)) {
-        string_replace_all(content);
+        string_replace_all(content.value_or(String {}).to_deprecated_string());
     }
 
     // If CharacterData, replace data with node this, offset 0, count this’s length, and data the given value.
     else if (is<CharacterData>(this)) {
 
         auto* character_data_node = verify_cast<CharacterData>(this);
-        character_data_node->set_data(content);
+        character_data_node->set_data(content.value_or(String {}).to_deprecated_string());
 
         // FIXME: CharacterData::set_data is not spec compliant. Make this match the spec when set_data becomes spec compliant.
         //        Do note that this will make this function able to throw an exception.
@@ -196,7 +196,7 @@ void Node::set_text_content(DeprecatedString const& content)
 
     // If Attr, set an existing attribute value with this and the given value.
     if (is<Attr>(*this)) {
-        static_cast<Attr&>(*this).set_value(content);
+        static_cast<Attr&>(*this).set_value(content.value_or(String {}).to_deprecated_string());
     }
 
     // Otherwise, do nothing.
@@ -206,18 +206,18 @@ void Node::set_text_content(DeprecatedString const& content)
 }
 
 // https://dom.spec.whatwg.org/#dom-node-nodevalue
-DeprecatedString Node::node_value() const
+Optional<String> Node::node_value() const
 {
     // The nodeValue getter steps are to return the following, switching on the interface this implements:
 
     // If Attr, return this’s value.
     if (is<Attr>(this)) {
-        return verify_cast<Attr>(this)->value();
+        return String::from_deprecated_string(verify_cast<Attr>(this)->value()).release_value();
     }
 
     // If CharacterData, return this’s data.
     if (is<CharacterData>(this)) {
-        return verify_cast<CharacterData>(this)->data();
+        return String::from_deprecated_string(verify_cast<CharacterData>(this)->data()).release_value();
     }
 
     // Otherwise, return null.
@@ -225,17 +225,18 @@ DeprecatedString Node::node_value() const
 }
 
 // https://dom.spec.whatwg.org/#ref-for-dom-node-nodevalue%E2%91%A0
-void Node::set_node_value(DeprecatedString const& value)
+void Node::set_node_value(Optional<String> const& value)
 {
     // The nodeValue setter steps are to, if the given value is null, act as if it was the empty string instead,
     // and then do as described below, switching on the interface this implements:
+    auto deprecated_value = value.value_or(String {}).to_deprecated_string();
 
     // If Attr, set an existing attribute value with this and the given value.
     if (is<Attr>(this)) {
-        verify_cast<Attr>(this)->set_value(value);
+        verify_cast<Attr>(this)->set_value(deprecated_value);
     } else if (is<CharacterData>(this)) {
         // If CharacterData, replace data with node this, offset 0, count this’s length, and data the given value.
-        verify_cast<CharacterData>(this)->set_data(value);
+        verify_cast<CharacterData>(this)->set_data(deprecated_value);
     }
 
     // Otherwise, do nothing.
@@ -283,7 +284,7 @@ DeprecatedString Node::child_text_content() const
     StringBuilder builder;
     verify_cast<ParentNode>(*this).for_each_child([&](auto& child) {
         if (is<Text>(child))
-            builder.append(verify_cast<Text>(child).text_content());
+            builder.append(verify_cast<Text>(child).text_content().value_or(String {}));
     });
     return builder.to_deprecated_string();
 }
@@ -1094,7 +1095,7 @@ bool Node::is_uninteresting_whitespace_node() const
 
 void Node::serialize_tree_as_json(JsonObjectSerializer<StringBuilder>& object) const
 {
-    MUST(object.add("name"sv, node_name().view()));
+    MUST(object.add("name"sv, node_name().bytes_as_string_view()));
     MUST(object.add("id"sv, id()));
     if (is_document()) {
         MUST(object.add("type"sv, "document"));
@@ -1410,7 +1411,7 @@ JS::NonnullGCPtr<Node> Node::get_root_node(GetRootNodeOptions const& options)
 DeprecatedString Node::debug_description() const
 {
     StringBuilder builder;
-    builder.append(node_name().to_lowercase());
+    builder.append(node_name().bytes_as_string_view().to_lowercase_string());
     if (is_element()) {
         auto& element = static_cast<DOM::Element const&>(*this);
         if (auto id = element.get_attribute(HTML::AttributeNames::id); !id.is_null())

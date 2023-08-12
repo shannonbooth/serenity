@@ -81,7 +81,7 @@ void XMLDocumentBuilder::element_start(const XML::Name& name, HashMap<XML::Name,
         script_element.set_parser_document(Badge<XMLDocumentBuilder> {}, m_document);
         script_element.set_force_async(Badge<XMLDocumentBuilder> {}, false);
     }
-    if (HTML::TagNames::template_ == m_current_node->node_name()) {
+    if (HTML::TagNames::template_ == m_current_node->node_name().to_deprecated_fly_string()) {
         // When an XML parser would append a node to a template element, it must instead append it to the template element's template contents (a DocumentFragment node).
         MUST(static_cast<HTML::HTMLTemplateElement&>(*m_current_node).content()->append_child(node));
     } else {
@@ -98,7 +98,7 @@ void XMLDocumentBuilder::element_end(const XML::Name& name)
 {
     if (m_has_error)
         return;
-    VERIFY(m_current_node->node_name().equals_ignoring_ascii_case(name));
+    VERIFY(m_current_node->node_name().bytes_as_string_view().equals_ignoring_ascii_case(name));
     // When an XML parser with XML scripting support enabled creates a script element, [...]
     // When the element's end tag is subsequently parsed,
     if (m_scripting_support == XMLScriptingSupport::Enabled && HTML::TagNames::script == name) {
