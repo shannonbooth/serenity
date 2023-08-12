@@ -1528,7 +1528,9 @@ URL URLParser::basic_parse(StringView raw_input, Optional<URL> const& base_url, 
                 if (!is_url_code_point(code_point) && code_point != '%')
                     report_validation_error();
 
-                // FIXME: 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                // 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                if (code_point == '%' && (!is_ascii_hex_digit(iterator.peek(1).value_or(end_of_file)) || !is_ascii_hex_digit(iterator.peek(2).value_or(end_of_file))))
+                    report_validation_error();
 
                 // 3. UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
                 URL::append_percent_encoded_if_necessary(buffer, code_point, URL::PercentEncodeSet::Path);
@@ -1560,7 +1562,9 @@ URL URLParser::basic_parse(StringView raw_input, Optional<URL> const& base_url, 
                 if (code_point != end_of_file && !is_url_code_point(code_point) && code_point != '%')
                     report_validation_error();
 
-                // FIXME: 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                // 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                if (code_point == '%' && (!is_ascii_hex_digit(iterator.peek(1).value_or(end_of_file)) || !is_ascii_hex_digit(iterator.peek(2).value_or(end_of_file))))
+                    report_validation_error();
 
                 // 3. If c is not the EOF code point, UTF-8 percent-encode c using the C0 control percent-encode set and append the result to url’s path.
                 if (code_point != end_of_file) {
@@ -1607,7 +1611,9 @@ URL URLParser::basic_parse(StringView raw_input, Optional<URL> const& base_url, 
                 if (!is_url_code_point(code_point) && code_point != '%')
                     report_validation_error();
 
-                // FIXME: 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                // 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                if (code_point == '%' && (!is_ascii_hex_digit(iterator.peek(1).value_or(end_of_file)) || !is_ascii_hex_digit(iterator.peek(2).value_or(end_of_file))))
+                    report_validation_error();
 
                 // 3. Append c to buffer.
                 buffer.append_code_point(code_point);
@@ -1622,7 +1628,9 @@ URL URLParser::basic_parse(StringView raw_input, Optional<URL> const& base_url, 
                 if (!is_url_code_point(code_point) && code_point != '%')
                     report_validation_error();
 
-                // FIXME: 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                // 2. If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+                if (code_point == '%' && (!is_ascii_hex_digit(iterator.peek(1).value_or(end_of_file)) || !is_ascii_hex_digit(iterator.peek(2).value_or(end_of_file))))
+                    report_validation_error();
 
                 // FIXME: 3. UTF-8 percent-encode c using the fragment percent-encode set and append the result to url’s fragment.
                 buffer.append_code_point(code_point);
