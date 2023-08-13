@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <AK/FlyString.h>
 #include <LibWeb/HTML/AttributeNames.h>
 
 namespace Web::HTML {
@@ -39,11 +40,13 @@ void initialize_strings()
 }
 
 // https://html.spec.whatwg.org/#boolean-attribute
-bool is_boolean_attribute(DeprecatedFlyString const& attribute)
+bool is_boolean_attribute(FlyString const& attribute)
 {
+    auto deprecated_attribute = attribute.to_deprecated_fly_string();
+
     // NOTE: This is the list of attributes from https://html.spec.whatwg.org/#attributes-3
     //       with a Value column value of "Boolean attribute".
-    return attribute.is_one_of(
+    return deprecated_attribute.is_one_of(
         AttributeNames::allowfullscreen,
         AttributeNames::async,
         AttributeNames::autofocus,

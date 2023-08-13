@@ -246,6 +246,6 @@ void initialize_strings();
 
 }
 
-bool is_boolean_attribute(DeprecatedFlyString const& attribute);
+bool is_boolean_attribute(FlyString const& attribute);
 
 }
