@@ -6,6 +6,7 @@
  */
 
 #include <AK/DeprecatedString.h>
+#include <AK/FlyString.h>
 #include <LibWeb/Bindings/Intrinsics.h>
 #include <LibWeb/HTML/Storage.h>
 
@@ -153,9 +154,9 @@ Vector<DeprecatedString> Storage::supported_property_names() const
     return m_map.keys();
 }
 
-WebIDL::ExceptionOr<JS::Value> Storage::named_item_value(DeprecatedFlyString const& name) const
+WebIDL::ExceptionOr<JS::Value> Storage::named_item_value(FlyString const& name) const
 {
-    auto value = get_item(name);
+    auto value = get_item(name.to_deprecated_fly_string());
     if (value.is_null())
         return JS::js_null();
     return JS::PrimitiveString::create(vm(), value);

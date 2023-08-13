@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <AK/FlyString.h>
 #include <LibJS/Runtime/GlobalObject.h>
 #include <LibWeb/Bindings/ExceptionOrUtils.h>
 #include <LibWeb/Bindings/LegacyPlatformObject.h>
@@ -114,7 +115,7 @@ JS::ThrowCompletionOr<Optional<JS::PropertyDescriptor>> LegacyPlatformObject::le
             // 2. Let value be an uninitialized variable.
             // 3. If operation was defined without an identifier, then set value to the result of performing the steps listed in the interface description to determine the value of a named property with P as the name.
             // 4. Otherwise, operation was defined with an identifier. Set value to the result of performing the method steps of operation with O as this and « P » as the argument values.
-            auto value = TRY(throw_dom_exception_if_needed(vm, [&] { return named_item_value(property_name_string); }));
+            auto value = TRY(throw_dom_exception_if_needed(vm, [&] { return named_item_value(FlyString::from_deprecated_fly_string(property_name_string).release_value()); }));
 
             // 5. Let desc be a newly created Property Descriptor with no fields.
             JS::PropertyDescriptor descriptor;
@@ -422,7 +423,7 @@ WebIDL::ExceptionOr<JS::Value> LegacyPlatformObject::item_value(size_t) const
     return JS::js_undefined();
 }
 
-WebIDL::ExceptionOr<JS::Value> LegacyPlatformObject::named_item_value(DeprecatedFlyString const&) const
+WebIDL::ExceptionOr<JS::Value> LegacyPlatformObject::named_item_value(FlyString const&) const
 {
     return JS::js_undefined();
 }

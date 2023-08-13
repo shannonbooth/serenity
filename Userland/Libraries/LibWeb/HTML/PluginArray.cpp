@@ -107,10 +107,9 @@ WebIDL::ExceptionOr<JS::Value> PluginArray::item_value(size_t index) const
     return return_value.ptr();
 }
 
-WebIDL::ExceptionOr<JS::Value> PluginArray::named_item_value(DeprecatedFlyString const& name) const
+WebIDL::ExceptionOr<JS::Value> PluginArray::named_item_value(FlyString const& name) const
 {
-    auto converted_name = TRY_OR_THROW_OOM(vm(), String::from_deprecated_string(name));
-    auto return_value = named_item(converted_name);
+    auto return_value = named_item(name.to_string());
     if (!return_value)
         return JS::js_null();
     return return_value.ptr();
