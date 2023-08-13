@@ -21,9 +21,11 @@ void SVGRadialGradientElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::SVGRadialGradientElementPrototype>(realm, "SVGRadialGradientElement"));
 }
 
-void SVGRadialGradientElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void SVGRadialGradientElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
-    SVGGradientElement::attribute_changed(name, value);
+    SVGGradientElement::attribute_changed(name_, value);
+
+    auto name = name_.to_deprecated_fly_string();
 
     // FIXME: These are <length> or <coordinate> in the spec, but all examples seem to allow percentages
     // and unitless values.

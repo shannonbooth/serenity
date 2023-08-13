@@ -223,9 +223,11 @@ bool HTMLElement::cannot_navigate() const
     return !is<HTML::HTMLAnchorElement>(this) && !is_connected();
 }
 
-void HTMLElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
-    Element::attribute_changed(name, value);
+    Element::attribute_changed(name_, value);
+
+    auto name = name_.to_deprecated_fly_string();
 
     if (name == HTML::AttributeNames::contenteditable) {
         if (value.is_null()) {

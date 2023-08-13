@@ -491,9 +491,12 @@ void HTMLInputElement::did_lose_focus()
     });
 }
 
-void HTMLInputElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLInputElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
-    HTMLElement::attribute_changed(name, value);
+    HTMLElement::attribute_changed(name_, value);
+
+    auto name = name_.to_deprecated_fly_string();
+
     if (name == HTML::AttributeNames::checked) {
         if (value.is_null()) {
             // When the checked content attribute is removed, if the control does not have dirty checkedness,

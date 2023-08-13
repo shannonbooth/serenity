@@ -142,7 +142,7 @@ WebIDL::ExceptionOr<void> Element::set_attribute(DeprecatedFlyString const& name
         attribute->set_value(value);
     }
 
-    attribute_changed(attribute->local_name(), value);
+    attribute_changed(FlyString::from_deprecated_fly_string(attribute->local_name()).release_value(), value);
 
     if (value != old_value) {
         invalidate_style_after_attribute_change(name);
@@ -224,7 +224,7 @@ WebIDL::ExceptionOr<JS::GCPtr<Attr>> Element::set_attribute_node_ns(Attr& attr)
 void Element::remove_attribute(DeprecatedFlyString const& name)
 {
     m_attributes->remove_attribute(name);
-    attribute_changed(name, {});
+    attribute_changed(FlyString::from_deprecated_fly_string(name).release_value(), {});
     invalidate_style_after_attribute_change(name);
 }
 
@@ -267,7 +267,7 @@ WebIDL::ExceptionOr<bool> Element::toggle_attribute(DeprecatedFlyString const& n
             auto new_attribute = TRY(Attr::create(document(), insert_as_lowercase ? name.to_lowercase() : name, ""));
             m_attributes->append_attribute(new_attribute);
 
-            attribute_changed(new_attribute->local_name(), "");
+            attribute_changed(FlyString::from_deprecated_fly_string(new_attribute->local_name()).release_value(), "");
 
             invalidate_style_after_attribute_change(name);
 
@@ -281,7 +281,7 @@ WebIDL::ExceptionOr<bool> Element::toggle_attribute(DeprecatedFlyString const& n
     // 5. Otherwise, if force is not given or is false, remove an attribute given qualifiedName and this, and then return false.
     if (!force.has_value() || !force.value()) {
         m_attributes->remove_attribute(name);
-        attribute_changed(name, {});
+        attribute_changed(FlyString::from_deprecated_fly_string(name).release_value(), {});
         invalidate_style_after_attribute_change(name);
     }
 
@@ -367,8 +367,10 @@ CSS::CSSStyleDeclaration const* Element::inline_style() const
     return m_inline_style.ptr();
 }
 
-void Element::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void Element::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
+    auto name = name_.to_deprecated_fly_string();
+
     if (name == HTML::AttributeNames::class_) {
         auto new_classes = value.split_view(Infra::is_ascii_whitespace);
         m_classes.clear();

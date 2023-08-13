@@ -27,10 +27,10 @@ void HTMLAnchorElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::HTMLAnchorElementPrototype>(realm, "HTMLAnchorElement"));
 }
 
-void HTMLAnchorElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLAnchorElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
-    if (name == HTML::AttributeNames::href) {
+    if (name.to_deprecated_fly_string() == HTML::AttributeNames::href) {
         set_the_url();
     }
 }

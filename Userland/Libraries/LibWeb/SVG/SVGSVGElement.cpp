@@ -64,9 +64,11 @@ void SVGSVGElement::apply_presentational_hints(CSS::StyleProperties& style) cons
     }
 }
 
-void SVGSVGElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void SVGSVGElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
-    SVGGraphicsElement::attribute_changed(name, value);
+    SVGGraphicsElement::attribute_changed(name_, value);
+
+    auto name = name_.to_deprecated_fly_string();
 
     if (name.equals_ignoring_ascii_case(SVG::AttributeNames::viewBox))
         m_view_box = try_parse_view_box(value);

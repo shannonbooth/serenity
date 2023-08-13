@@ -83,9 +83,11 @@ void HTMLImageElement::apply_presentational_hints(CSS::StyleProperties& style) c
     });
 }
 
-void HTMLImageElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLImageElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
-    HTMLElement::attribute_changed(name, value);
+    HTMLElement::attribute_changed(name_, value);
+
+    auto name = name_.to_deprecated_fly_string();
 
     if (name == HTML::AttributeNames::crossorigin) {
         if (value.is_null()) {

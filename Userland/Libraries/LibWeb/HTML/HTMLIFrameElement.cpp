@@ -32,10 +32,10 @@ JS::GCPtr<Layout::Node> HTMLIFrameElement::create_layout_node(NonnullRefPtr<CSS:
     return heap().allocate_without_realm<Layout::FrameBox>(document(), *this, move(style));
 }
 
-void HTMLIFrameElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLIFrameElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
-    if (name == HTML::AttributeNames::src)
+    if (name.to_deprecated_fly_string() == HTML::AttributeNames::src)
         load_src(value);
 }
 

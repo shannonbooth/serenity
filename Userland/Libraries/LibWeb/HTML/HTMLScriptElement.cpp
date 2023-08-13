@@ -45,9 +45,11 @@ void HTMLScriptElement::visit_edges(Cell::Visitor& visitor)
     visitor.visit(m_preparation_time_document.ptr());
 }
 
-void HTMLScriptElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLScriptElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
 {
-    Base::attribute_changed(name, value);
+    Base::attribute_changed(name_, value);
+
+    auto name = name_.to_deprecated_fly_string();
 
     if (name == HTML::AttributeNames::crossorigin) {
         if (value.is_null())

@@ -23,10 +23,10 @@ void HTMLAreaElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::HTMLAreaElementPrototype>(realm, "HTMLAreaElement"));
 }
 
-void HTMLAreaElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLAreaElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
-    if (name == HTML::AttributeNames::href) {
+    if (name.to_deprecated_fly_string() == HTML::AttributeNames::href) {
         set_the_url();
     }
 }

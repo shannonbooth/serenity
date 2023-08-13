@@ -43,13 +43,13 @@ void HTMLBaseElement::removed_from(Node* parent)
     document().update_base_element({});
 }
 
-void HTMLBaseElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLBaseElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
 
     // The frozen base URL must be immediately set for an element whenever any of the following situations occur:
     // - The base element is the first base element in tree order with an href content attribute in its Document, and its href content attribute is changed.
-    if (name != AttributeNames::href)
+    if (name.to_deprecated_fly_string() != AttributeNames::href)
         return;
 
     document().update_base_element({});

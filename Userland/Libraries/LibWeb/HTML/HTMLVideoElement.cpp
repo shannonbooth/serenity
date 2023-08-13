@@ -40,11 +40,11 @@ void HTMLVideoElement::visit_edges(Cell::Visitor& visitor)
     visitor.visit(m_fetch_controller);
 }
 
-void HTMLVideoElement::attribute_changed(DeprecatedFlyString const& name, DeprecatedString const& value)
+void HTMLVideoElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     Base::attribute_changed(name, value);
 
-    if (name == HTML::AttributeNames::poster) {
+    if (name.to_deprecated_fly_string() == HTML::AttributeNames::poster) {
         if (value.is_null())
             determine_element_poster_frame({}).release_value_but_fixme_should_propagate_errors();
         else
