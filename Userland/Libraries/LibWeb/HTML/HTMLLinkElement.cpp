@@ -58,12 +58,12 @@ void HTMLLinkElement::inserted()
     if (m_relationship & Relationship::Preload) {
         // FIXME: Respect the "as" attribute.
         LoadRequest request;
-        request.set_url(document().parse_url(attribute(HTML::AttributeNames::href)));
+        request.set_url(document().parse_url(attribute(HTML::AttributeNames::href.to_deprecated_fly_string())));
         set_resource(ResourceLoader::the().load_resource(Resource::Type::Generic, request));
     } else if (m_relationship & Relationship::DNSPrefetch) {
-        ResourceLoader::the().prefetch_dns(document().parse_url(attribute(HTML::AttributeNames::href)));
+        ResourceLoader::the().prefetch_dns(document().parse_url(attribute(HTML::AttributeNames::href.to_deprecated_fly_string())));
     } else if (m_relationship & Relationship::Preconnect) {
-        ResourceLoader::the().preconnect(document().parse_url(attribute(HTML::AttributeNames::href)));
+        ResourceLoader::the().preconnect(document().parse_url(attribute(HTML::AttributeNames::href.to_deprecated_fly_string())));
     } else if (m_relationship & Relationship::Icon) {
         auto favicon_url = document().parse_url(href());
         auto favicon_request = LoadRequest::create_for_url_on_page(favicon_url, document().page());
@@ -76,11 +76,9 @@ bool HTMLLinkElement::has_loaded_icon() const
     return m_relationship & Relationship::Icon && resource() && resource()->is_loaded() && resource()->has_encoded_data();
 }
 
-void HTMLLinkElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void HTMLLinkElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    HTMLElement::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    HTMLElement::attribute_changed(name, value);
 
     // 4.6.7 Link types - https://html.spec.whatwg.org/multipage/links.html#linkTypes
     if (name == HTML::AttributeNames::rel) {
@@ -162,7 +160,7 @@ HTMLLinkElement::LinkProcessingOptions HTMLLinkElement::create_link_options()
     // FIXME: destination                      the result of translating the state of el's as attribute
     // crossorigin                      the state of el's crossorigin content attribute
     options.crossorigin = cors_setting_attribute_from_keyword(
-        has_attribute(AttributeNames::crossorigin) ? String::from_deprecated_string(get_attribute(AttributeNames::crossorigin)).release_value_but_fixme_should_propagate_errors()
+        has_attribute(AttributeNames::crossorigin) ? String::from_deprecated_string(get_attribute(AttributeNames::crossorigin.to_deprecated_fly_string())).release_value_but_fixme_should_propagate_errors()
                                                    : Optional<String> {});
     // FIXME: referrer policy                  the state of el's referrerpolicy content attribute
     // FIXME: source set                       el's source set
@@ -180,15 +178,15 @@ HTMLLinkElement::LinkProcessingOptions HTMLLinkElement::create_link_options()
 
     // 3. If el has an href attribute, then set options's href to the value of el's href attribute.
     if (has_attribute(AttributeNames::href))
-        options.href = String::from_deprecated_string(get_attribute(AttributeNames::href)).release_value_but_fixme_should_propagate_errors();
+        options.href = String::from_deprecated_string(get_attribute(AttributeNames::href.to_deprecated_fly_string())).release_value_but_fixme_should_propagate_errors();
 
     // 4. If el has an integrity attribute, then set options's integrity to the value of el's integrity content attribute.
     if (has_attribute(AttributeNames::integrity))
-        options.integrity = String::from_deprecated_string(get_attribute(AttributeNames::integrity)).release_value_but_fixme_should_propagate_errors();
+        options.integrity = String::from_deprecated_string(get_attribute(AttributeNames::integrity.to_deprecated_fly_string())).release_value_but_fixme_should_propagate_errors();
 
     // 5. If el has a type attribute, then set options's type to the value of el's type attribute.
     if (has_attribute(AttributeNames::type))
-        options.type = String::from_deprecated_string(get_attribute(AttributeNames::type)).release_value_but_fixme_should_propagate_errors();
+        options.type = String::from_deprecated_string(get_attribute(AttributeNames::type.to_deprecated_fly_string())).release_value_but_fixme_should_propagate_errors();
 
     // FIXME: 6. Assert: options's href is not the empty string, or options's source set is not null.
     //           A link element with neither an href or an imagesrcset does not represent a link.
@@ -345,7 +343,7 @@ void HTMLLinkElement::process_stylesheet_resource(bool success, Fetch::Infrastru
         //     2. Otherwise, return the document's character encoding. [DOM]
 
         DeprecatedString encoding;
-        if (auto charset = attribute(HTML::AttributeNames::charset); !charset.is_null())
+        if (auto charset = attribute(HTML::AttributeNames::charset.to_deprecated_fly_string()); !charset.is_null())
             encoding = charset;
         else
             encoding = document().encoding_or_default();
@@ -368,7 +366,7 @@ void HTMLLinkElement::process_stylesheet_resource(bool success, Fetch::Infrastru
 
                 if (m_loaded_style_sheet) {
                     m_loaded_style_sheet->set_owner_node(this);
-                    m_loaded_style_sheet->set_media(attribute(HTML::AttributeNames::media));
+                    m_loaded_style_sheet->set_media(attribute(HTML::AttributeNames::media.to_deprecated_fly_string()));
                     document().style_sheets().add_sheet(*m_loaded_style_sheet);
                 } else {
                     dbgln_if(CSS_LOADER_DEBUG, "HTMLLinkElement: Failed to parse stylesheet: {}", resource()->url());

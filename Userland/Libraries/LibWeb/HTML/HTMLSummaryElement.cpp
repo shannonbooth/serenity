@@ -25,9 +25,9 @@ HTMLSummaryElement::HTMLSummaryElement(DOM::Document& document, DOM::QualifiedNa
 
         // 3. If the open attribute is present on parent, then remove it. Otherwise, set parent's open attribute to the empty string.
         if (parent->has_attribute(HTML::AttributeNames::open))
-            parent->remove_attribute(HTML::AttributeNames::open);
+            parent->remove_attribute(HTML::AttributeNames::open.to_deprecated_fly_string());
         else
-            parent->set_attribute(HTML::AttributeNames::open, "").release_value_but_fixme_should_propagate_errors();
+            parent->set_attribute(HTML::AttributeNames::open.to_deprecated_fly_string(), "").release_value_but_fixme_should_propagate_errors();
     };
 }
 

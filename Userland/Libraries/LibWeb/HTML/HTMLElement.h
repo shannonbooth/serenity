@@ -27,7 +27,7 @@ class HTMLElement
 public:
     virtual ~HTMLElement() override;
 
-    DeprecatedString title() const { return attribute(HTML::AttributeNames::title); }
+    DeprecatedString title() const { return attribute(HTML::AttributeNames::title.to_deprecated_fly_string()); }
 
     DeprecatedString dir() const;
     void set_dir(DeprecatedString const&);

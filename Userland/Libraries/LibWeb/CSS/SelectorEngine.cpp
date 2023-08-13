@@ -32,7 +32,7 @@ static inline bool matches_lang_pseudo_class(DOM::Element const& element, Vector
 {
     FlyString element_language;
     for (auto const* e = &element; e; e = e->parent_element()) {
-        auto lang = e->attribute(HTML::AttributeNames::lang);
+        auto lang = e->attribute(HTML::AttributeNames::lang.to_deprecated_fly_string());
         if (!lang.is_null()) {
             element_language = FlyString::from_deprecated_fly_string(lang).release_value_but_fixme_should_propagate_errors();
             break;
@@ -478,7 +478,7 @@ static inline bool matches(CSS::Selector::SimpleSelector const& component, Optio
         VERIFY_NOT_REACHED();
     }
     case CSS::Selector::SimpleSelector::Type::Id:
-        return component.name() == element.attribute(HTML::AttributeNames::id).view();
+        return component.name() == element.attribute(HTML::AttributeNames::id.to_deprecated_fly_string()).view();
     case CSS::Selector::SimpleSelector::Type::Class:
         return element.has_class(component.name());
     case CSS::Selector::SimpleSelector::Type::Attribute:

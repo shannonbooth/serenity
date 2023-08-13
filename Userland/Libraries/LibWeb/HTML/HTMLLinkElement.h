@@ -28,9 +28,9 @@ public:
 
     virtual void inserted() override;
 
-    DeprecatedString rel() const { return attribute(HTML::AttributeNames::rel); }
-    DeprecatedString type() const { return attribute(HTML::AttributeNames::type); }
-    DeprecatedString href() const { return attribute(HTML::AttributeNames::href); }
+    DeprecatedString rel() const { return attribute(HTML::AttributeNames::rel.to_deprecated_fly_string()); }
+    DeprecatedString type() const { return attribute(HTML::AttributeNames::type.to_deprecated_fly_string()); }
+    DeprecatedString href() const { return attribute(HTML::AttributeNames::href.to_deprecated_fly_string()); }
 
     bool has_loaded_icon() const;
     bool load_favicon_and_use_if_window_is_active();

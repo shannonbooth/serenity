@@ -36,7 +36,8 @@ void HTMLTableRowElement::initialize(JS::Realm& realm)
 void HTMLTableRowElement::apply_presentational_hints(CSS::StyleProperties& style) const
 {
     Base::apply_presentational_hints(style);
-    for_each_attribute([&](auto& name, auto& value) {
+    for_each_attribute([&](auto& name_, auto& value) {
+        auto name = FlyString::from_deprecated_fly_string(name_).release_value();
         if (name == HTML::AttributeNames::bgcolor) {
             // https://html.spec.whatwg.org/multipage/rendering.html#tables-2:rules-for-parsing-a-legacy-colour-value
             auto color = parse_legacy_color_value(value);

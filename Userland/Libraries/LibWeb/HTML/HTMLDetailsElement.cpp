@@ -24,7 +24,7 @@ WebIDL::ExceptionOr<void> HTMLDetailsElement::set_attribute(DeprecatedFlyString 
     if (result.is_exception())
         return result.exception();
 
-    if (name == HTML::AttributeNames::open)
+    if (name == HTML::AttributeNames::open.to_deprecated_fly_string())
         run_details_notification_task_steps();
 
     return result;
@@ -34,7 +34,7 @@ void HTMLDetailsElement::remove_attribute(DeprecatedFlyString const& name)
 {
     HTMLElement::remove_attribute(name);
 
-    if (name == HTML::AttributeNames::open)
+    if (name == HTML::AttributeNames::open.to_deprecated_fly_string())
         run_details_notification_task_steps();
 }
 

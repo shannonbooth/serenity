@@ -46,7 +46,7 @@ JS::ThrowCompletionOr<JS::NonnullGCPtr<JS::Object>> AudioConstructor::construct(
     auto audio = TRY(Bindings::throw_dom_exception_if_needed(vm, [&]() { return DOM::create_element(document, HTML::TagNames::audio, Namespace::HTML); }));
 
     // 3. Set an attribute value for audio using "preload" and "auto".
-    MUST(audio->set_attribute(HTML::AttributeNames::preload, "auto"sv));
+    MUST(audio->set_attribute(HTML::AttributeNames::preload.to_deprecated_fly_string(), "auto"sv));
 
     auto src_value = vm.argument(0);
 
@@ -54,7 +54,7 @@ JS::ThrowCompletionOr<JS::NonnullGCPtr<JS::Object>> AudioConstructor::construct(
     //    (This will cause the user agent to invoke the object's resource selection algorithm before returning.)
     if (!src_value.is_undefined()) {
         auto src = TRY(src_value.to_deprecated_string(vm));
-        MUST(audio->set_attribute(HTML::AttributeNames::src, move(src)));
+        MUST(audio->set_attribute(HTML::AttributeNames::src.to_deprecated_fly_string(), move(src)));
     }
 
     // 5. Return audio.

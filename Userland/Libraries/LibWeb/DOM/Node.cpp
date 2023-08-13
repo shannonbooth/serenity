@@ -1414,7 +1414,7 @@ DeprecatedString Node::debug_description() const
     builder.append(node_name().bytes_as_string_view().to_lowercase_string());
     if (is_element()) {
         auto& element = static_cast<DOM::Element const&>(*this);
-        if (auto id = element.get_attribute(HTML::AttributeNames::id); !id.is_null())
+        if (auto id = element.get_attribute(HTML::AttributeNames::id.to_deprecated_fly_string()); !id.is_null())
             builder.appendff("#{}", id);
         for (auto const& class_name : element.class_names())
             builder.appendff(".{}", class_name);

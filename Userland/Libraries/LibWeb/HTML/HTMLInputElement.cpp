@@ -388,7 +388,7 @@ Optional<DeprecatedString> HTMLInputElement::placeholder_value() const
     if (!has_attribute(HTML::AttributeNames::placeholder))
         return {};
 
-    auto placeholder = attribute(HTML::AttributeNames::placeholder);
+    auto placeholder = attribute(HTML::AttributeNames::placeholder.to_deprecated_fly_string());
 
     if (placeholder.contains('\r') || placeholder.contains('\n')) {
         StringBuilder builder;
@@ -436,7 +436,7 @@ void HTMLInputElement::create_shadow_tree_if_needed()
     if (initial_value.is_null())
         initial_value = DeprecatedString::empty();
     auto element = DOM::create_element(document(), HTML::TagNames::div, Namespace::HTML).release_value_but_fixme_should_propagate_errors();
-    MUST(element->set_attribute(HTML::AttributeNames::style, R"~~~(
+    MUST(element->set_attribute(HTML::AttributeNames::style.to_deprecated_fly_string(), R"~~~(
         display: flex;
         height: 100%;
         align-items: center;
@@ -449,7 +449,7 @@ void HTMLInputElement::create_shadow_tree_if_needed()
     MUST(m_placeholder_element->style_for_bindings()->set_property(CSS::PropertyID::Height, "1lh"sv));
 
     m_placeholder_text_node = heap().allocate<DOM::Text>(realm(), document(), initial_value).release_allocated_value_but_fixme_should_propagate_errors();
-    m_placeholder_text_node->set_data(attribute(HTML::AttributeNames::placeholder));
+    m_placeholder_text_node->set_data(attribute(HTML::AttributeNames::placeholder.to_deprecated_fly_string()));
     m_placeholder_text_node->set_owner_input_element({}, *this);
     MUST(m_placeholder_element->append_child(*m_placeholder_text_node));
     MUST(element->append_child(*m_placeholder_element));
@@ -491,11 +491,9 @@ void HTMLInputElement::did_lose_focus()
     });
 }
 
-void HTMLInputElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void HTMLInputElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    HTMLElement::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    HTMLElement::attribute_changed(name, value);
 
     if (name == HTML::AttributeNames::checked) {
         if (value.is_null()) {
@@ -558,7 +556,7 @@ DeprecatedString HTMLInputElement::type() const
 
 WebIDL::ExceptionOr<void> HTMLInputElement::set_type(DeprecatedString const& type)
 {
-    return set_attribute(HTML::AttributeNames::type, type);
+    return set_attribute(HTML::AttributeNames::type.to_deprecated_fly_string(), type);
 }
 
 // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-simple-colour
@@ -839,7 +837,7 @@ void HTMLInputElement::reset_algorithm()
     m_dirty_checkedness = false;
 
     // set the value of the element to the value of the value content attribute, if there is one, or the empty string otherwise,
-    m_value = has_attribute(AttributeNames::value) ? get_attribute(AttributeNames::value) : DeprecatedString::empty();
+    m_value = has_attribute(AttributeNames::value) ? get_attribute(AttributeNames::value.to_deprecated_fly_string()) : DeprecatedString::empty();
 
     // set the checkedness of the element to true if the element has a checked content attribute and false if it does not,
     m_checked = has_attribute(AttributeNames::checked);

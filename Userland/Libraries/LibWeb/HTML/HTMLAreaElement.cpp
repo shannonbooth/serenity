@@ -26,19 +26,19 @@ void HTMLAreaElement::initialize(JS::Realm& realm)
 void HTMLAreaElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
-    if (name.to_deprecated_fly_string() == HTML::AttributeNames::href) {
+    if (name == HTML::AttributeNames::href) {
         set_the_url();
     }
 }
 
 DeprecatedString HTMLAreaElement::hyperlink_element_utils_href() const
 {
-    return attribute(HTML::AttributeNames::href);
+    return attribute(HTML::AttributeNames::href.to_deprecated_fly_string());
 }
 
 WebIDL::ExceptionOr<void> HTMLAreaElement::set_hyperlink_element_utils_href(DeprecatedString href)
 {
-    return set_attribute(HTML::AttributeNames::href, move(href));
+    return set_attribute(HTML::AttributeNames::href.to_deprecated_fly_string(), move(href));
 }
 
 // https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex

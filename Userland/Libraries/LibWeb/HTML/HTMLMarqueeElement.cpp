@@ -29,7 +29,7 @@ void HTMLMarqueeElement::apply_presentational_hints(CSS::StyleProperties& style)
 {
     HTMLElement::apply_presentational_hints(style);
     for_each_attribute([&](auto& name, auto& value) {
-        if (name == HTML::AttributeNames::bgcolor) {
+        if (name == HTML::AttributeNames::bgcolor.to_deprecated_fly_string()) {
             // https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2:rules-for-parsing-a-legacy-colour-value
             auto color = parse_legacy_color_value(value);
             if (color.has_value())

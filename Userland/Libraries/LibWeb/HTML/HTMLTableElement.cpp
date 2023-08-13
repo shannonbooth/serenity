@@ -41,7 +41,8 @@ void HTMLTableElement::visit_edges(Cell::Visitor& visitor)
 
 void HTMLTableElement::apply_presentational_hints(CSS::StyleProperties& style) const
 {
-    for_each_attribute([&](auto& name, auto& value) {
+    for_each_attribute([&](auto& name_, auto& value) {
+        auto name = FlyString::from_deprecated_fly_string(name_).release_value();
         if (name == HTML::AttributeNames::width) {
             if (auto parsed_value = parse_nonzero_dimension_value(value))
                 style.set_property(CSS::PropertyID::Width, parsed_value.release_nonnull());

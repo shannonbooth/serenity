@@ -30,19 +30,19 @@ void HTMLAnchorElement::initialize(JS::Realm& realm)
 void HTMLAnchorElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
-    if (name.to_deprecated_fly_string() == HTML::AttributeNames::href) {
+    if (name == HTML::AttributeNames::href) {
         set_the_url();
     }
 }
 
 DeprecatedString HTMLAnchorElement::hyperlink_element_utils_href() const
 {
-    return attribute(HTML::AttributeNames::href);
+    return attribute(HTML::AttributeNames::href.to_deprecated_fly_string());
 }
 
 WebIDL::ExceptionOr<void> HTMLAnchorElement::set_hyperlink_element_utils_href(DeprecatedString href)
 {
-    return set_attribute(HTML::AttributeNames::href, move(href));
+    return set_attribute(HTML::AttributeNames::href.to_deprecated_fly_string(), move(href));
 }
 
 void HTMLAnchorElement::run_activation_behavior(Web::DOM::Event const&)
@@ -122,7 +122,7 @@ void HTMLAnchorElement::set_text(DeprecatedString const& text)
 DeprecatedString HTMLAnchorElement::referrer_policy() const
 {
     // The IDL attribute referrerPolicy must reflect the referrerpolicy content attribute, limited to only known values.
-    auto policy_string = attribute(HTML::AttributeNames::referrerpolicy);
+    auto policy_string = attribute(HTML::AttributeNames::referrerpolicy.to_deprecated_fly_string());
     auto maybe_policy = ReferrerPolicy::from_string(policy_string);
     if (maybe_policy.has_value())
         return ReferrerPolicy::to_string(maybe_policy.value());
@@ -133,7 +133,7 @@ DeprecatedString HTMLAnchorElement::referrer_policy() const
 WebIDL::ExceptionOr<void> HTMLAnchorElement::set_referrer_policy(DeprecatedString const& referrer_policy)
 {
     // The IDL attribute referrerPolicy must reflect the referrerpolicy content attribute, limited to only known values.
-    return set_attribute(HTML::AttributeNames::referrerpolicy, referrer_policy);
+    return set_attribute(HTML::AttributeNames::referrerpolicy.to_deprecated_fly_string(), referrer_policy);
 }
 
 }

@@ -35,7 +35,7 @@ JS::GCPtr<Layout::Node> HTMLIFrameElement::create_layout_node(NonnullRefPtr<CSS:
 void HTMLIFrameElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
     HTMLElement::attribute_changed(name, value);
-    if (name.to_deprecated_fly_string() == HTML::AttributeNames::src)
+    if (name == HTML::AttributeNames::src)
         load_src(value);
 }
 
@@ -134,7 +134,8 @@ void HTMLIFrameElement::load_src(DeprecatedString const& value)
 // https://html.spec.whatwg.org/multipage/rendering.html#attributes-for-embedded-content-and-images
 void HTMLIFrameElement::apply_presentational_hints(CSS::StyleProperties& style) const
 {
-    for_each_attribute([&](auto& name, auto& value) {
+    for_each_attribute([&](auto& name_, auto& value) {
+        auto name = FlyString::from_deprecated_fly_string(name_).release_value();
         if (name == HTML::AttributeNames::width) {
             if (auto parsed_value = parse_dimension_value(value))
                 style.set_property(CSS::PropertyID::Width, parsed_value.release_nonnull());

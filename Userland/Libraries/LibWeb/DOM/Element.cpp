@@ -229,6 +229,12 @@ void Element::remove_attribute(DeprecatedFlyString const& name)
 }
 
 // https://dom.spec.whatwg.org/#dom-element-hasattribute
+bool Element::has_attribute(FlyString const& name) const
+{
+    return m_attributes->get_attribute(name) != nullptr;
+}
+
+// https://dom.spec.whatwg.org/#dom-element-hasattribute
 bool Element::has_attribute(DeprecatedFlyString const& name) const
 {
     return m_attributes->get_attribute(name) != nullptr;
@@ -367,10 +373,8 @@ CSS::CSSStyleDeclaration const* Element::inline_style() const
     return m_inline_style.ptr();
 }
 
-void Element::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void Element::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    auto name = name_.to_deprecated_fly_string();
-
     if (name == HTML::AttributeNames::class_) {
         auto new_classes = value.split_view(Infra::is_ascii_whitespace);
         m_classes.clear();
@@ -495,7 +499,7 @@ NonnullRefPtr<CSS::StyleProperties> Element::resolved_css_values()
 DOMTokenList* Element::class_list()
 {
     if (!m_class_list)
-        m_class_list = DOMTokenList::create(*this, FlyString::from_deprecated_fly_string(HTML::AttributeNames::class_).release_value()).release_value();
+        m_class_list = DOMTokenList::create(*this, HTML::AttributeNames::class_).release_value();
     return m_class_list;
 }
 
@@ -886,7 +890,7 @@ i32 Element::default_tab_index_value() const
 i32 Element::tab_index() const
 {
     // FIXME: I'm not sure if "to_int" exactly matches the specs "rules for parsing integers"
-    auto maybe_table_index = attribute(HTML::AttributeNames::tabindex).to_int<i32>();
+    auto maybe_table_index = attribute(HTML::AttributeNames::tabindex.to_deprecated_fly_string()).to_int<i32>();
     if (!maybe_table_index.has_value())
         return default_tab_index_value();
     return maybe_table_index.value();
@@ -895,7 +899,7 @@ i32 Element::tab_index() const
 // https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
 void Element::set_tab_index(i32 tab_index)
 {
-    MUST(set_attribute(HTML::AttributeNames::tabindex, DeprecatedString::number(tab_index)));
+    MUST(set_attribute(HTML::AttributeNames::tabindex.to_deprecated_fly_string(), DeprecatedString::number(tab_index)));
 }
 
 // https://drafts.csswg.org/cssom-view/#potentially-scrollable

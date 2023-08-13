@@ -19,9 +19,9 @@ class HTMLAnchorElement final
 public:
     virtual ~HTMLAnchorElement() override;
 
-    DeprecatedString rel() const { return attribute(HTML::AttributeNames::rel); }
-    DeprecatedString target() const { return attribute(HTML::AttributeNames::target); }
-    DeprecatedString download() const { return attribute(HTML::AttributeNames::download); }
+    DeprecatedString rel() const { return attribute(HTML::AttributeNames::rel.to_deprecated_fly_string()); }
+    DeprecatedString target() const { return attribute(HTML::AttributeNames::target.to_deprecated_fly_string()); }
+    DeprecatedString download() const { return attribute(HTML::AttributeNames::download.to_deprecated_fly_string()); }
 
     DeprecatedString text() const;
     void set_text(DeprecatedString const&);

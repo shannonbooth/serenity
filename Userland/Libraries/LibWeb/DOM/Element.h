@@ -87,6 +87,7 @@ public:
     // NOTE: This is for the JS bindings
     DeprecatedFlyString const& namespace_uri() const { return namespace_(); }
 
+    bool has_attribute(FlyString const& name) const;
     bool has_attribute(DeprecatedFlyString const& name) const;
     bool has_attribute_ns(DeprecatedFlyString namespace_, DeprecatedFlyString const& name) const;
     bool has_attributes() const;
@@ -150,7 +151,7 @@ public:
     Layout::NodeWithStyle* layout_node();
     Layout::NodeWithStyle const* layout_node() const;
 
-    DeprecatedString name() const { return attribute(HTML::AttributeNames::name); }
+    DeprecatedString name() const { return attribute(HTML::AttributeNames::name.to_deprecated_fly_string()); }
 
     CSS::StyleProperties* computed_css_values() { return m_computed_css_values.ptr(); }
     CSS::StyleProperties const* computed_css_values() const { return m_computed_css_values.ptr(); }

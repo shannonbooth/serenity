@@ -53,12 +53,12 @@ void HTMLCanvasElement::visit_edges(Cell::Visitor& visitor)
 
 unsigned HTMLCanvasElement::width() const
 {
-    return attribute(HTML::AttributeNames::width).to_uint().value_or(300);
+    return attribute(HTML::AttributeNames::width.to_deprecated_fly_string()).to_uint().value_or(300);
 }
 
 unsigned HTMLCanvasElement::height() const
 {
-    return attribute(HTML::AttributeNames::height).to_uint().value_or(150);
+    return attribute(HTML::AttributeNames::height.to_deprecated_fly_string()).to_uint().value_or(150);
 }
 
 void HTMLCanvasElement::reset_context_to_default_state()
@@ -77,7 +77,7 @@ void HTMLCanvasElement::reset_context_to_default_state()
 
 WebIDL::ExceptionOr<void> HTMLCanvasElement::set_width(unsigned value)
 {
-    TRY(set_attribute(HTML::AttributeNames::width, DeprecatedString::number(value)));
+    TRY(set_attribute(HTML::AttributeNames::width.to_deprecated_fly_string(), DeprecatedString::number(value)));
     m_bitmap = nullptr;
     reset_context_to_default_state();
     return {};
@@ -85,7 +85,7 @@ WebIDL::ExceptionOr<void> HTMLCanvasElement::set_width(unsigned value)
 
 WebIDL::ExceptionOr<void> HTMLCanvasElement::set_height(unsigned value)
 {
-    TRY(set_attribute(HTML::AttributeNames::height, DeprecatedString::number(value)));
+    TRY(set_attribute(HTML::AttributeNames::height.to_deprecated_fly_string(), DeprecatedString::number(value)));
     m_bitmap = nullptr;
     reset_context_to_default_state();
     return {};

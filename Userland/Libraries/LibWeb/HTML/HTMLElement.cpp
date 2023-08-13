@@ -60,7 +60,7 @@ void HTMLElement::visit_edges(Cell::Visitor& visitor)
 // https://html.spec.whatwg.org/multipage/dom.html#dom-dir
 DeprecatedString HTMLElement::dir() const
 {
-    auto dir = attribute(HTML::AttributeNames::dir);
+    auto dir = attribute(HTML::AttributeNames::dir.to_deprecated_fly_string());
 #define __ENUMERATE_HTML_ELEMENT_DIR_ATTRIBUTE(keyword) \
     if (dir.equals_ignoring_ascii_case(#keyword##sv))   \
         return #keyword##sv;
@@ -72,7 +72,7 @@ DeprecatedString HTMLElement::dir() const
 
 void HTMLElement::set_dir(DeprecatedString const& dir)
 {
-    MUST(set_attribute(HTML::AttributeNames::dir, dir));
+    MUST(set_attribute(HTML::AttributeNames::dir.to_deprecated_fly_string(), dir));
 }
 
 bool HTMLElement::is_editable() const
@@ -107,15 +107,15 @@ DeprecatedString HTMLElement::content_editable() const
 WebIDL::ExceptionOr<void> HTMLElement::set_content_editable(DeprecatedString const& content_editable)
 {
     if (content_editable.equals_ignoring_ascii_case("inherit"sv)) {
-        remove_attribute(HTML::AttributeNames::contenteditable);
+        remove_attribute(HTML::AttributeNames::contenteditable.to_deprecated_fly_string());
         return {};
     }
     if (content_editable.equals_ignoring_ascii_case("true"sv)) {
-        MUST(set_attribute(HTML::AttributeNames::contenteditable, "true"));
+        MUST(set_attribute(HTML::AttributeNames::contenteditable.to_deprecated_fly_string(), "true"));
         return {};
     }
     if (content_editable.equals_ignoring_ascii_case("false"sv)) {
-        MUST(set_attribute(HTML::AttributeNames::contenteditable, "false"));
+        MUST(set_attribute(HTML::AttributeNames::contenteditable.to_deprecated_fly_string(), "false"));
         return {};
     }
     return WebIDL::SyntaxError::create(realm(), "Invalid contentEditable value, must be 'true', 'false', or 'inherit'");
@@ -223,11 +223,9 @@ bool HTMLElement::cannot_navigate() const
     return !is<HTML::HTMLAnchorElement>(this) && !is_connected();
 }
 
-void HTMLElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void HTMLElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    Element::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    Element::attribute_changed(name, value);
 
     if (name == HTML::AttributeNames::contenteditable) {
         if (value.is_null()) {
@@ -429,7 +427,7 @@ DeprecatedString HTMLElement::get_an_elements_target() const
 
     // 1. If element has a target attribute, then return that attribute's value.
     if (has_attribute(AttributeNames::target))
-        return attribute(AttributeNames::target);
+        return attribute(AttributeNames::target.to_deprecated_fly_string());
 
     // FIXME: 2. If element's node document contains a base element with a
     // target attribute, then return the value of the target attribute of the
@@ -443,7 +441,7 @@ DeprecatedString HTMLElement::get_an_elements_target() const
 TokenizedFeature::NoOpener HTMLElement::get_an_elements_noopener(StringView target) const
 {
     // To get an element's noopener, given an a, area, or form element element and a string target:
-    auto rel = attribute(HTML::AttributeNames::rel).to_lowercase();
+    auto rel = attribute(HTML::AttributeNames::rel.to_deprecated_fly_string()).to_lowercase();
     auto link_types = rel.view().split_view_if(Infra::is_ascii_whitespace);
 
     // 1. If element's link types include the noopener or noreferrer keyword, then return true.

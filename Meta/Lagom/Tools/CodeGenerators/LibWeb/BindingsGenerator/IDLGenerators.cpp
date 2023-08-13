@@ -2772,7 +2772,7 @@ JS_DEFINE_NATIVE_FUNCTION(@class_name@::@attribute.getter_callback@)
         if (attribute.extended_attributes.contains("Reflect")) {
             if (attribute.type->name() != "boolean") {
                 attribute_generator.append(R"~~~(
-    auto retval = impl->attribute(HTML::AttributeNames::@attribute.reflect_name@);
+    auto retval = impl->attribute(HTML::AttributeNames::@attribute.reflect_name@.to_deprecated_fly_string());
 )~~~");
             } else {
                 attribute_generator.append(R"~~~(
@@ -2849,14 +2849,14 @@ JS_DEFINE_NATIVE_FUNCTION(@class_name@::@attribute.setter_callback@)
             if (attribute.extended_attributes.contains("Reflect")) {
                 if (attribute.type->name() != "boolean") {
                     attribute_generator.append(R"~~~(
-    MUST(impl->set_attribute(HTML::AttributeNames::@attribute.reflect_name@, cpp_value));
+    MUST(impl->set_attribute(HTML::AttributeNames::@attribute.reflect_name@.to_deprecated_fly_string(), cpp_value));
 )~~~");
                 } else {
                     attribute_generator.append(R"~~~(
     if (!cpp_value)
-        impl->remove_attribute(HTML::AttributeNames::@attribute.reflect_name@);
+        impl->remove_attribute(HTML::AttributeNames::@attribute.reflect_name@.to_deprecated_fly_string());
     else
-        MUST(impl->set_attribute(HTML::AttributeNames::@attribute.reflect_name@, DeprecatedString::empty()));
+        MUST(impl->set_attribute(HTML::AttributeNames::@attribute.reflect_name@.to_deprecated_fly_string(), DeprecatedString::empty()));
 )~~~");
                 }
 

@@ -83,11 +83,9 @@ void HTMLMediaElement::visit_edges(Cell::Visitor& visitor)
     visitor.visit(m_fetch_controller);
 }
 
-void HTMLMediaElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void HTMLMediaElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    Base::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    Base::attribute_changed(name, value);
 
     if (name == HTML::AttributeNames::src) {
         load_element().release_value_but_fixme_should_propagate_errors();
@@ -582,7 +580,7 @@ public:
         //    empty string, then end the synchronous section, and jump down to the failed with elements step below.
         String candiate_src;
         if (m_candidate->has_attribute(HTML::AttributeNames::src))
-            candiate_src = TRY_OR_THROW_OOM(vm, String::from_deprecated_string(m_candidate->attribute(HTML::AttributeNames::src)));
+            candiate_src = TRY_OR_THROW_OOM(vm, String::from_deprecated_string(m_candidate->attribute(HTML::AttributeNames::src.to_deprecated_fly_string())));
 
         if (candiate_src.is_empty()) {
             TRY(failed_with_elements());
@@ -827,7 +825,7 @@ WebIDL::ExceptionOr<void> HTMLMediaElement::select_resource()
         };
 
         // 1. ⌛ If the src attribute's value is the empty string, then end the synchronous section, and jump down to the failed with attribute step below.
-        auto source = attribute(HTML::AttributeNames::src);
+        auto source = attribute(HTML::AttributeNames::src.to_deprecated_fly_string());
         if (source.is_empty()) {
             failed_with_attribute("The 'src' attribute is empty"_string);
             return {};

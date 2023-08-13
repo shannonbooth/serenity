@@ -39,11 +39,9 @@ void HTMLObjectElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::HTMLObjectElementPrototype>(realm, "HTMLObjectElement"));
 }
 
-void HTMLObjectElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void HTMLObjectElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    NavigableContainer::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    NavigableContainer::attribute_changed(name, value);
 
     // https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element
     // Whenever one of the following conditions occur:
@@ -65,7 +63,7 @@ void HTMLObjectElement::attribute_changed(FlyString const& name_, DeprecatedStri
 // https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-object-data
 DeprecatedString HTMLObjectElement::data() const
 {
-    auto data = attribute(HTML::AttributeNames::data);
+    auto data = attribute(HTML::AttributeNames::data.to_deprecated_fly_string());
     return document().parse_url(data).to_deprecated_string();
 }
 
@@ -119,7 +117,7 @@ void HTMLObjectElement::queue_element_task_to_run_object_representation_steps()
         // FIXME: 3. If the classid attribute is present, and has a value that isn't the empty string, then: if the user agent can find a plugin suitable according to the value of the classid attribute, and plugins aren't being sandboxed, then that plugin should be used, and the value of the data attribute, if any, should be passed to the plugin. If no suitable plugin can be found, or if the plugin reports an error, jump to the step below labeled fallback.
 
         // 4. If the data attribute is present and its value is not the empty string, then:
-        if (auto data = attribute(HTML::AttributeNames::data); !data.is_empty()) {
+        if (auto data = attribute(HTML::AttributeNames::data.to_deprecated_fly_string()); !data.is_empty()) {
             // 1. If the type attribute is present and its value is not a type that the user agent supports, and is not a type that the user agent can find a plugin for, then the user agent may jump to the step below labeled fallback without fetching the content to examine its real type.
 
             // 2. Parse a URL given the data attribute, relative to the element's node document.
@@ -316,7 +314,7 @@ void HTMLObjectElement::run_object_representation_fallback_steps()
 void HTMLObjectElement::load_image()
 {
     // NOTE: This currently reloads the image instead of reusing the resource we've already downloaded.
-    auto data = attribute(HTML::AttributeNames::data);
+    auto data = attribute(HTML::AttributeNames::data.to_deprecated_fly_string());
     auto url = document().parse_url(data);
     m_image_request = HTML::SharedImageRequest::get_or_create(*document().page(), url).release_value_but_fixme_should_propagate_errors();
     m_image_request->add_callbacks(

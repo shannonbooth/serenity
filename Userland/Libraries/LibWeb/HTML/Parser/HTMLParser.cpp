@@ -656,7 +656,7 @@ JS::NonnullGCPtr<DOM::Element> HTMLParser::create_element_for(HTMLToken const& t
     auto local_name = token.tag_name();
 
     // 5. Let is be the value of the "is" attribute in the given token, if such an attribute exists, or null otherwise.
-    auto is_value_deprecated_string = token.attribute(AttributeNames::is);
+    auto is_value_deprecated_string = token.attribute(AttributeNames::is.to_deprecated_fly_string());
     Optional<String> is_value;
     if (!is_value_deprecated_string.is_null())
         is_value = String::from_utf8(is_value_deprecated_string).release_value_but_fixme_should_propagate_errors();
@@ -1993,7 +1993,7 @@ void HTMLParser::handle_in_body(HTMLToken& token)
         (void)insert_html_element(token);
         (void)m_stack_of_open_elements.pop();
         token.acknowledge_self_closing_flag_if_set();
-        auto type_attribute = token.attribute(HTML::AttributeNames::type);
+        auto type_attribute = token.attribute(HTML::AttributeNames::type.to_deprecated_fly_string());
         if (type_attribute.is_null() || !type_attribute.equals_ignoring_ascii_case("hidden"sv)) {
             m_frameset_ok = false;
         }
@@ -2898,7 +2898,7 @@ void HTMLParser::handle_in_table(HTMLToken& token)
         // If the token does not have an attribute with the name "type",
         // or if it does, but that attribute's value is not an ASCII case-insensitive match for the string "hidden",
         // then: act as described in the "anything else" entry below.
-        auto type_attribute = token.attribute(HTML::AttributeNames::type);
+        auto type_attribute = token.attribute(HTML::AttributeNames::type.to_deprecated_fly_string());
         if (type_attribute.is_null() || !type_attribute.equals_ignoring_ascii_case("hidden"sv)) {
             goto AnythingElse;
         }
@@ -3453,7 +3453,7 @@ void HTMLParser::process_using_the_rules_for_foreign_content(HTMLToken& token)
     }
 
     if ((token.is_start_tag() && token.tag_name().is_one_of(HTML::TagNames::b, HTML::TagNames::big, HTML::TagNames::blockquote, HTML::TagNames::body, HTML::TagNames::br, HTML::TagNames::center, HTML::TagNames::code, HTML::TagNames::dd, HTML::TagNames::div, HTML::TagNames::dl, HTML::TagNames::dt, HTML::TagNames::em, HTML::TagNames::embed, HTML::TagNames::h1, HTML::TagNames::h2, HTML::TagNames::h3, HTML::TagNames::h4, HTML::TagNames::h5, HTML::TagNames::h6, HTML::TagNames::head, HTML::TagNames::hr, HTML::TagNames::i, HTML::TagNames::img, HTML::TagNames::li, HTML::TagNames::listing, HTML::TagNames::menu, HTML::TagNames::meta, HTML::TagNames::nobr, HTML::TagNames::ol, HTML::TagNames::p, HTML::TagNames::pre, HTML::TagNames::ruby, HTML::TagNames::s, HTML::TagNames::small, HTML::TagNames::span, HTML::TagNames::strong, HTML::TagNames::strike, HTML::TagNames::sub, HTML::TagNames::sup, HTML::TagNames::table, HTML::TagNames::tt, HTML::TagNames::u, HTML::TagNames::ul, HTML::TagNames::var))
-        || (token.is_start_tag() && token.tag_name() == HTML::TagNames::font && (token.has_attribute(HTML::AttributeNames::color) || token.has_attribute(HTML::AttributeNames::face) || token.has_attribute(HTML::AttributeNames::size)))
+        || (token.is_start_tag() && token.tag_name() == HTML::TagNames::font && (token.has_attribute(HTML::AttributeNames::color.to_deprecated_fly_string()) || token.has_attribute(HTML::AttributeNames::face.to_deprecated_fly_string()) || token.has_attribute(HTML::AttributeNames::size.to_deprecated_fly_string())))
         || (token.is_end_tag() && token.tag_name().is_one_of(HTML::TagNames::br, HTML::TagNames::p))) {
         log_parse_error();
 

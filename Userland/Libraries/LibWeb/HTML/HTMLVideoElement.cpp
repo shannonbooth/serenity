@@ -44,7 +44,7 @@ void HTMLVideoElement::attribute_changed(FlyString const& name, DeprecatedString
 {
     Base::attribute_changed(name, value);
 
-    if (name.to_deprecated_fly_string() == HTML::AttributeNames::poster) {
+    if (name == HTML::AttributeNames::poster) {
         if (value.is_null())
             determine_element_poster_frame({}).release_value_but_fixme_should_propagate_errors();
         else

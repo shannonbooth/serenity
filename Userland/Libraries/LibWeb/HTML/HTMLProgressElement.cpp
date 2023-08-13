@@ -51,7 +51,7 @@ void HTMLProgressElement::progress_position_updated()
 
 double HTMLProgressElement::value() const
 {
-    auto const& value_characters = attribute(HTML::AttributeNames::value);
+    auto const& value_characters = attribute(HTML::AttributeNames::value.to_deprecated_fly_string());
     if (value_characters == nullptr)
         return 0;
 
@@ -71,14 +71,14 @@ WebIDL::ExceptionOr<void> HTMLProgressElement::set_value(double value)
     if (value < 0)
         return {};
 
-    TRY(set_attribute(HTML::AttributeNames::value, DeprecatedString::number(value)));
+    TRY(set_attribute(HTML::AttributeNames::value.to_deprecated_fly_string(), DeprecatedString::number(value)));
     progress_position_updated();
     return {};
 }
 
 double HTMLProgressElement::max() const
 {
-    auto const& max_characters = attribute(HTML::AttributeNames::max);
+    auto const& max_characters = attribute(HTML::AttributeNames::max.to_deprecated_fly_string());
     if (max_characters == nullptr)
         return 1;
 
@@ -98,7 +98,7 @@ WebIDL::ExceptionOr<void> HTMLProgressElement::set_max(double value)
     if (value <= 0)
         return {};
 
-    TRY(set_attribute(HTML::AttributeNames::max, DeprecatedString::number(value)));
+    TRY(set_attribute(HTML::AttributeNames::max.to_deprecated_fly_string(), DeprecatedString::number(value)));
     progress_position_updated();
     return {};
 }

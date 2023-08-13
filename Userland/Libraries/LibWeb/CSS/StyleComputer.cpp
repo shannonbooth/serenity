@@ -279,7 +279,7 @@ Vector<MatchingRule> StyleComputer::collect_matching_rules(DOM::Element const& e
         if (auto it = rule_cache.rules_by_class.find(class_name); it != rule_cache.rules_by_class.end())
             add_rules_to_run(it->value);
     }
-    if (auto id = element.get_attribute(HTML::AttributeNames::id); !id.is_null()) {
+    if (auto id = element.get_attribute(HTML::AttributeNames::id.to_deprecated_fly_string()); !id.is_null()) {
         if (auto it = rule_cache.rules_by_id.find(FlyString::from_deprecated_fly_string(id).release_value_but_fixme_should_propagate_errors()); it != rule_cache.rules_by_id.end())
             add_rules_to_run(it->value);
     }

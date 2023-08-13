@@ -32,8 +32,8 @@ public:
 
     virtual void attribute_changed(FlyString const& name, DeprecatedString const& value) override;
 
-    DeprecatedString alt() const { return attribute(HTML::AttributeNames::alt); }
-    DeprecatedString src() const { return attribute(HTML::AttributeNames::src); }
+    DeprecatedString alt() const { return attribute(HTML::AttributeNames::alt.to_deprecated_fly_string()); }
+    DeprecatedString src() const { return attribute(HTML::AttributeNames::src.to_deprecated_fly_string()); }
 
     RefPtr<Gfx::Bitmap const> bitmap() const;
 

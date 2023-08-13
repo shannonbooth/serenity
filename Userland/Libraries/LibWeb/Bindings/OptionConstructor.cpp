@@ -61,14 +61,14 @@ JS::ThrowCompletionOr<JS::NonnullGCPtr<JS::Object>> OptionConstructor::construct
     // 4. If value is given, then set an attribute value for option using "value" and value.
     if (vm.argument_count() > 1) {
         auto value = TRY(vm.argument(1).to_deprecated_string(vm));
-        MUST(option_element->set_attribute(HTML::AttributeNames::value, value));
+        MUST(option_element->set_attribute(HTML::AttributeNames::value.to_deprecated_fly_string(), value));
     }
 
     // 5. If defaultSelected is true, then set an attribute value for option using "selected" and the empty string.
     if (vm.argument_count() > 2) {
         auto default_selected = vm.argument(2).to_boolean();
         if (default_selected) {
-            MUST(option_element->set_attribute(HTML::AttributeNames::selected, ""));
+            MUST(option_element->set_attribute(HTML::AttributeNames::selected.to_deprecated_fly_string(), ""));
         }
     }
 

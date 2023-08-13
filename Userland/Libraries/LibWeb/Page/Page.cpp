@@ -334,9 +334,9 @@ WebIDL::ExceptionOr<void> Page::toggle_media_loop_state()
     HTML::TemporaryExecutionContext execution_context { media_element->document().relevant_settings_object() };
 
     if (media_element->has_attribute(HTML::AttributeNames::loop))
-        media_element->remove_attribute(HTML::AttributeNames::loop);
+        media_element->remove_attribute(HTML::AttributeNames::loop.to_deprecated_fly_string());
     else
-        TRY(media_element->set_attribute(HTML::AttributeNames::loop, {}));
+        TRY(media_element->set_attribute(HTML::AttributeNames::loop.to_deprecated_fly_string(), {}));
 
     return {};
 }
@@ -350,9 +350,9 @@ WebIDL::ExceptionOr<void> Page::toggle_media_controls_state()
     HTML::TemporaryExecutionContext execution_context { media_element->document().relevant_settings_object() };
 
     if (media_element->has_attribute(HTML::AttributeNames::controls))
-        media_element->remove_attribute(HTML::AttributeNames::controls);
+        media_element->remove_attribute(HTML::AttributeNames::controls.to_deprecated_fly_string());
     else
-        TRY(media_element->set_attribute(HTML::AttributeNames::controls, {}));
+        TRY(media_element->set_attribute(HTML::AttributeNames::controls.to_deprecated_fly_string(), {}));
 
     return {};
 }

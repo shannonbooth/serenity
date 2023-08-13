@@ -27,10 +27,9 @@ void HTMLFrameSetElement::attribute_changed(FlyString const& name, DeprecatedStr
 {
     HTMLElement::attribute_changed(name, value);
 
-    auto deprecated_name = name.to_deprecated_fly_string();
 #undef __ENUMERATE
 #define __ENUMERATE(attribute_name, event_name)                                                                     \
-    if (deprecated_name == HTML::AttributeNames::attribute_name) {                                                  \
+    if (name == HTML::AttributeNames::attribute_name) {                                                             \
         element_event_handler_attribute_changed(event_name, String::from_deprecated_string(value).release_value()); \
     }
     ENUMERATE_WINDOW_EVENT_HANDLERS(__ENUMERATE)

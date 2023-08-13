@@ -49,7 +49,7 @@ void HTMLBaseElement::attribute_changed(FlyString const& name, DeprecatedString 
 
     // The frozen base URL must be immediately set for an element whenever any of the following situations occur:
     // - The base element is the first base element in tree order with an href content attribute in its Document, and its href content attribute is changed.
-    if (name.to_deprecated_fly_string() != AttributeNames::href)
+    if (name != AttributeNames::href)
         return;
 
     document().update_base_element({});
@@ -66,7 +66,7 @@ void HTMLBaseElement::set_the_frozen_base_url()
     auto& document = this->document();
 
     // 2. Let urlRecord be the result of parsing the value of element's href content attribute with document's fallback base URL, and document's character encoding. (Thus, the base element isn't affected by itself.)
-    auto href = attribute(AttributeNames::href);
+    auto href = attribute(AttributeNames::href.to_deprecated_fly_string());
     auto url_record = document.fallback_base_url().complete_url(href);
 
     // 3. Set element's frozen base URL to document's fallback base URL, if urlRecord is failure or running Is base allowed for Document? on the resulting URL record and document returns "Blocked", and to urlRecord otherwise.
@@ -88,7 +88,7 @@ DeprecatedString HTMLBaseElement::href() const
     // 2. Let url be the value of the href attribute of this element, if it has one, and the empty string otherwise.
     auto url = DeprecatedString::empty();
     if (has_attribute(AttributeNames::href))
-        url = attribute(AttributeNames::href);
+        url = attribute(AttributeNames::href.to_deprecated_fly_string());
 
     // 3. Let urlRecord be the result of parsing url with document's fallback base URL, and document's character encoding. (Thus, the base element isn't affected by other base elements or itself.)
     // FIXME: Pass in document's character encoding.
@@ -106,7 +106,7 @@ DeprecatedString HTMLBaseElement::href() const
 WebIDL::ExceptionOr<void> HTMLBaseElement::set_href(DeprecatedString const& href)
 {
     // The href IDL attribute, on setting, must set the href content attribute to the given new value.
-    return set_attribute(AttributeNames::href, href);
+    return set_attribute(AttributeNames::href.to_deprecated_fly_string(), href);
 }
 
 }

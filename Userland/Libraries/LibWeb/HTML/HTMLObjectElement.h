@@ -37,9 +37,9 @@ public:
     virtual void attribute_changed(FlyString const& name, DeprecatedString const& value) override;
 
     DeprecatedString data() const;
-    void set_data(DeprecatedString const& data) { MUST(set_attribute(HTML::AttributeNames::data, data)); }
+    void set_data(DeprecatedString const& data) { MUST(set_attribute(HTML::AttributeNames::data.to_deprecated_fly_string(), data)); }
 
-    DeprecatedString type() const { return attribute(HTML::AttributeNames::type); }
+    DeprecatedString type() const { return attribute(HTML::AttributeNames::type.to_deprecated_fly_string()); }
 
     // ^FormAssociatedElement
     // https://html.spec.whatwg.org/multipage/forms.html#category-listed

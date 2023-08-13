@@ -31,7 +31,8 @@ void HTMLTableCellElement::initialize(JS::Realm& realm)
 
 void HTMLTableCellElement::apply_presentational_hints(CSS::StyleProperties& style) const
 {
-    for_each_attribute([&](auto& name, auto& value) {
+    for_each_attribute([&](auto& name_, auto& value) {
+        auto name = FlyString::from_deprecated_fly_string(name_).release_value();
         if (name == HTML::AttributeNames::bgcolor) {
             // https://html.spec.whatwg.org/multipage/rendering.html#tables-2:rules-for-parsing-a-legacy-colour-value
             auto color = parse_legacy_color_value(value);
@@ -71,22 +72,22 @@ void HTMLTableCellElement::apply_presentational_hints(CSS::StyleProperties& styl
 
 unsigned int HTMLTableCellElement::col_span() const
 {
-    return attribute(HTML::AttributeNames::colspan).to_uint().value_or(1);
+    return attribute(HTML::AttributeNames::colspan.to_deprecated_fly_string()).to_uint().value_or(1);
 }
 
 WebIDL::ExceptionOr<void> HTMLTableCellElement::set_col_span(unsigned int value)
 {
-    return set_attribute(HTML::AttributeNames::colspan, DeprecatedString::number(value));
+    return set_attribute(HTML::AttributeNames::colspan.to_deprecated_fly_string(), DeprecatedString::number(value));
 }
 
 unsigned int HTMLTableCellElement::row_span() const
 {
-    return attribute(HTML::AttributeNames::rowspan).to_uint().value_or(1);
+    return attribute(HTML::AttributeNames::rowspan.to_deprecated_fly_string()).to_uint().value_or(1);
 }
 
 WebIDL::ExceptionOr<void> HTMLTableCellElement::set_row_span(unsigned int value)
 {
-    return set_attribute(HTML::AttributeNames::rowspan, DeprecatedString::number(value));
+    return set_attribute(HTML::AttributeNames::rowspan.to_deprecated_fly_string(), DeprecatedString::number(value));
 }
 
 Optional<ARIA::Role> HTMLTableCellElement::default_role() const

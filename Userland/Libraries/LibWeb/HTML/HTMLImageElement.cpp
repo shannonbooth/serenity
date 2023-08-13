@@ -62,7 +62,8 @@ void HTMLImageElement::initialize(JS::Realm& realm)
 
 void HTMLImageElement::apply_presentational_hints(CSS::StyleProperties& style) const
 {
-    for_each_attribute([&](auto& name, auto& value) {
+    for_each_attribute([&](auto& name_, auto& value) {
+        auto name = FlyString::from_deprecated_fly_string(name_).release_value();
         if (name == HTML::AttributeNames::width) {
             if (auto parsed_value = parse_dimension_value(value))
                 style.set_property(CSS::PropertyID::Width, parsed_value.release_nonnull());
@@ -83,11 +84,9 @@ void HTMLImageElement::apply_presentational_hints(CSS::StyleProperties& style) c
     });
 }
 
-void HTMLImageElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void HTMLImageElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    HTMLElement::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    HTMLElement::attribute_changed(name, value);
 
     if (name == HTML::AttributeNames::crossorigin) {
         if (value.is_null()) {
@@ -160,7 +159,7 @@ unsigned HTMLImageElement::width() const
         return paintable_box->content_width().to_int();
 
     // NOTE: This step seems to not be in the spec, but all browsers do it.
-    auto width_attr = get_attribute(HTML::AttributeNames::width);
+    auto width_attr = get_attribute(HTML::AttributeNames::width.to_deprecated_fly_string());
     if (auto converted = width_attr.to_uint(); converted.has_value())
         return *converted;
 
@@ -175,7 +174,7 @@ unsigned HTMLImageElement::width() const
 
 WebIDL::ExceptionOr<void> HTMLImageElement::set_width(unsigned width)
 {
-    return set_attribute(HTML::AttributeNames::width, DeprecatedString::number(width));
+    return set_attribute(HTML::AttributeNames::width.to_deprecated_fly_string(), DeprecatedString::number(width));
 }
 
 // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-height
@@ -188,7 +187,7 @@ unsigned HTMLImageElement::height() const
         return paintable_box->content_height().to_int();
 
     // NOTE: This step seems to not be in the spec, but all browsers do it.
-    auto height_attr = get_attribute(HTML::AttributeNames::height);
+    auto height_attr = get_attribute(HTML::AttributeNames::height.to_deprecated_fly_string());
     if (auto converted = height_attr.to_uint(); converted.has_value())
         return *converted;
 
@@ -203,7 +202,7 @@ unsigned HTMLImageElement::height() const
 
 WebIDL::ExceptionOr<void> HTMLImageElement::set_height(unsigned height)
 {
-    return set_attribute(HTML::AttributeNames::height, DeprecatedString::number(height));
+    return set_attribute(HTML::AttributeNames::height.to_deprecated_fly_string(), DeprecatedString::number(height));
 }
 
 // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-naturalwidth
@@ -240,7 +239,7 @@ bool HTMLImageElement::complete() const
         return true;
 
     // - The srcset attribute is omitted and the src attribute's value is the empty string.
-    if (!has_attribute(HTML::AttributeNames::srcset) && attribute(HTML::AttributeNames::src) == ""sv)
+    if (!has_attribute(HTML::AttributeNames::srcset) && attribute(HTML::AttributeNames::src.to_deprecated_fly_string()) == ""sv)
         return true;
 
     // - The img element's current request's state is completely available and its pending request is null.
@@ -333,8 +332,8 @@ ErrorOr<void> HTMLImageElement::update_the_image_data(bool restart_animations, b
     //    and it has a src attribute specified whose value is not the empty string,
     //    then set selected source to the value of the element's src attribute
     //    and set selected pixel density to 1.0.
-    if (!uses_srcset_or_picture() && has_attribute(HTML::AttributeNames::src) && !attribute(HTML::AttributeNames::src).is_empty()) {
-        selected_source = TRY(String::from_deprecated_string(attribute(HTML::AttributeNames::src)));
+    if (!uses_srcset_or_picture() && has_attribute(HTML::AttributeNames::src) && !attribute(HTML::AttributeNames::src.to_deprecated_fly_string()).is_empty()) {
+        selected_source = TRY(String::from_deprecated_string(attribute(HTML::AttributeNames::src.to_deprecated_fly_string())));
         selected_pixel_density = 1.0f;
     }
 
@@ -533,7 +532,7 @@ after_step_7:
             request->set_initiator(Fetch::Infrastructure::Request::Initiator::ImageSet);
 
         // 21. Set request's referrer policy to the current state of the element's referrerpolicy attribute.
-        request->set_referrer_policy(ReferrerPolicy::from_string(attribute(HTML::AttributeNames::referrerpolicy)));
+        request->set_referrer_policy(ReferrerPolicy::from_string(attribute(HTML::AttributeNames::referrerpolicy.to_deprecated_fly_string())));
 
         // FIXME: 22. Set request's priority to the current state of the element's fetchpriority attribute.
 
@@ -748,7 +747,7 @@ void HTMLImageElement::react_to_changes_in_the_environment()
         request->set_initiator(Fetch::Infrastructure::Request::Initiator::ImageSet);
 
         // 3. Set request's referrer policy to the current state of the element's referrerpolicy attribute.
-        request->set_referrer_policy(ReferrerPolicy::from_string(attribute(HTML::AttributeNames::referrerpolicy)));
+        request->set_referrer_policy(ReferrerPolicy::from_string(attribute(HTML::AttributeNames::referrerpolicy.to_deprecated_fly_string())));
 
         // FIXME: 4. Set request's priority to the current state of the element's fetchpriority attribute.
 
@@ -855,37 +854,37 @@ static void update_the_source_set(DOM::Element& element)
 
             // 4. If el is an img element that has a srcset attribute, then set srcset to that attribute's value.
             if (is<HTMLImageElement>(element)) {
-                if (auto srcset_value = element.attribute(HTML::AttributeNames::srcset); !srcset_value.is_null())
+                if (auto srcset_value = element.attribute(HTML::AttributeNames::srcset.to_deprecated_fly_string()); !srcset_value.is_null())
                     srcset = String::from_deprecated_string(srcset_value).release_value_but_fixme_should_propagate_errors();
             }
 
             // 5. Otherwise, if el is a link element that has an imagesrcset attribute, then set srcset to that attribute's value.
             else if (is<HTMLLinkElement>(element)) {
-                if (auto imagesrcset_value = element.attribute(HTML::AttributeNames::imagesrcset); !imagesrcset_value.is_null())
+                if (auto imagesrcset_value = element.attribute(HTML::AttributeNames::imagesrcset.to_deprecated_fly_string()); !imagesrcset_value.is_null())
                     srcset = String::from_deprecated_string(imagesrcset_value).release_value_but_fixme_should_propagate_errors();
             }
 
             // 6. If el is an img element that has a sizes attribute, then set sizes to that attribute's value.
             if (is<HTMLImageElement>(element)) {
-                if (auto sizes_value = element.attribute(HTML::AttributeNames::sizes); !sizes_value.is_null())
+                if (auto sizes_value = element.attribute(HTML::AttributeNames::sizes.to_deprecated_fly_string()); !sizes_value.is_null())
                     sizes = String::from_deprecated_string(sizes_value).release_value_but_fixme_should_propagate_errors();
             }
 
             // 7. Otherwise, if el is a link element that has an imagesizes attribute, then set sizes to that attribute's value.
             else if (is<HTMLLinkElement>(element)) {
-                if (auto imagesizes_value = element.attribute(HTML::AttributeNames::imagesizes); !imagesizes_value.is_null())
+                if (auto imagesizes_value = element.attribute(HTML::AttributeNames::imagesizes.to_deprecated_fly_string()); !imagesizes_value.is_null())
                     sizes = String::from_deprecated_string(imagesizes_value).release_value_but_fixme_should_propagate_errors();
             }
 
             // 8. If el is an img element that has a src attribute, then set default source to that attribute's value.
             if (is<HTMLImageElement>(element)) {
-                if (auto src_value = element.attribute(HTML::AttributeNames::src); !src_value.is_null())
+                if (auto src_value = element.attribute(HTML::AttributeNames::src.to_deprecated_fly_string()); !src_value.is_null())
                     default_source = String::from_deprecated_string(src_value).release_value_but_fixme_should_propagate_errors();
             }
 
             // 9. Otherwise, if el is a link element that has an href attribute, then set default source to that attribute's value.
             else if (is<HTMLLinkElement>(element)) {
-                if (auto href_value = element.attribute(HTML::AttributeNames::href); !href_value.is_null())
+                if (auto href_value = element.attribute(HTML::AttributeNames::href.to_deprecated_fly_string()); !href_value.is_null())
                     default_source = String::from_deprecated_string(href_value).release_value_but_fixme_should_propagate_errors();
             }
 
@@ -905,7 +904,7 @@ static void update_the_source_set(DOM::Element& element)
             continue;
 
         // 4. Parse child's srcset attribute and let the returned source set be source set.
-        auto source_set = parse_a_srcset_attribute(child->attribute(HTML::AttributeNames::srcset));
+        auto source_set = parse_a_srcset_attribute(child->attribute(HTML::AttributeNames::srcset.to_deprecated_fly_string()));
 
         // 5. If source set has zero image sources, continue to the next child.
         if (source_set.is_empty())
@@ -914,14 +913,14 @@ static void update_the_source_set(DOM::Element& element)
         // 6. If child has a media attribute, and its value does not match the environment, continue to the next child.
         if (child->has_attribute(HTML::AttributeNames::media)) {
             auto media_query = parse_media_query(CSS::Parser::ParsingContext { element.document() },
-                child->attribute(HTML::AttributeNames::media));
+                child->attribute(HTML::AttributeNames::media.to_deprecated_fly_string()));
             if (!media_query || !media_query->evaluate(element.document().window())) {
                 continue;
             }
         }
 
         // 7. Parse child's sizes attribute, and let source set's source size be the returned value.
-        source_set.m_source_size = parse_a_sizes_attribute(element.document(), child->attribute(HTML::AttributeNames::sizes));
+        source_set.m_source_size = parse_a_sizes_attribute(element.document(), child->attribute(HTML::AttributeNames::sizes.to_deprecated_fly_string()));
 
         // FIXME: 8. If child has a type attribute, and its value is an unknown or unsupported MIME type, continue to the next child.
         if (child->has_attribute(HTML::AttributeNames::type)) {
@@ -991,7 +990,7 @@ void HTMLImageElement::animate()
 // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes
 HTMLImageElement::LazyLoading HTMLImageElement::lazy_loading() const
 {
-    auto value = attribute(HTML::AttributeNames::loading);
+    auto value = attribute(HTML::AttributeNames::loading.to_deprecated_fly_string());
     if (value.equals_ignoring_ascii_case("lazy"sv))
         return LazyLoading::Lazy;
     return LazyLoading::Eager;

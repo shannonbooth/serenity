@@ -35,7 +35,7 @@ void HTMLOptionElement::attribute_changed(FlyString const& name, DeprecatedStrin
 {
     HTMLElement::attribute_changed(name, value);
 
-    if (name.to_deprecated_fly_string() == HTML::AttributeNames::selected) {
+    if (name == HTML::AttributeNames::selected) {
         if (value.is_null()) {
             // Whenever an option element's selected attribute is removed, if its dirtiness is false, its selectedness must be set to false.
             if (!m_dirty)
@@ -63,7 +63,7 @@ void HTMLOptionElement::set_selected(bool selected)
 DeprecatedString HTMLOptionElement::value() const
 {
     // The value of an option element is the value of the value content attribute, if there is one.
-    if (auto value_attr = get_attribute(HTML::AttributeNames::value); !value_attr.is_null())
+    if (auto value_attr = get_attribute(HTML::AttributeNames::value.to_deprecated_fly_string()); !value_attr.is_null())
         return value_attr;
 
     // ...or, if there is not, the value of the element's text IDL attribute.
@@ -73,7 +73,7 @@ DeprecatedString HTMLOptionElement::value() const
 // https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-value
 WebIDL::ExceptionOr<void> HTMLOptionElement::set_value(DeprecatedString value)
 {
-    return set_attribute(HTML::AttributeNames::value, value);
+    return set_attribute(HTML::AttributeNames::value.to_deprecated_fly_string(), value);
 }
 
 static void concatenate_descendants_text_content(DOM::Node const* node, StringBuilder& builder)
