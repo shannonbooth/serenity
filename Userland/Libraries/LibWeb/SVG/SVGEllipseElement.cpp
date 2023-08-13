@@ -22,11 +22,9 @@ void SVGEllipseElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::SVGEllipseElementPrototype>(realm, "SVGEllipseElement"));
 }
 
-void SVGEllipseElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void SVGEllipseElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    SVGGeometryElement::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    SVGGeometryElement::attribute_changed(name, value);
 
     if (name == SVG::AttributeNames::cx) {
         m_center_x = AttributeParser::parse_coordinate(value);

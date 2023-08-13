@@ -22,11 +22,9 @@ void SVGLineElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::SVGLineElementPrototype>(realm, "SVGLineElement"));
 }
 
-void SVGLineElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void SVGLineElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    SVGGeometryElement::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    SVGGeometryElement::attribute_changed(name, value);
 
     if (name == SVG::AttributeNames::x1) {
         m_x1 = AttributeParser::parse_coordinate(value);

@@ -44,11 +44,9 @@ void SVGUseElement::visit_edges(Cell::Visitor& visitor)
     visitor.visit(m_document_observer);
 }
 
-void SVGUseElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void SVGUseElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    Base::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    Base::attribute_changed(name, value);
 
     // https://svgwg.org/svg2-draft/struct.html#UseLayout
     if (name == SVG::AttributeNames::x) {

@@ -26,7 +26,7 @@ void SVGPolylineElement::attribute_changed(FlyString const& name, DeprecatedStri
 {
     SVGGeometryElement::attribute_changed(name, value);
 
-    if (name.to_deprecated_fly_string() == SVG::AttributeNames::points) {
+    if (name == SVG::AttributeNames::points) {
         m_points = AttributeParser::parse_points(value);
         m_path.clear();
     }

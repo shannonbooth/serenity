@@ -28,11 +28,9 @@ void SVGTextPositioningElement::initialize(JS::Realm& realm)
     set_prototype(&Bindings::ensure_web_prototype<Bindings::SVGTextPositioningElementPrototype>(realm, "SVGTextPositioningElement"));
 }
 
-void SVGTextPositioningElement::attribute_changed(FlyString const& name_, DeprecatedString const& value)
+void SVGTextPositioningElement::attribute_changed(FlyString const& name, DeprecatedString const& value)
 {
-    SVGGraphicsElement::attribute_changed(name_, value);
-
-    auto name = name_.to_deprecated_fly_string();
+    SVGGraphicsElement::attribute_changed(name, value);
 
     if (name == SVG::AttributeNames::x) {
         m_x = AttributeParser::parse_coordinate(value).value_or(m_x);
