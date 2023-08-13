@@ -128,7 +128,7 @@ JS::GCPtr<DOM::Element> StackOfOpenElements::topmost_special_node_below(DOM::Ele
     for (auto& element : m_elements.in_reverse()) {
         if (element.ptr() == &formatting_element)
             break;
-        if (HTMLParser::is_special_tag(element->local_name(), element->namespace_()))
+        if (HTMLParser::is_special_tag(FlyString::from_deprecated_fly_string(element->local_name()).release_value(), FlyString::from_deprecated_fly_string(element->namespace_()).release_value()))
             found_element = element.ptr();
     }
     return found_element.ptr();

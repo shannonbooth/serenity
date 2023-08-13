@@ -1432,10 +1432,13 @@ HTMLParser::AdoptionAgencyAlgorithmOutcome HTMLParser::run_the_adoption_agency_a
 }
 
 // https://html.spec.whatwg.org/multipage/parsing.html#special
-bool HTMLParser::is_special_tag(DeprecatedFlyString const& tag_name, DeprecatedFlyString const& namespace_)
+bool HTMLParser::is_special_tag(FlyString const& tag_name, FlyString const& namespace_)
 {
-    if (namespace_ == Namespace::HTML) {
-        return tag_name.is_one_of(
+    auto deprecated_namespace = namespace_.to_deprecated_fly_string();
+    auto deprecated_tag_name = tag_name.to_deprecated_fly_string();
+
+    if (deprecated_namespace == Namespace::HTML) {
+        return deprecated_tag_name.is_one_of(
             HTML::TagNames::address,
             HTML::TagNames::applet,
             HTML::TagNames::area,
@@ -1518,13 +1521,13 @@ bool HTMLParser::is_special_tag(DeprecatedFlyString const& tag_name, DeprecatedF
             HTML::TagNames::ul,
             HTML::TagNames::wbr,
             HTML::TagNames::xmp);
-    } else if (namespace_ == Namespace::SVG) {
-        return tag_name.is_one_of(
+    } else if (deprecated_namespace == Namespace::SVG) {
+        return deprecated_tag_name.is_one_of(
             SVG::TagNames::desc,
             SVG::TagNames::foreignObject,
             SVG::TagNames::title);
-    } else if (namespace_ == Namespace::MathML) {
-        return tag_name.is_one_of(
+    } else if (deprecated_namespace == Namespace::MathML) {
+        return deprecated_tag_name.is_one_of(
             MathML::TagNames::mi,
             MathML::TagNames::mo,
             MathML::TagNames::mn,
@@ -1735,7 +1738,7 @@ void HTMLParser::handle_in_body(HTMLToken& token)
                 break;
             }
 
-            if (is_special_tag(node->local_name(), node->namespace_()) && !node->local_name().is_one_of(HTML::TagNames::address, HTML::TagNames::div, HTML::TagNames::p))
+            if (is_special_tag(FlyString::from_deprecated_fly_string(node->local_name()).release_value(), FlyString::from_deprecated_fly_string(node->namespace_()).release_value()) && !node->local_name().is_one_of(HTML::TagNames::address, HTML::TagNames::div, HTML::TagNames::p))
                 break;
         }
 
@@ -1766,7 +1769,7 @@ void HTMLParser::handle_in_body(HTMLToken& token)
                 m_stack_of_open_elements.pop_until_an_element_with_tag_name_has_been_popped(HTML::TagNames::dt);
                 break;
             }
-            if (is_special_tag(node->local_name(), node->namespace_()) && !node->local_name().is_one_of(HTML::TagNames::address, HTML::TagNames::div, HTML::TagNames::p))
+            if (is_special_tag(FlyString::from_deprecated_fly_string(node->local_name()).release_value(), FlyString::from_deprecated_fly_string(node->namespace_()).release_value()) && !node->local_name().is_one_of(HTML::TagNames::address, HTML::TagNames::div, HTML::TagNames::p))
                 break;
         }
         if (m_stack_of_open_elements.has_in_button_scope(HTML::TagNames::p))
@@ -2173,7 +2176,7 @@ void HTMLParser::handle_in_body(HTMLToken& token)
                 (void)m_stack_of_open_elements.pop();
                 break;
             }
-            if (is_special_tag(node->local_name(), node->namespace_())) {
+            if (is_special_tag(FlyString::from_deprecated_fly_string(node->local_name()).release_value(), FlyString::from_deprecated_fly_string(node->namespace_()).release_value())) {
                 log_parse_error();
                 return;
             }

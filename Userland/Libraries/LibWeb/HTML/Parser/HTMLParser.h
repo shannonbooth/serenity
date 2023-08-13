@@ -68,7 +68,7 @@ public:
 
     InsertionMode insertion_mode() const { return m_insertion_mode; }
 
-    static bool is_special_tag(DeprecatedFlyString const& tag_name, DeprecatedFlyString const& namespace_);
+    static bool is_special_tag(FlyString const& tag_name, FlyString const& namespace_);
 
     HTMLTokenizer& tokenizer() { return m_tokenizer; }
 
