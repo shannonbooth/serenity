@@ -3485,7 +3485,7 @@ void HTMLParser::process_using_the_rules_for_foreign_content(HTMLToken& token)
         (void)insert_foreign_element(token, adjusted_current_node().namespace_());
 
         if (token.is_self_closing()) {
-            if (token.tag_name() == SVG::TagNames::script && current_node().namespace_() == Namespace::SVG) {
+            if (token.tag_name() == SVG::TagNames::script.to_deprecated_fly_string() && current_node().namespace_() == Namespace::SVG) {
                 token.acknowledge_self_closing_flag_if_set();
                 goto ScriptEndTag;
             }
@@ -3497,7 +3497,7 @@ void HTMLParser::process_using_the_rules_for_foreign_content(HTMLToken& token)
         return;
     }
 
-    if (token.is_end_tag() && current_node().namespace_() == Namespace::SVG && current_node().tag_name() == SVG::TagNames::script) {
+    if (token.is_end_tag() && current_node().namespace_() == Namespace::SVG && current_node().tag_name() == SVG::TagNames::script.to_deprecated_fly_string()) {
     ScriptEndTag:
         // Pop the current node off the stack of open elements.
         (void)m_stack_of_open_elements.pop();
