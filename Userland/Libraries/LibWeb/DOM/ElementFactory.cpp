@@ -111,135 +111,213 @@
 
 namespace Web::DOM {
 
-ErrorOr<FixedArray<DeprecatedFlyString>> valid_local_names_for_given_html_element_interface(StringView html_element_interface_name)
+ErrorOr<FixedArray<FlyString>> valid_local_names_for_given_html_element_interface(StringView html_element_interface_name)
 {
     if (html_element_interface_name == "HTMLAnchorElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::a });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::a).release_value() });
     if (html_element_interface_name == "HTMLAreaElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::area });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::area).release_value() });
     if (html_element_interface_name == "HTMLAudioElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::audio });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::audio).release_value() });
     if (html_element_interface_name == "HTMLBaseElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::base });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::base).release_value() });
     if (html_element_interface_name == "HTMLBodyElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::body });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::body).release_value() });
     if (html_element_interface_name == "HTMLBRElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::br });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::br).release_value() });
     if (html_element_interface_name == "HTMLButtonElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::button });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::button).release_value() });
     if (html_element_interface_name == "HTMLCanvasElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::canvas });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::canvas).release_value() });
     if (html_element_interface_name == "HTMLDataElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::data });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::data).release_value() });
     if (html_element_interface_name == "HTMLDataListElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::datalist });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::datalist).release_value() });
     if (html_element_interface_name == "HTMLDetailsElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::details });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::details).release_value() });
     if (html_element_interface_name == "HTMLDialogElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::dialog });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::dialog).release_value() });
     if (html_element_interface_name == "HTMLDirectoryElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::dir });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::dir).release_value() });
     if (html_element_interface_name == "HTMLDivElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::div });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::div).release_value() });
     if (html_element_interface_name == "HTMLDListElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::dl });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::dl).release_value() });
     if (html_element_interface_name == "HTMLEmbedElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::embed });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::embed).release_value() });
     if (html_element_interface_name == "HTMLFieldsetElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::fieldset });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::fieldset).release_value() });
     if (html_element_interface_name == "HTMLFontElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::font });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::font).release_value() });
     if (html_element_interface_name == "HTMLFormElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::form });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::form).release_value() });
     if (html_element_interface_name == "HTMLFrameElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::frame });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::frame).release_value() });
     if (html_element_interface_name == "HTMLFrameSetElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::frameset });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::frameset).release_value() });
     if (html_element_interface_name == "HTMLHeadElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::head });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::head).release_value() });
     if (html_element_interface_name == "HTMLHeadingElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::h1, HTML::TagNames::h2, HTML::TagNames::h3, HTML::TagNames::h4, HTML::TagNames::h5, HTML::TagNames::h6 });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::h1).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::h2).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::h3).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::h4).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::h5).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::h6).release_value(),
+        });
     if (html_element_interface_name == "HTMLHRElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::hr });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::hr).release_value() });
     if (html_element_interface_name == "HTMLHtmlElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::html });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::html).release_value() });
     if (html_element_interface_name == "HTMLIFrameElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::iframe });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::iframe).release_value() });
     if (html_element_interface_name == "HTMLImageElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::img });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::img).release_value() });
     if (html_element_interface_name == "HTMLInputElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::input });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::input).release_value() });
     if (html_element_interface_name == "HTMLLabelElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::label });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::label).release_value() });
     if (html_element_interface_name == "HTMLLIElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::li });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::li).release_value() });
     if (html_element_interface_name == "HTMLLinkElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::link });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::link).release_value() });
     if (html_element_interface_name == "HTMLMapElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::map });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::map).release_value() });
     if (html_element_interface_name == "HTMLMarqueeElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::marquee });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::marquee).release_value() });
     if (html_element_interface_name == "HTMLMenuElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::menu });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::menu).release_value() });
     if (html_element_interface_name == "HTMLMeterElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::meter });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::meter).release_value() });
     if (html_element_interface_name == "HTMLModElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::ins, HTML::TagNames::del });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::ins).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::del).release_value(),
+        });
     if (html_element_interface_name == "HTMLObjectElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::object });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::object).release_value() });
     if (html_element_interface_name == "HTMLOutputElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::output });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::output).release_value() });
     if (html_element_interface_name == "HTMLParagraphElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::p });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::p).release_value() });
     if (html_element_interface_name == "HTMLParamElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::param });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::param).release_value() });
     if (html_element_interface_name == "HTMLPictureElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::picture });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::picture).release_value() });
     if (html_element_interface_name == "HTMLPreElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::pre, HTML::TagNames::listing, HTML::TagNames::xmp });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::pre).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::listing).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::xmp).release_value(),
+        });
     if (html_element_interface_name == "HTMLProgressElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::progress });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::progress).release_value() });
     if (html_element_interface_name == "HTMLQuoteElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::blockquote, HTML::TagNames::q });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::blockquote).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::q).release_value(),
+        });
     if (html_element_interface_name == "HTMLScriptElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::script });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::script).release_value() });
     if (html_element_interface_name == "HTMLSelectElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::select });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::select).release_value() });
     if (html_element_interface_name == "HTMLSlotElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::slot });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::slot).release_value() });
     if (html_element_interface_name == "HTMLSourceElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::source });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::source).release_value() });
     if (html_element_interface_name == "HTMLSpanElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::span });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::span).release_value() });
     if (html_element_interface_name == "HTMLStyleElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::style });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::style).release_value() });
     if (html_element_interface_name == "HTMLTableCaptionElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::caption });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::caption).release_value() });
     if (html_element_interface_name == "HTMLTableCellElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::td, HTML::TagNames::th });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::td).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::th).release_value(),
+        });
     if (html_element_interface_name == "HTMLTableColElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::colgroup, HTML::TagNames::col });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::colgroup).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::col).release_value(),
+        });
     if (html_element_interface_name == "HTMLTableElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::table });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::table).release_value() });
     if (html_element_interface_name == "HTMLTableSectionElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::tbody, HTML::TagNames::thead, HTML::TagNames::tfoot });
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::tbody).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::thead).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::tfoot).release_value(),
+        });
     if (html_element_interface_name == "HTMLTemplateElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::template_ });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::template_).release_value() });
     if (html_element_interface_name == "HTMLTextAreaElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::textarea });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::textarea).release_value() });
     if (html_element_interface_name == "HTMLTimeElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::time });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::time).release_value() });
     if (html_element_interface_name == "HTMLTitleElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::title });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::title).release_value() });
     if (html_element_interface_name == "HTMLTrackElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::track });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::track).release_value() });
     if (html_element_interface_name == "HTMLUListElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::ul });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::ul).release_value() });
     if (html_element_interface_name == "HTMLVideoElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::video });
+        return FixedArray<FlyString>::create({ FlyString::from_deprecated_fly_string(HTML::TagNames::video).release_value() });
     if (html_element_interface_name == "HTMLElement"sv)
-        return FixedArray<DeprecatedFlyString>::create({ HTML::TagNames::article, HTML::TagNames::section, HTML::TagNames::nav, HTML::TagNames::aside, HTML::TagNames::hgroup, HTML::TagNames::header, HTML::TagNames::footer, HTML::TagNames::address, HTML::TagNames::dt, HTML::TagNames::dd, HTML::TagNames::figure, HTML::TagNames::figcaption, HTML::TagNames::main, HTML::TagNames::em, HTML::TagNames::strong, HTML::TagNames::small, HTML::TagNames::s, HTML::TagNames::cite, HTML::TagNames::dfn, HTML::TagNames::abbr, HTML::TagNames::ruby, HTML::TagNames::rt, HTML::TagNames::rp, HTML::TagNames::code, HTML::TagNames::var, HTML::TagNames::samp, HTML::TagNames::kbd, HTML::TagNames::sub, HTML::TagNames::sup, HTML::TagNames::i, HTML::TagNames::b, HTML::TagNames::u, HTML::TagNames::mark, HTML::TagNames::bdi, HTML::TagNames::bdo, HTML::TagNames::wbr, HTML::TagNames::summary, HTML::TagNames::noscript, HTML::TagNames::acronym, HTML::TagNames::basefont, HTML::TagNames::big, HTML::TagNames::center, HTML::TagNames::nobr, HTML::TagNames::noembed, HTML::TagNames::noframes, HTML::TagNames::plaintext, HTML::TagNames::rb, HTML::TagNames::rtc, HTML::TagNames::strike, HTML::TagNames::tt });
-    return FixedArray<DeprecatedFlyString>::create({});
+        return FixedArray<FlyString>::create({
+            FlyString::from_deprecated_fly_string(HTML::TagNames::article).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::section).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::nav).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::aside).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::hgroup).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::header).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::footer).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::address).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::dt).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::dd).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::figure).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::figcaption).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::main).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::em).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::strong).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::small).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::s).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::cite).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::dfn).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::abbr).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::ruby).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::rt).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::rp).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::code).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::var).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::samp).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::kbd).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::sub).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::sup).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::i).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::b).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::u).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::mark).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::bdi).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::bdo).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::wbr).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::summary).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::noscript).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::acronym).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::basefont).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::big).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::center).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::nobr).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::noembed).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::noframes).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::plaintext).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::rb).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::rtc).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::strike).release_value(),
+            FlyString::from_deprecated_fly_string(HTML::TagNames::tt).release_value(),
+        });
+    return FixedArray<FlyString>::create({});
 }
 
 // https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom%3Aelement-interface

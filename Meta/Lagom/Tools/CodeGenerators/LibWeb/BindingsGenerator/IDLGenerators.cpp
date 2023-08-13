@@ -3459,7 +3459,7 @@ JS::ThrowCompletionOr<JS::NonnullGCPtr<JS::Object>> @constructor_class@::constru
         static auto valid_local_names = TRY_OR_THROW_OOM(vm, DOM::valid_local_names_for_given_html_element_interface("@name@"sv));
 
         // 2. If valid local names does not contain definition's local name, then throw a TypeError.
-        if (!valid_local_names.contains_slow(definition->local_name().to_deprecated_string()))
+        if (!valid_local_names.contains_slow(definition->local_name()))
             return vm.throw_completion<JS::TypeError>(TRY_OR_THROW_OOM(vm, String::formatted("Local name '{}' of customized built-in element is not a valid local name for @name@"sv, definition->local_name())));
 
         // 3. Set is value to definition's name.
