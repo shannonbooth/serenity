@@ -132,7 +132,7 @@ const HTML::HTMLElement* Node::enclosing_html_element() const
     return first_ancestor_of_type<HTML::HTMLElement>();
 }
 
-const HTML::HTMLElement* Node::enclosing_html_element_with_attribute(DeprecatedFlyString const& attribute) const
+const HTML::HTMLElement* Node::enclosing_html_element_with_attribute(FlyString const& attribute) const
 {
     for (auto* node = this; node; node = node->parent()) {
         if (is<HTML::HTMLElement>(*node) && verify_cast<HTML::HTMLElement>(*node).has_attribute(attribute))
