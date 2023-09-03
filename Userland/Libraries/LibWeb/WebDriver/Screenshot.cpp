@@ -33,14 +33,14 @@ static Response encode_canvas_element(HTML::HTMLCanvasElement const& canvas)
 
     // 3. Let file be a serialization of the canvas element’s bitmap as a file, using "image/png" as an argument.
     // 4. Let data url be a data: URL representing file. [RFC2397]
-    auto data_url = canvas.to_data_url("image/png"sv, {});
+    auto data_url = canvas.to_data_url("image/png"_string, {});
 
     // 5. Let index be the index of "," in data url.
-    auto index = data_url.find(',');
+    auto index = data_url.bytes_as_string_view().find(',');
     VERIFY(index.has_value());
 
     // 6. Let encoded string be a substring of data url using (index + 1) as the start argument.
-    auto encoded_string = data_url.substring(*index + 1);
+    auto encoded_string = MUST(data_url.substring_from_byte_offset(*index + 1));
 
     // 7. Return success with data encoded string.
     return JsonValue { move(encoded_string) };

@@ -153,7 +153,7 @@ JS::ThrowCompletionOr<HTMLCanvasElement::HasOrCreatedContext> HTMLCanvasElement:
 }
 
 // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-getcontext
-JS::ThrowCompletionOr<HTMLCanvasElement::RenderingContext> HTMLCanvasElement::get_context(DeprecatedString const& type, JS::Value options)
+JS::ThrowCompletionOr<HTMLCanvasElement::RenderingContext> HTMLCanvasElement::get_context(String const& type, JS::Value options)
 {
     // 1. If options is not an object, then set options to null.
     if (!options.is_object())
@@ -223,7 +223,7 @@ struct SerializeBitmapResult {
 };
 
 // https://html.spec.whatwg.org/multipage/canvas.html#a-serialisation-of-the-bitmap-as-a-file
-static ErrorOr<SerializeBitmapResult> serialize_bitmap(Gfx::Bitmap const& bitmap, StringView type, Optional<double> quality)
+static ErrorOr<SerializeBitmapResult> serialize_bitmap(Gfx::Bitmap const& bitmap, Optional<String> const& type, Optional<double> quality)
 {
     // If type is an image format that supports variable quality (such as "image/jpeg"), quality is given, and type is not "image/png", then,
     // if Type(quality) is Number, and quality is in the range 0.0 to 1.0 inclusive, the user agent must treat quality as the desired quality level.
@@ -231,7 +231,7 @@ static ErrorOr<SerializeBitmapResult> serialize_bitmap(Gfx::Bitmap const& bitmap
     if (quality.has_value() && !(*quality >= 0.0 && *quality <= 1.0))
         quality = OptionalNone {};
 
-    if (type.equals_ignoring_ascii_case("image/jpeg"sv)) {
+    if (type.has_value() && type->bytes_as_string_view().equals_ignoring_ascii_case("image/jpeg"sv)) {
         AllocatingMemoryStream file;
         Gfx::JPEGWriter::Options jpeg_options;
         if (quality.has_value())
@@ -246,14 +246,14 @@ static ErrorOr<SerializeBitmapResult> serialize_bitmap(Gfx::Bitmap const& bitmap
 }
 
 // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-todataurl
-DeprecatedString HTMLCanvasElement::to_data_url(DeprecatedString const& type, Optional<double> quality) const
+String HTMLCanvasElement::to_data_url(Optional<String> const& type, Optional<double> quality) const
 {
     // FIXME: 1. If this canvas element's bitmap's origin-clean flag is set to false, then throw a "SecurityError" DOMException.
 
     // 2. If this canvas element's bitmap has no pixels (i.e. either its horizontal dimension or its vertical dimension is zero)
     //    then return the string "data:,". (This is the shortest data: URL; it represents the empty string in a text/plain resource.)
     if (!m_bitmap)
-        return "data:,";
+        return "data:,"_string;
 
     // 3. Let file be a serialization of this canvas element's bitmap as a file, passing type and quality if given.
     auto file = serialize_bitmap(*m_bitmap, type, move(quality));
@@ -261,19 +261,19 @@ DeprecatedString HTMLCanvasElement::to_data_url(DeprecatedString const& type, Op
     // 4. If file is null then return "data:,".
     if (file.is_error()) {
         dbgln("HTMLCanvasElement: Failed to encode canvas bitmap to {}: {}", type, file.error());
-        return "data:,";
+        return "data:,"_string;
     }
 
     // 5. Return a data: URL representing file. [RFC2397]
     auto base64_encoded_or_error = encode_base64(file.value().buffer);
     if (base64_encoded_or_error.is_error()) {
-        return "data:,";
+        return "data:,"_string;
     }
-    return AK::URL::create_with_data(file.value().mime_type, base64_encoded_or_error.release_value(), true).to_deprecated_string();
+    return MUST(AK::URL::create_with_data(file.value().mime_type, base64_encoded_or_error.release_value(), true).to_string());
 }
 
 // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-toblob
-WebIDL::ExceptionOr<void> HTMLCanvasElement::to_blob(JS::NonnullGCPtr<WebIDL::CallbackType> callback, DeprecatedString const& type, Optional<double> quality)
+WebIDL::ExceptionOr<void> HTMLCanvasElement::to_blob(JS::NonnullGCPtr<WebIDL::CallbackType> callback, Optional<String> const& type, Optional<double> quality)
 {
     // FIXME: 1. If this canvas element's bitmap's origin-clean flag is set to false, then throw a "SecurityError" DOMException.
 
