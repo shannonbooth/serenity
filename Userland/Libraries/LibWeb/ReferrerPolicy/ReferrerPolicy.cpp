@@ -8,27 +8,27 @@
 
 namespace Web::ReferrerPolicy {
 
-StringView to_string(ReferrerPolicy referrer_policy)
+String to_string(ReferrerPolicy referrer_policy)
 {
     switch (referrer_policy) {
     case ReferrerPolicy::EmptyString:
-        return ""sv;
+        return ""_string;
     case ReferrerPolicy::NoReferrer:
-        return "no-referrer"sv;
+        return "no-referrer"_string;
     case ReferrerPolicy::NoReferrerWhenDowngrade:
-        return "no-referrer-when-downgrade"sv;
+        return "no-referrer-when-downgrade"_string;
     case ReferrerPolicy::SameOrigin:
-        return "same-origin"sv;
+        return "same-origin"_string;
     case ReferrerPolicy::Origin:
-        return "origin"sv;
+        return "origin"_string;
     case ReferrerPolicy::StrictOrigin:
-        return "strict-origin"sv;
+        return "strict-origin"_string;
     case ReferrerPolicy::OriginWhenCrossOrigin:
-        return "origin-when-cross-origin"sv;
+        return "origin-when-cross-origin"_string;
     case ReferrerPolicy::StrictOriginWhenCrossOrigin:
-        return "strict-origin-when-cross-origin"sv;
+        return "strict-origin-when-cross-origin"_string;
     case ReferrerPolicy::UnsafeURL:
-        return "unsafe-url"sv;
+        return "unsafe-url"_string;
     }
     VERIFY_NOT_REACHED();
 }

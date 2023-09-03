@@ -7,6 +7,7 @@
 #pragma once
 
 #include <AK/Optional.h>
+#include <AK/String.h>
 #include <AK/StringView.h>
 
 namespace Web::ReferrerPolicy {
@@ -28,7 +29,7 @@ enum class ReferrerPolicy {
 // The default referrer policy is "strict-origin-when-cross-origin".
 constexpr auto DEFAULT_REFERRER_POLICY = ReferrerPolicy::StrictOriginWhenCrossOrigin;
 
-StringView to_string(ReferrerPolicy);
+String to_string(ReferrerPolicy);
 Optional<ReferrerPolicy> from_string(StringView);
 
 }
