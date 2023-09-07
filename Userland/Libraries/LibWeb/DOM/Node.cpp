@@ -161,7 +161,7 @@ DeprecatedString Node::text_content() const
 
     // If CharacterData, return this’s data.
     if (is<CharacterData>(this))
-        return static_cast<CharacterData const&>(*this).data();
+        return static_cast<CharacterData const&>(*this).data().to_deprecated_string();
 
     // If Attr node, return this's value.
     if (is<Attr>(*this))
@@ -186,7 +186,7 @@ void Node::set_text_content(DeprecatedString const& content)
     else if (is<CharacterData>(this)) {
 
         auto* character_data_node = verify_cast<CharacterData>(this);
-        character_data_node->set_data(content);
+        character_data_node->set_data(MUST(String::from_deprecated_string(content)));
 
         // FIXME: CharacterData::set_data is not spec compliant. Make this match the spec when set_data becomes spec compliant.
         //        Do note that this will make this function able to throw an exception.
@@ -215,7 +215,7 @@ DeprecatedString Node::node_value() const
 
     // If CharacterData, return this’s data.
     if (is<CharacterData>(this)) {
-        return verify_cast<CharacterData>(this)->data();
+        return verify_cast<CharacterData>(this)->data().to_deprecated_string();
     }
 
     // Otherwise, return null.
@@ -233,7 +233,7 @@ void Node::set_node_value(DeprecatedString const& value)
         verify_cast<Attr>(this)->set_value(value);
     } else if (is<CharacterData>(this)) {
         // If CharacterData, replace data with node this, offset 0, count this’s length, and data the given value.
-        verify_cast<CharacterData>(this)->set_data(value);
+        verify_cast<CharacterData>(this)->set_data(MUST(String::from_deprecated_string(value)));
     }
 
     // Otherwise, do nothing.
@@ -805,21 +805,21 @@ JS::NonnullGCPtr<Node> Node::clone_node(Document* document, bool clone_children)
         auto text = verify_cast<Text>(this);
 
         // Set copy’s data to that of node.
-        auto text_copy = heap().allocate<Text>(realm(), *document, MUST(String::from_deprecated_string(text->data())));
+        auto text_copy = heap().allocate<Text>(realm(), *document, text->data());
         copy = move(text_copy);
     } else if (is<Comment>(this)) {
         // Comment
         auto comment = verify_cast<Comment>(this);
 
         // Set copy’s data to that of node.
-        auto comment_copy = heap().allocate<Comment>(realm(), *document, MUST(String::from_deprecated_string(comment->data())));
+        auto comment_copy = heap().allocate<Comment>(realm(), *document, comment->data());
         copy = move(comment_copy);
     } else if (is<ProcessingInstruction>(this)) {
         // ProcessingInstruction
         auto processing_instruction = verify_cast<ProcessingInstruction>(this);
 
         // Set copy’s target and data to those of node.
-        auto processing_instruction_copy = heap().allocate<ProcessingInstruction>(realm(), *document, processing_instruction->data(), processing_instruction->target());
+        auto processing_instruction_copy = heap().allocate<ProcessingInstruction>(realm(), *document, processing_instruction->data().to_deprecated_string(), processing_instruction->target());
         copy = processing_instruction_copy;
     }
     // Otherwise, Do nothing.
@@ -1081,7 +1081,7 @@ bool Node::is_uninteresting_whitespace_node() const
 {
     if (!is<Text>(*this))
         return false;
-    if (!static_cast<Text const&>(*this).data().is_whitespace())
+    if (!static_cast<Text const&>(*this).data().to_deprecated_string().is_whitespace()) // FIXME: this is ugly check properly
         return false;
     if (!layout_node())
         return true;
@@ -1429,7 +1429,8 @@ size_t Node::length() const
     // 2. If node is a CharacterData node, then return node’s data’s length.
     if (is_character_data()) {
         auto* character_data_node = verify_cast<CharacterData>(this);
-        return character_data_node->data().length();
+        // FIXME: This should be in UTF-16 code units, not byte size.
+        return character_data_node->length();
     }
 
     // 3. Return the number of node’s children.
@@ -1812,7 +1813,7 @@ ErrorOr<String> Node::name_or_description(NameOrDescription target, Document con
     // G. Otherwise, if the current node is a Text node, return its textual contents.
     if (is_text()) {
         auto const* text_node = static_cast<DOM::Text const*>(this);
-        return String::from_deprecated_string(text_node->data());
+        return text_node->data();
     }
     // TODO: H. Otherwise, if the current node is a descendant of an element whose Accessible Name or Accessible Description is being computed, and contains descendants, proceed to 2F.i.
 
