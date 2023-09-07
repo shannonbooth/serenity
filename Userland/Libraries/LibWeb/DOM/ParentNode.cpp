@@ -187,10 +187,10 @@ JS::NonnullGCPtr<HTMLCollection> ParentNode::get_elements_by_tag_name_ns(Depreca
 }
 
 // https://dom.spec.whatwg.org/#dom-parentnode-prepend
-WebIDL::ExceptionOr<void> ParentNode::prepend(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& nodes)
+WebIDL::ExceptionOr<void> ParentNode::prepend(Vector<Variant<JS::Handle<Node>, String>> const& nodes)
 {
     // 1. Let node be the result of converting nodes into a node given nodes and this’s node document.
-    auto node = TRY(convert_nodes_to_single_node(from_deprecated_handle_or_node(nodes), document()));
+    auto node = TRY(convert_nodes_to_single_node(nodes, document()));
 
     // 2. Pre-insert node into this before this’s first child.
     (void)TRY(pre_insert(node, first_child()));
@@ -198,10 +198,25 @@ WebIDL::ExceptionOr<void> ParentNode::prepend(Vector<Variant<JS::Handle<Node>, D
     return {};
 }
 
+WebIDL::ExceptionOr<void> ParentNode::prepend(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& nodes)
+{
+    return prepend(from_deprecated_handle_or_node(nodes));
+}
+
 WebIDL::ExceptionOr<void> ParentNode::append(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& nodes)
 {
+    return append(from_deprecated_handle_or_node(nodes));
+}
+
+WebIDL::ExceptionOr<void> ParentNode::replace_children(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& nodes)
+{
+    return replace_children(from_deprecated_handle_or_node(nodes));
+}
+
+WebIDL::ExceptionOr<void> ParentNode::append(Vector<Variant<JS::Handle<Node>, String>> const& nodes)
+{
     // 1. Let node be the result of converting nodes into a node given nodes and this’s node document.
-    auto node = TRY(convert_nodes_to_single_node(from_deprecated_handle_or_node(nodes), document()));
+    auto node = TRY(convert_nodes_to_single_node(nodes, document()));
 
     // 2. Append node to this.
     (void)TRY(append_child(node));
@@ -209,10 +224,10 @@ WebIDL::ExceptionOr<void> ParentNode::append(Vector<Variant<JS::Handle<Node>, De
     return {};
 }
 
-WebIDL::ExceptionOr<void> ParentNode::replace_children(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& nodes)
+WebIDL::ExceptionOr<void> ParentNode::replace_children(Vector<Variant<JS::Handle<Node>, String>> const& nodes)
 {
     // 1. Let node be the result of converting nodes into a node given nodes and this’s node document.
-    auto node = TRY(convert_nodes_to_single_node(from_deprecated_handle_or_node(nodes), document()));
+    auto node = TRY(convert_nodes_to_single_node(nodes, document()));
 
     // 2. Ensure pre-insertion validity of node into this before null.
     TRY(ensure_pre_insertion_validity(node, nullptr));
