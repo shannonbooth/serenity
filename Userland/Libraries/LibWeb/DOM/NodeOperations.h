@@ -12,6 +12,8 @@
 
 namespace Web::DOM {
 
-WebIDL::ExceptionOr<JS::NonnullGCPtr<Node>> convert_nodes_to_single_node(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& nodes, DOM::Document& document);
+WebIDL::ExceptionOr<JS::NonnullGCPtr<Node>> convert_nodes_to_single_node(Vector<Variant<JS::Handle<Node>, String>> const& nodes, DOM::Document& document);
+
+Vector<Variant<JS::Handle<Node>, String>> from_deprecated_handle_or_node(Vector<Variant<JS::Handle<Node>, DeprecatedString>> const& deprecated_nodes);
 
 }
