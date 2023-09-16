@@ -1606,8 +1606,9 @@ NonnullRefPtr<ClassExpression const> Parser::parse_class_expression(bool expect_
 Parser::PrimaryExpressionParseResult Parser::parse_primary_expression()
 {
     auto rule_start = push_start();
-    if (match_unary_prefixed_expression())
+    if (match_unary_prefixed_expression()) {
         return { parse_unary_prefixed_expression() };
+    }
 
     auto try_arrow_function_parse_or_fail = [this](Position const& position, bool expect_paren, bool is_async = false) -> RefPtr<FunctionExpression const> {
         if (try_parse_arrow_function_expression_failed_at_position(position))
@@ -1805,9 +1806,16 @@ NonnullRefPtr<Expression const> Parser::parse_unary_prefixed_expression()
     auto rule_start = push_start();
     auto precedence = g_operator_precedence.get_unary(m_state.current_token.type());
     auto associativity = operator_associativity(m_state.current_token.type());
+    auto check_exponent = [this]() {
+        auto lookahead_token = next_token();
+        if (lookahead_token.type() == TokenType::DoubleAsterisk)
+            syntax_error("Unary operator used immediately before exponentiation expression. Parenthesis must be used to disambiguate operator precedence");
+    };
+
     switch (m_state.current_token.type()) {
     case TokenType::PlusPlus: {
         consume();
+        check_exponent();
         auto rhs_start = position();
         auto rhs = parse_expression(precedence, associativity);
         if (!is_simple_assignment_target(*rhs))
@@ -1823,6 +1831,7 @@ NonnullRefPtr<Expression const> Parser::parse_unary_prefixed_expression()
     }
     case TokenType::MinusMinus: {
         consume();
+        check_exponent();
         auto rhs_start = position();
         auto rhs = parse_expression(precedence, associativity);
         if (!is_simple_assignment_target(*rhs))
@@ -1838,27 +1847,35 @@ NonnullRefPtr<Expression const> Parser::parse_unary_prefixed_expression()
     }
     case TokenType::ExclamationMark:
         consume();
+        check_exponent();
         return create_ast_node<UnaryExpression>({ m_source_code, rule_start.position(), position() }, UnaryOp::Not, parse_expression(precedence, associativity));
     case TokenType::Tilde:
         consume();
+        check_exponent();
         return create_ast_node<UnaryExpression>({ m_source_code, rule_start.position(), position() }, UnaryOp::BitwiseNot, parse_expression(precedence, associativity));
     case TokenType::Plus:
         consume();
+        check_exponent();
         return create_ast_node<UnaryExpression>({ m_source_code, rule_start.position(), position() }, UnaryOp::Plus, parse_expression(precedence, associativity));
-    case TokenType::Minus:
+    case TokenType::Minus: {
         consume();
+        check_exponent();
         return create_ast_node<UnaryExpression>({ m_source_code, rule_start.position(), position() }, UnaryOp::Minus, parse_expression(precedence, associativity));
+    }
     case TokenType::Typeof:
         consume();
+        check_exponent();
         return create_ast_node<UnaryExpression>({ m_source_code, rule_start.position(), position() }, UnaryOp::Typeof, parse_expression(precedence, associativity));
     case TokenType::Void:
         consume();
+        check_exponent();
         // FIXME: This check is really hiding the fact that we don't deal with different expressions correctly.
         if (match(TokenType::Yield) && m_state.in_generator_function_context)
             syntax_error("'yield' is not an identifier in generator function context");
         return create_ast_node<UnaryExpression>({ m_source_code, rule_start.position(), position() }, UnaryOp::Void, parse_expression(precedence, associativity));
     case TokenType::Delete: {
         consume();
+        check_exponent();
         auto rhs_start = position();
         auto rhs = parse_expression(precedence, associativity);
         if (is<Identifier>(*rhs) && m_state.strict_mode) {

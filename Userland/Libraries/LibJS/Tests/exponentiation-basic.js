@@ -14,8 +14,7 @@ test("exponentiation with negatives", () => {
     expect(2 ** -3).toBe(0.125);
     expect((-2) ** 3).toBe(-8);
 
-    // FIXME: This should fail :)
-    // expect("-2 ** 3").not.toEval();
+    expect("-2 ** 3").not.toEval();
 });
 
 test("exponentiation with non-numeric primitives", () => {
