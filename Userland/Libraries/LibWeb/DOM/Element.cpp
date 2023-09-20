@@ -141,7 +141,7 @@ DeprecatedString Element::get_attribute(DeprecatedFlyString const& name) const
         return {};
 
     // 3. Return attr’s value.
-    return attribute->value();
+    return attribute->value().to_deprecated_string();
 }
 
 // https://dom.spec.whatwg.org/#concept-element-attributes-get-value
@@ -155,7 +155,7 @@ DeprecatedString Element::get_attribute_value(DeprecatedFlyString const& local_n
         return DeprecatedString::empty();
 
     // 3. Return attr’s value.
-    return attribute->value();
+    return attribute->value().to_deprecated_string();
 }
 
 // https://dom.spec.whatwg.org/#dom-element-getattributenode
@@ -183,14 +183,14 @@ WebIDL::ExceptionOr<void> Element::set_attribute(DeprecatedFlyString const& name
     // 4. If attribute is null, create an attribute whose local name is qualifiedName, value is value, and node document
     //    is this’s node document, then append this attribute to this, and then return.
     if (!attribute) {
-        auto new_attribute = Attr::create(document(), insert_as_lowercase ? name.to_lowercase() : name, value);
+        auto new_attribute = Attr::create(document(), MUST(String::from_deprecated_string(insert_as_lowercase ? name.to_lowercase() : name)), MUST(String::from_deprecated_string(value)));
         m_attributes->append_attribute(new_attribute);
 
         return {};
     }
 
     // 5. Change attribute to value.
-    attribute->change_attribute(value);
+    attribute->change_attribute(MUST(String::from_deprecated_string(value)));
 
     return {};
 }
@@ -270,14 +270,14 @@ void Element::set_attribute_value(DeprecatedFlyString const& local_name, Depreca
     if (!attribute) {
         QualifiedName name { MUST(FlyString::from_deprecated_fly_string(local_name)), prefix, namespace_ };
 
-        auto new_attribute = Attr::create(document(), move(name), value);
+        auto new_attribute = Attr::create(document(), move(name), MUST(String::from_deprecated_string(value)));
         m_attributes->append_attribute(new_attribute);
 
         return;
     }
 
     // 3. Change attribute to value.
-    attribute->change_attribute(value);
+    attribute->change_attribute(MUST(String::from_deprecated_string(value)));
 }
 
 // https://dom.spec.whatwg.org/#dom-element-setattributenode
@@ -338,7 +338,7 @@ WebIDL::ExceptionOr<bool> Element::toggle_attribute(DeprecatedFlyString const& n
         // 1. If force is not given or is true, create an attribute whose local name is qualifiedName, value is the empty
         //    string, and node document is this’s node document, then append this attribute to this, and then return true.
         if (!force.has_value() || force.value()) {
-            auto new_attribute = Attr::create(document(), insert_as_lowercase ? name.to_lowercase() : name, "");
+            auto new_attribute = Attr::create(document(), MUST(String::from_deprecated_string(insert_as_lowercase ? name.to_lowercase() : name)), String {});
             m_attributes->append_attribute(new_attribute);
 
             return true;
@@ -365,7 +365,7 @@ Vector<DeprecatedString> Element::get_attribute_names() const
     Vector<DeprecatedString> names;
     for (size_t i = 0; i < m_attributes->length(); ++i) {
         auto const* attribute = m_attributes->item(i);
-        names.append(attribute->name());
+        names.append(attribute->name().to_deprecated_fly_string());
     }
     return names;
 }
@@ -1744,7 +1744,7 @@ JS::ThrowCompletionOr<void> Element::upgrade_element(JS::NonnullGCPtr<HTML::Cust
         arguments.append(JS::PrimitiveString::create(vm, attribute->local_name()));
         arguments.append(JS::js_null());
         arguments.append(JS::PrimitiveString::create(vm, attribute->value()));
-        arguments.append(JS::PrimitiveString::create(vm, attribute->namespace_uri()));
+        arguments.append(attribute->namespace_uri().has_value() ? JS::PrimitiveString::create(vm, attribute->namespace_uri().value()) : JS::js_null());
 
         enqueue_a_custom_element_callback_reaction(HTML::CustomElementReactionNames::attributeChangedCallback, move(arguments));
     }
@@ -1857,7 +1857,7 @@ void Element::for_each_attribute(Function<void(DeprecatedFlyString const&, Depre
 {
     for (size_t i = 0; i < m_attributes->length(); ++i) {
         auto const* attribute = m_attributes->item(i);
-        callback(attribute->name(), attribute->value());
+        callback(attribute->name().to_deprecated_fly_string(), attribute->value().to_deprecated_string());
     }
 }
 
