@@ -199,7 +199,7 @@ Optional<DeprecatedString> run_prescan_byte_stream_algorithm(DOM::Document& docu
                     break;
                 if (attribute_list.contains_slow(attribute->name()))
                     continue;
-                auto& attribute_name = attribute->name();
+                auto const& attribute_name = attribute->name();
                 attribute_list.append(attribute->name());
 
                 if (attribute_name == "http-equiv") {

@@ -26,10 +26,23 @@ public:
 
     virtual FlyString node_name() const override { return MUST(FlyString::from_deprecated_fly_string(name())); }
 
-    DeprecatedFlyString const& namespace_uri() const { return m_qualified_name.namespace_(); }
-    DeprecatedFlyString const& prefix() const { return m_qualified_name.prefix(); }
-    DeprecatedFlyString const& local_name() const { return m_qualified_name.local_name(); }
-    DeprecatedFlyString const& name() const { return m_qualified_name.as_string(); }
+    DeprecatedFlyString namespace_uri() const
+    {
+        if (!m_qualified_name.namespace_().has_value())
+            return {};
+        return m_qualified_name.namespace_().value().to_deprecated_fly_string();
+    }
+
+    DeprecatedFlyString prefix() const
+    {
+        if (!m_qualified_name.prefix().has_value())
+            return {};
+        return m_qualified_name.prefix().value().to_deprecated_fly_string();
+    }
+
+    DeprecatedFlyString local_name() const { return m_qualified_name.local_name().to_deprecated_fly_string(); }
+
+    DeprecatedFlyString name() const { return m_qualified_name.as_string().to_deprecated_fly_string(); }
 
     DeprecatedString const& value() const { return m_value; }
     void set_value(DeprecatedString value);

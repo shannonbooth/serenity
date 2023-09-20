@@ -243,7 +243,7 @@ WebIDL::ExceptionOr<QualifiedName> validate_and_extract(JS::Realm& realm, Deprec
         return WebIDL::NamespaceError::create(realm, "Namespace is the XMLNS namespace and neither qualifiedName nor prefix is 'xmlns'."_fly_string);
 
     // 10. Return namespace, prefix, and localName.
-    return QualifiedName { local_name, prefix, namespace_ };
+    return QualifiedName { MUST(FlyString::from_deprecated_fly_string(local_name)), prefix, namespace_ };
 }
 
 // https://dom.spec.whatwg.org/#dom-element-setattributens
@@ -253,7 +253,7 @@ WebIDL::ExceptionOr<void> Element::set_attribute_ns(DeprecatedFlyString const& n
     auto extracted_qualified_name = TRY(validate_and_extract(realm(), namespace_, qualified_name));
 
     // 2. Set an attribute value for this using localName, value, and also prefix and namespace.
-    set_attribute_value(extracted_qualified_name.local_name(), value, extracted_qualified_name.prefix(), extracted_qualified_name.namespace_());
+    set_attribute_value(extracted_qualified_name.local_name().to_deprecated_fly_string(), value, extracted_qualified_name.deprecated_prefix(), extracted_qualified_name.deprecated_namespace_());
 
     return {};
 }
@@ -268,7 +268,7 @@ void Element::set_attribute_value(DeprecatedFlyString const& local_name, Depreca
     //    is localName, value is value, and node document is element’s node document, then append this attribute to element,
     //    and then return.
     if (!attribute) {
-        QualifiedName name { local_name, prefix, namespace_ };
+        QualifiedName name { MUST(FlyString::from_deprecated_fly_string(local_name)), prefix, namespace_ };
 
         auto new_attribute = Attr::create(document(), move(name), value);
         m_attributes->append_attribute(new_attribute);
@@ -1850,7 +1850,7 @@ void Element::setup_custom_element_from_constructor(HTML::CustomElementDefinitio
 
 void Element::set_prefix(DeprecatedFlyString const& value)
 {
-    m_qualified_name.set_prefix(value);
+    m_qualified_name.set_prefix(MUST(FlyString::from_deprecated_fly_string(value)));
 }
 
 void Element::for_each_attribute(Function<void(DeprecatedFlyString const&, DeprecatedString const&)> callback) const

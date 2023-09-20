@@ -17,7 +17,7 @@ namespace Web::DOM {
 
 JS::NonnullGCPtr<Attr> Attr::create(Document& document, DeprecatedFlyString local_name, DeprecatedString value, Element* owner_element)
 {
-    return document.heap().allocate<Attr>(document.realm(), document, QualifiedName(move(local_name), {}, {}), move(value), owner_element);
+    return document.heap().allocate<Attr>(document.realm(), document, QualifiedName(MUST(FlyString::from_deprecated_fly_string(local_name)), Optional<FlyString> {}, Optional<FlyString> {}), move(value), owner_element);
 }
 
 JS::NonnullGCPtr<Attr> Attr::create(Document& document, QualifiedName qualified_name, DeprecatedString value, Element* owner_element)
