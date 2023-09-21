@@ -131,7 +131,7 @@ void Element::visit_edges(Cell::Visitor& visitor)
 }
 
 // https://dom.spec.whatwg.org/#dom-element-getattribute
-DeprecatedString Element::get_attribute(DeprecatedFlyString const& name) const
+DeprecatedString Element::get_attribute(StringView name) const
 {
     // 1. Let attr be the result of getting an attribute given qualifiedName and this.
     auto const* attribute = m_attributes->get_attribute(name);
