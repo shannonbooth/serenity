@@ -91,7 +91,7 @@ public:
     // NOTE: This is for the JS bindings
     DeprecatedFlyString namespace_uri() const { return namespace_(); }
 
-    bool has_attribute(DeprecatedFlyString const& name) const;
+    bool has_attribute(StringView name) const;
     bool has_attribute_ns(DeprecatedFlyString namespace_, DeprecatedFlyString const& name) const;
     bool has_attributes() const;
 
