@@ -240,8 +240,8 @@ public:
 
     bool is_actually_disabled() const;
 
-    WebIDL::ExceptionOr<JS::GCPtr<Element>> insert_adjacent_element(DeprecatedString const& where, JS::NonnullGCPtr<Element> element);
-    WebIDL::ExceptionOr<void> insert_adjacent_text(DeprecatedString const& where, DeprecatedString const& data);
+    WebIDL::ExceptionOr<JS::GCPtr<Element>> insert_adjacent_element(StringView where, JS::NonnullGCPtr<Element> element);
+    WebIDL::ExceptionOr<void> insert_adjacent_text(StringView where, DeprecatedString const& data);
 
     // https://w3c.github.io/csswg-drafts/cssom-view-1/#dom-element-scrollintoview
     ErrorOr<void> scroll_into_view(Optional<Variant<bool, ScrollIntoViewOptions>> = {});
@@ -378,7 +378,7 @@ private:
 
     void invalidate_style_after_attribute_change(DeprecatedFlyString const& attribute_name);
 
-    WebIDL::ExceptionOr<JS::GCPtr<Node>> insert_adjacent(DeprecatedString const& where, JS::NonnullGCPtr<Node> node);
+    WebIDL::ExceptionOr<JS::GCPtr<Node>> insert_adjacent(StringView where, JS::NonnullGCPtr<Node> node);
 
     void enqueue_an_element_on_the_appropriate_element_queue();
 

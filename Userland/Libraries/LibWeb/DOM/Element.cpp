@@ -1423,7 +1423,7 @@ WebIDL::ExceptionOr<void> Element::insert_adjacent_html(StringView position, Str
 }
 
 // https://dom.spec.whatwg.org/#insert-adjacent
-WebIDL::ExceptionOr<JS::GCPtr<Node>> Element::insert_adjacent(DeprecatedString const& where, JS::NonnullGCPtr<Node> node)
+WebIDL::ExceptionOr<JS::GCPtr<Node>> Element::insert_adjacent(StringView where, JS::NonnullGCPtr<Node> node)
 {
     // To insert adjacent, given an element element, string where, and a node node, run the steps associated with the first ASCII case-insensitive match for where:
     if (Infra::is_ascii_case_insensitive_match(where, "beforebegin"sv)) {
@@ -1464,7 +1464,7 @@ WebIDL::ExceptionOr<JS::GCPtr<Node>> Element::insert_adjacent(DeprecatedString c
 }
 
 // https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
-WebIDL::ExceptionOr<JS::GCPtr<Element>> Element::insert_adjacent_element(DeprecatedString const& where, JS::NonnullGCPtr<Element> element)
+WebIDL::ExceptionOr<JS::GCPtr<Element>> Element::insert_adjacent_element(StringView where, JS::NonnullGCPtr<Element> element)
 {
     // The insertAdjacentElement(where, element) method steps are to return the result of running insert adjacent, give this, where, and element.
     auto returned_node = TRY(insert_adjacent(where, move(element)));
@@ -1474,7 +1474,7 @@ WebIDL::ExceptionOr<JS::GCPtr<Element>> Element::insert_adjacent_element(Depreca
 }
 
 // https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
-WebIDL::ExceptionOr<void> Element::insert_adjacent_text(DeprecatedString const& where, DeprecatedString const& data)
+WebIDL::ExceptionOr<void> Element::insert_adjacent_text(StringView where, DeprecatedString const& data)
 {
     // 1. Let text be a new Text node whose data is data and node document is this’s node document.
     auto text = heap().allocate<DOM::Text>(realm(), document(), MUST(String::from_deprecated_string(data)));
