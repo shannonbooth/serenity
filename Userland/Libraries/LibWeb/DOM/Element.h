@@ -188,7 +188,7 @@ public:
     WebIDL::ExceptionOr<DeprecatedString> inner_html() const;
     WebIDL::ExceptionOr<void> set_inner_html(DeprecatedString const&);
 
-    WebIDL::ExceptionOr<void> insert_adjacent_html(DeprecatedString position, DeprecatedString text);
+    WebIDL::ExceptionOr<void> insert_adjacent_html(StringView position, StringView text);
 
     bool is_focused() const;
     bool is_active() const;

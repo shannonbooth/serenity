@@ -1348,7 +1348,7 @@ bool Element::is_actually_disabled() const
 }
 
 // https://w3c.github.io/DOM-Parsing/#dom-element-insertadjacenthtml
-WebIDL::ExceptionOr<void> Element::insert_adjacent_html(DeprecatedString position, DeprecatedString text)
+WebIDL::ExceptionOr<void> Element::insert_adjacent_html(StringView position, StringView text)
 {
     JS::GCPtr<Node> context;
     // 1. Use the first matching item from this list:
