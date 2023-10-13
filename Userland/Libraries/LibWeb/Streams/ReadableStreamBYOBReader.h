@@ -47,8 +47,12 @@ public:
 
     Vector<JS::NonnullGCPtr<ReadIntoRequest>>& read_into_requests() { return m_read_into_requests; }
 
+    WebIDL::ExceptionOr<JS::NonnullGCPtr<JS::Promise>> read(JS::Value);
+
 private:
     explicit ReadableStreamBYOBReader(JS::Realm&);
+
+    virtual void initialize(JS::Realm&) override;
 
     virtual void visit_edges(Cell::Visitor&) override;
 
