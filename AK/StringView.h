@@ -222,7 +222,7 @@ public:
     template<typename T = int>
     Optional<T> to_int() const;
     template<typename T = unsigned>
-    Optional<T> to_uint() const;
+    Optional<T> to_uint(TrimWhitespace = TrimWhitespace::Yes) const;
 #ifndef KERNEL
     Optional<double> to_double(TrimWhitespace trim_whitespace = TrimWhitespace::Yes) const;
     Optional<float> to_float(TrimWhitespace trim_whitespace = TrimWhitespace::Yes) const;

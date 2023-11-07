@@ -235,16 +235,16 @@ template Optional<long> StringView::to_int() const;
 template Optional<long long> StringView::to_int() const;
 
 template<typename T>
-Optional<T> StringView::to_uint() const
+Optional<T> StringView::to_uint(TrimWhitespace trim_whitespace) const
 {
-    return StringUtils::convert_to_uint<T>(*this);
+    return StringUtils::convert_to_uint<T>(*this, trim_whitespace);
 }
 
-template Optional<u8> StringView::to_uint() const;
-template Optional<u16> StringView::to_uint() const;
-template Optional<u32> StringView::to_uint() const;
-template Optional<unsigned long> StringView::to_uint() const;
-template Optional<unsigned long long> StringView::to_uint() const;
+template Optional<u8> StringView::to_uint(TrimWhitespace) const;
+template Optional<u16> StringView::to_uint(TrimWhitespace) const;
+template Optional<u32> StringView::to_uint(TrimWhitespace) const;
+template Optional<unsigned long> StringView::to_uint(TrimWhitespace) const;
+template Optional<unsigned long long> StringView::to_uint(TrimWhitespace) const;
 
 #ifndef KERNEL
 Optional<double> StringView::to_double(TrimWhitespace trim_whitespace) const
