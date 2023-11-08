@@ -25,7 +25,7 @@ ThrowCompletionOr<Value> ModuleEnvironment::get_binding_value(VM& vm, Deprecated
 
     // 2. Assert: envRec has a binding for N.
     auto* indirect_binding = get_indirect_binding(name);
-    VERIFY(indirect_binding || !DeclarativeEnvironment::has_binding(name).is_error());
+    VERIFY(indirect_binding || !DeclarativeEnvironment::has_binding(MUST(FlyString::from_deprecated_fly_string(name))).is_error());
 
     // 3. If the binding for N is an indirect binding, then
     if (indirect_binding) {

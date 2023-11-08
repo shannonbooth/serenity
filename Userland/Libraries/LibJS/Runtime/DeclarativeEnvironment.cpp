@@ -50,9 +50,9 @@ void DeclarativeEnvironment::visit_edges(Visitor& visitor)
 }
 
 // 9.1.1.1.1 HasBinding ( N ), https://tc39.es/ecma262/#sec-declarative-environment-records-hasbinding-n
-ThrowCompletionOr<bool> DeclarativeEnvironment::has_binding(DeprecatedFlyString const& name, Optional<size_t>* out_index) const
+ThrowCompletionOr<bool> DeclarativeEnvironment::has_binding(FlyString const& name, Optional<size_t>* out_index) const
 {
-    auto binding_and_index = find_binding_and_index(name);
+    auto binding_and_index = find_binding_and_index(name.to_deprecated_fly_string());
     if (!binding_and_index.has_value())
         return false;
     if (!is_permanently_screwed_by_eval() && out_index && binding_and_index->index().has_value())

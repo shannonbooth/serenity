@@ -39,7 +39,7 @@ ThrowCompletionOr<Value> GlobalEnvironment::get_this_binding(VM&) const
 }
 
 // 9.1.1.4.1 HasBinding ( N ), https://tc39.es/ecma262/#sec-global-environment-records-hasbinding-n
-ThrowCompletionOr<bool> GlobalEnvironment::has_binding(DeprecatedFlyString const& name, Optional<size_t>*) const
+ThrowCompletionOr<bool> GlobalEnvironment::has_binding(FlyString const& name, Optional<size_t>*) const
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, return true.
@@ -56,7 +56,7 @@ ThrowCompletionOr<void> GlobalEnvironment::create_mutable_binding(VM& vm, Deprec
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, throw a TypeError exception.
-    if (MUST(m_declarative_record->has_binding(name)))
+    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name)))))
         return vm.throw_completion<TypeError>(ErrorType::GlobalEnvironmentAlreadyHasBinding, name);
 
     // 3. Return ! DclRec.CreateMutableBinding(N, D).
@@ -68,7 +68,7 @@ ThrowCompletionOr<void> GlobalEnvironment::create_immutable_binding(VM& vm, Depr
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, throw a TypeError exception.
-    if (MUST(m_declarative_record->has_binding(name)))
+    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name)))))
         return vm.throw_completion<TypeError>(ErrorType::GlobalEnvironmentAlreadyHasBinding, name);
 
     // 3. Return ! DclRec.CreateImmutableBinding(N, S).
@@ -80,7 +80,7 @@ ThrowCompletionOr<void> GlobalEnvironment::initialize_binding(VM& vm, Deprecated
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, then
-    if (MUST(m_declarative_record->has_binding(name))) {
+    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name))))) {
         // a. Return ! DclRec.InitializeBinding(N, V, hint).
         return MUST(m_declarative_record->initialize_binding(vm, name, value, hint));
     }
@@ -98,7 +98,7 @@ ThrowCompletionOr<void> GlobalEnvironment::set_mutable_binding(VM& vm, Deprecate
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, then
-    if (MUST(m_declarative_record->has_binding(name))) {
+    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name))))) {
         // a. Return ? DclRec.SetMutableBinding(N, V, S).
         return m_declarative_record->set_mutable_binding(vm, name, value, strict);
     }
@@ -114,7 +114,7 @@ ThrowCompletionOr<Value> GlobalEnvironment::get_binding_value(VM& vm, Deprecated
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, then
     Optional<size_t> index;
-    if (MUST(m_declarative_record->has_binding(name, &index))) {
+    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name)), &index))) {
         // a. Return ? DclRec.GetBindingValue(N, S).
         if (index.has_value())
             return m_declarative_record->get_binding_value_direct(vm, index.value(), strict);
@@ -131,7 +131,7 @@ ThrowCompletionOr<bool> GlobalEnvironment::delete_binding(VM& vm, FlyString cons
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, then
-    if (MUST(m_declarative_record->has_binding(name.to_deprecated_fly_string()))) {
+    if (MUST(m_declarative_record->has_binding(name))) {
         // a. Return ! DclRec.DeleteBinding(N).
         return MUST(m_declarative_record->delete_binding(vm, name));
     }
@@ -177,7 +177,7 @@ bool GlobalEnvironment::has_lexical_declaration(DeprecatedFlyString const& name)
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. Return ! DclRec.HasBinding(N).
-    return MUST(m_declarative_record->has_binding(name));
+    return MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name))));
 }
 
 // 9.1.1.4.14 HasRestrictedGlobalProperty ( N ), https://tc39.es/ecma262/#sec-hasrestrictedglobalproperty

@@ -35,7 +35,7 @@ public:
 
     virtual ~DeclarativeEnvironment() override = default;
 
-    virtual ThrowCompletionOr<bool> has_binding(DeprecatedFlyString const& name, Optional<size_t>* = nullptr) const override final;
+    virtual ThrowCompletionOr<bool> has_binding(FlyString const& name, Optional<size_t>* = nullptr) const override final;
     virtual ThrowCompletionOr<void> create_mutable_binding(VM&, DeprecatedFlyString const& name, bool can_be_deleted) override final;
     virtual ThrowCompletionOr<void> create_immutable_binding(VM&, DeprecatedFlyString const& name, bool strict) override final;
     virtual ThrowCompletionOr<void> initialize_binding(VM&, DeprecatedFlyString const& name, Value, InitializeBindingHint) override final;

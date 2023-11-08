@@ -746,7 +746,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
                 TRY(program.for_each_var_declared_identifier([&](auto const& identifier) -> ThrowCompletionOr<void> {
                     auto const& name = identifier.string();
                     // a. If ! thisEnv.HasBinding(name) is true, then
-                    if (MUST(this_environment->has_binding(name))) {
+                    if (MUST(this_environment->has_binding(MUST(FlyString::from_deprecated_fly_string(name))))) {
                         // i. Throw a SyntaxError exception.
                         return vm.throw_completion<SyntaxError>(ErrorType::TopLevelVariableAlreadyDeclared, name);
 
@@ -839,7 +839,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
                 // a. If thisEnv is not an object Environment Record, then
                 if (!is<ObjectEnvironment>(*this_environment)) {
                     // i. If ! thisEnv.HasBinding(F) is true, then
-                    if (MUST(this_environment->has_binding(function_name))) {
+                    if (MUST(this_environment->has_binding(MUST(FlyString::from_utf8(function_name))))) {
                         // i. Let bindingExists be true.
                         // Note: When bindingExists is true we skip all the other steps.
                         return {};
@@ -884,7 +884,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
 
                     // i. Let bindingExists be ! varEnv.HasBinding(F).
                     // ii. If bindingExists is false, then
-                    if (!MUST(variable_environment->has_binding(function_name))) {
+                    if (!MUST(variable_environment->has_binding(MUST(FlyString::from_utf8(function_name))))) {
                         // i. Perform ! varEnv.CreateMutableBinding(F, true).
                         MUST(variable_environment->create_mutable_binding(vm, function_name, true));
                         // ii. Perform ! varEnv.InitializeBinding(F, undefined, normal).
@@ -982,7 +982,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
         // d. Else,
         else {
             // i. Let bindingExists be ! varEnv.HasBinding(fn).
-            auto binding_exists = MUST(variable_environment->has_binding(declaration.name()));
+            auto binding_exists = MUST(variable_environment->has_binding(MUST(FlyString::from_utf8(declaration.name()))));
 
             // ii. If bindingExists is false, then
             if (!binding_exists) {
@@ -1012,7 +1012,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
         // b. Else,
         else {
             // i. Let bindingExists be ! varEnv.HasBinding(vn).
-            auto binding_exists = MUST(variable_environment->has_binding(var_name));
+            auto binding_exists = MUST(variable_environment->has_binding(MUST(FlyString::from_deprecated_fly_string(var_name))));
 
             // ii. If bindingExists is false, then
             if (!binding_exists) {

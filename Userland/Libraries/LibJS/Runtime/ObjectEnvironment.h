@@ -19,7 +19,7 @@ public:
         Yes,
     };
 
-    virtual ThrowCompletionOr<bool> has_binding(DeprecatedFlyString const& name, Optional<size_t>* = nullptr) const override;
+    virtual ThrowCompletionOr<bool> has_binding(FlyString const& name, Optional<size_t>* = nullptr) const override;
     virtual ThrowCompletionOr<void> create_mutable_binding(VM&, DeprecatedFlyString const& name, bool can_be_deleted) override;
     virtual ThrowCompletionOr<void> create_immutable_binding(VM&, DeprecatedFlyString const& name, bool strict) override;
     virtual ThrowCompletionOr<void> initialize_binding(VM&, DeprecatedFlyString const& name, Value, Environment::InitializeBindingHint) override;

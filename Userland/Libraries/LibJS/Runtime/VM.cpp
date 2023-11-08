@@ -554,7 +554,7 @@ ThrowCompletionOr<Reference> VM::get_identifier_reference(Environment* environme
 
     // 2. Let exists be ? env.HasBinding(name).
     Optional<size_t> index;
-    auto exists = TRY(environment->has_binding(name, &index));
+    auto exists = TRY(environment->has_binding(MUST(FlyString::from_deprecated_fly_string(name)), &index));
 
     // Note: This is an optimization for looking up the same reference.
     Optional<EnvironmentCoordinate> environment_coordinate;

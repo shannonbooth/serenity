@@ -26,11 +26,9 @@ void ObjectEnvironment::visit_edges(Cell::Visitor& visitor)
 }
 
 // 9.1.1.2.1 HasBinding ( N ), https://tc39.es/ecma262/#sec-object-environment-records-hasbinding-n
-ThrowCompletionOr<bool> ObjectEnvironment::has_binding(DeprecatedFlyString const& deprecated_name, Optional<size_t>*) const
+ThrowCompletionOr<bool> ObjectEnvironment::has_binding(FlyString const& name, Optional<size_t>*) const
 {
     auto& vm = this->vm();
-
-    auto name = MUST(FlyString::from_deprecated_fly_string(deprecated_name));
 
     // 1. Let bindingObject be envRec.[[BindingObject]].
 

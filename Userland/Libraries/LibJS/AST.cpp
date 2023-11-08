@@ -1651,7 +1651,7 @@ void ScopeNode::block_declaration_instantiation(VM& vm, Environment* environment
             // ii. Else,
             else {
                 // 1. Perform ! env.CreateMutableBinding(dn, false). NOTE: This step is replaced in section B.3.2.6.
-                if (!MUST(environment->has_binding(name)))
+                if (!MUST(environment->has_binding(MUST(FlyString::from_deprecated_fly_string(name)))))
                     MUST(environment->create_mutable_binding(vm, name, false));
             }
         }));

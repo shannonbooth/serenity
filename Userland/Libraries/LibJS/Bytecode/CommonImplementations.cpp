@@ -114,13 +114,13 @@ ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, FlyStrin
         // NOTE: GetGlobal is used to access variables stored in the module environment and global environment.
         //       The module environment is checked first since it precedes the global environment in the environment chain.
         auto& module_environment = *vm.running_execution_context().script_or_module.get<NonnullGCPtr<Module>>()->environment();
-        if (TRY(module_environment.has_binding(deprecated_identifier))) {
+        if (TRY(module_environment.has_binding(identifier))) {
             // TODO: Cache offset of binding value
             return TRY(module_environment.get_binding_value(vm, deprecated_identifier, vm.in_strict_mode()));
         }
     }
 
-    if (TRY(declarative_record.has_binding(deprecated_identifier))) {
+    if (TRY(declarative_record.has_binding(identifier))) {
         // TODO: Cache offset of binding value
         return TRY(declarative_record.get_binding_value(vm, deprecated_identifier, vm.in_strict_mode()));
     }
@@ -432,7 +432,7 @@ ThrowCompletionOr<void> create_variable(VM& vm, FlyString const& name, Op::Envir
 
         // Note: This is papering over an issue where "FunctionDeclarationInstantiation" creates these bindings for us.
         //       Instead of crashing in there, we'll just raise an exception here.
-        if (TRY(vm.lexical_environment()->has_binding(deprecated_name)))
+        if (TRY(vm.lexical_environment()->has_binding(name)))
             return vm.throw_completion<InternalError>(TRY_OR_THROW_OOM(vm, String::formatted("Lexical environment already has binding '{}'", name)));
 
         if (is_immutable)
