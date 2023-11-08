@@ -1468,7 +1468,7 @@ static Value cxx_set_variable(
     Bytecode::Op::EnvironmentMode environment_mode,
     Bytecode::Op::SetVariable::InitializationMode initialization_mode)
 {
-    TRY_OR_SET_EXCEPTION(Bytecode::set_variable(vm, identifier.to_deprecated_fly_string(), value, environment_mode, initialization_mode));
+    TRY_OR_SET_EXCEPTION(Bytecode::set_variable(vm, identifier, value, environment_mode, initialization_mode));
     return {};
 }
 

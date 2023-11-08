@@ -247,13 +247,13 @@ ThrowCompletionOr<Value> typeof_variable(VM& vm, FlyString const& string)
 
 ThrowCompletionOr<void> set_variable(
     VM& vm,
-    DeprecatedFlyString const& name,
+    FlyString const& name,
     Value value,
     Op::EnvironmentMode mode,
     Op::SetVariable::InitializationMode initialization_mode)
 {
     auto environment = mode == Op::EnvironmentMode::Lexical ? vm.running_execution_context().lexical_environment : vm.running_execution_context().variable_environment;
-    auto reference = TRY(vm.resolve_binding(name, environment));
+    auto reference = TRY(vm.resolve_binding(name.to_deprecated_fly_string(), environment));
     switch (initialization_mode) {
     case Op::SetVariable::InitializationMode::Initialize:
         TRY(reference.initialize_referenced_binding(vm, value));
