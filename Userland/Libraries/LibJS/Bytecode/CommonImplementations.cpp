@@ -89,10 +89,12 @@ ThrowCompletionOr<Value> get_by_value(VM& vm, Value base_value, Value property_k
     return TRY(object->internal_get(property_key, base_value));
 }
 
-ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, DeprecatedFlyString const& identifier, GlobalVariableCache& cache)
+ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, FlyString const& identifier, GlobalVariableCache& cache)
 {
     auto& vm = interpreter.vm();
     auto& realm = *vm.current_realm();
+
+    auto deprecated_identifier = identifier.to_deprecated_fly_string();
 
     auto& binding_object = realm.global_environment().object_record().binding_object();
     auto& declarative_record = realm.global_environment().declarative_record();
@@ -112,21 +114,20 @@ ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, Deprecat
         // NOTE: GetGlobal is used to access variables stored in the module environment and global environment.
         //       The module environment is checked first since it precedes the global environment in the environment chain.
         auto& module_environment = *vm.running_execution_context().script_or_module.get<NonnullGCPtr<Module>>()->environment();
-        if (TRY(module_environment.has_binding(identifier))) {
+        if (TRY(module_environment.has_binding(deprecated_identifier))) {
             // TODO: Cache offset of binding value
-            return TRY(module_environment.get_binding_value(vm, identifier, vm.in_strict_mode()));
+            return TRY(module_environment.get_binding_value(vm, deprecated_identifier, vm.in_strict_mode()));
         }
     }
 
-    if (TRY(declarative_record.has_binding(identifier))) {
+    if (TRY(declarative_record.has_binding(deprecated_identifier))) {
         // TODO: Cache offset of binding value
-        return TRY(declarative_record.get_binding_value(vm, identifier, vm.in_strict_mode()));
+        return TRY(declarative_record.get_binding_value(vm, deprecated_identifier, vm.in_strict_mode()));
     }
 
-    auto deprecated_identifier = MUST(FlyString::from_deprecated_fly_string(identifier));
-    if (TRY(binding_object.has_property(deprecated_identifier))) {
+    if (TRY(binding_object.has_property(identifier))) {
         CacheablePropertyMetadata cacheable_metadata;
-        auto value = TRY(binding_object.internal_get(deprecated_identifier, js_undefined(), &cacheable_metadata));
+        auto value = TRY(binding_object.internal_get(identifier, js_undefined(), &cacheable_metadata));
         if (cacheable_metadata.type == CacheablePropertyMetadata::Type::OwnProperty) {
             cache.shape = shape;
             cache.property_offset = cacheable_metadata.property_offset.value();

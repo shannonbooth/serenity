@@ -1088,7 +1088,7 @@ void Compiler::compile_get_by_value(Bytecode::Op::GetByValue const& op)
 
 static Value cxx_get_global(VM& vm, FlyString const& identifier, Bytecode::GlobalVariableCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_global(vm.bytecode_interpreter(), identifier.to_deprecated_fly_string(), cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_global(vm.bytecode_interpreter(), identifier, cache));
 }
 
 void Compiler::compile_get_global(Bytecode::Op::GetGlobal const& op)

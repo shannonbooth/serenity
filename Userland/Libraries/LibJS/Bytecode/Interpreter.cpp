@@ -702,7 +702,7 @@ ThrowCompletionOr<void> GetGlobal::execute_impl(Bytecode::Interpreter& interpret
 {
     interpreter.accumulator() = TRY(get_global(
         interpreter,
-        interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string(),
+        interpreter.current_executable().get_identifier(m_identifier),
         interpreter.current_executable().global_variable_caches[m_cache_index]));
     return {};
 }
