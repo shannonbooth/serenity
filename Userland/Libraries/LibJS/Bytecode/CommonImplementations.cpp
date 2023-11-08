@@ -423,30 +423,32 @@ MarkedVector<Value> argument_list_evaluation(VM& vm, Value arguments)
     return argument_values;
 }
 
-ThrowCompletionOr<void> create_variable(VM& vm, DeprecatedFlyString const& name, Op::EnvironmentMode mode, bool is_global, bool is_immutable, bool is_strict)
+ThrowCompletionOr<void> create_variable(VM& vm, FlyString const& name, Op::EnvironmentMode mode, bool is_global, bool is_immutable, bool is_strict)
 {
+    auto deprecated_name = name.to_deprecated_fly_string();
+
     if (mode == Op::EnvironmentMode::Lexical) {
         VERIFY(!is_global);
 
         // Note: This is papering over an issue where "FunctionDeclarationInstantiation" creates these bindings for us.
         //       Instead of crashing in there, we'll just raise an exception here.
-        if (TRY(vm.lexical_environment()->has_binding(name)))
+        if (TRY(vm.lexical_environment()->has_binding(deprecated_name)))
             return vm.throw_completion<InternalError>(TRY_OR_THROW_OOM(vm, String::formatted("Lexical environment already has binding '{}'", name)));
 
         if (is_immutable)
-            return vm.lexical_environment()->create_immutable_binding(vm, name, is_strict);
-        return vm.lexical_environment()->create_mutable_binding(vm, name, is_strict);
+            return vm.lexical_environment()->create_immutable_binding(vm, deprecated_name, is_strict);
+        return vm.lexical_environment()->create_mutable_binding(vm, deprecated_name, is_strict);
     }
 
     if (!is_global) {
         if (is_immutable)
-            return vm.variable_environment()->create_immutable_binding(vm, name, is_strict);
-        return vm.variable_environment()->create_mutable_binding(vm, name, is_strict);
+            return vm.variable_environment()->create_immutable_binding(vm, deprecated_name, is_strict);
+        return vm.variable_environment()->create_mutable_binding(vm, deprecated_name, is_strict);
     }
 
     // NOTE: CreateVariable with m_is_global set to true is expected to only be used in GlobalDeclarationInstantiation currently, which only uses "false" for "can_be_deleted".
     //       The only area that sets "can_be_deleted" to true is EvalDeclarationInstantiation, which is currently fully implemented in C++ and not in Bytecode.
-    return verify_cast<GlobalEnvironment>(vm.variable_environment())->create_global_var_binding(name, false);
+    return verify_cast<GlobalEnvironment>(vm.variable_environment())->create_global_var_binding(deprecated_name, false);
 }
 
 ThrowCompletionOr<ECMAScriptFunctionObject*> new_class(VM& vm, Value super_class, ClassExpression const& class_expression, Optional<IdentifierTableIndex> const& lhs_name)

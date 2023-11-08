@@ -745,7 +745,7 @@ ThrowCompletionOr<void> EnterObjectEnvironment::execute_impl(Bytecode::Interpret
 
 ThrowCompletionOr<void> CreateVariable::execute_impl(Bytecode::Interpreter& interpreter) const
 {
-    auto const& name = interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string();
+    auto const& name = interpreter.current_executable().get_identifier(m_identifier);
     return create_variable(interpreter.vm(), name, m_mode, m_is_global, m_is_immutable, m_is_strict);
 }
 

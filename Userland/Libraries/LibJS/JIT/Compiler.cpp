@@ -1436,7 +1436,7 @@ static Value cxx_create_variable(
     bool is_immutable,
     bool is_strict)
 {
-    TRY_OR_SET_EXCEPTION(Bytecode::create_variable(vm, name.to_deprecated_fly_string(), mode, is_global, is_immutable, is_strict));
+    TRY_OR_SET_EXCEPTION(Bytecode::create_variable(vm, name, mode, is_global, is_immutable, is_strict));
     return {};
 }
 
