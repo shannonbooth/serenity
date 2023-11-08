@@ -136,11 +136,9 @@ ThrowCompletionOr<void> ObjectEnvironment::set_mutable_binding(VM&, DeprecatedFl
 }
 
 // 9.1.1.2.6 GetBindingValue ( N, S ), https://tc39.es/ecma262/#sec-object-environment-records-getbindingvalue-n-s
-ThrowCompletionOr<Value> ObjectEnvironment::get_binding_value(VM&, DeprecatedFlyString const& deprecated_name, bool strict)
+ThrowCompletionOr<Value> ObjectEnvironment::get_binding_value(VM&, FlyString const& name, bool strict)
 {
     auto& vm = this->vm();
-
-    auto name = MUST(FlyString::from_deprecated_fly_string(deprecated_name));
 
     // OPTIMIZATION: For non-with environments in non-strict mode, we don't need the separate HasProperty check
     //               since Get will return undefined for missing properties anyway. So we take advantage of this

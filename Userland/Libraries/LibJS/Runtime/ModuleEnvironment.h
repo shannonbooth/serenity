@@ -21,7 +21,7 @@ public:
     //       in Table 18 and share the same specifications for all of those methods except for
     //       GetBindingValue, DeleteBinding, HasThisBinding and GetThisBinding.
     //       In addition, module Environment Records support the methods listed in Table 24.
-    virtual ThrowCompletionOr<Value> get_binding_value(VM&, DeprecatedFlyString const& name, bool strict) override;
+    virtual ThrowCompletionOr<Value> get_binding_value(VM&, FlyString const& name, bool strict) override;
     virtual ThrowCompletionOr<bool> delete_binding(VM&, FlyString const& name) override;
     virtual bool has_this_binding() const final { return true; }
     virtual ThrowCompletionOr<Value> get_this_binding(VM&) const final;

@@ -798,7 +798,7 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
                     if (id.is_local()) {
                         initial_value = callee_context.local_variables[id.local_variable_index()];
                     } else {
-                        initial_value = MUST(environment->get_binding_value(vm, id.string(), false));
+                        initial_value = MUST(environment->get_binding_value(vm, MUST(FlyString::from_deprecated_fly_string(id.string())), false));
                     }
                 }
 

@@ -94,8 +94,6 @@ ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, FlyStrin
     auto& vm = interpreter.vm();
     auto& realm = *vm.current_realm();
 
-    auto deprecated_identifier = identifier.to_deprecated_fly_string();
-
     auto& binding_object = realm.global_environment().object_record().binding_object();
     auto& declarative_record = realm.global_environment().declarative_record();
 
@@ -116,13 +114,13 @@ ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, FlyStrin
         auto& module_environment = *vm.running_execution_context().script_or_module.get<NonnullGCPtr<Module>>()->environment();
         if (TRY(module_environment.has_binding(identifier))) {
             // TODO: Cache offset of binding value
-            return TRY(module_environment.get_binding_value(vm, deprecated_identifier, vm.in_strict_mode()));
+            return TRY(module_environment.get_binding_value(vm, identifier, vm.in_strict_mode()));
         }
     }
 
     if (TRY(declarative_record.has_binding(identifier))) {
         // TODO: Cache offset of binding value
-        return TRY(declarative_record.get_binding_value(vm, deprecated_identifier, vm.in_strict_mode()));
+        return TRY(declarative_record.get_binding_value(vm, identifier, vm.in_strict_mode()));
     }
 
     if (TRY(binding_object.has_property(identifier))) {

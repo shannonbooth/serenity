@@ -109,12 +109,12 @@ ThrowCompletionOr<void> GlobalEnvironment::set_mutable_binding(VM& vm, Deprecate
 }
 
 // 9.1.1.4.6 GetBindingValue ( N, S ), https://tc39.es/ecma262/#sec-global-environment-records-getbindingvalue-n-s
-ThrowCompletionOr<Value> GlobalEnvironment::get_binding_value(VM& vm, DeprecatedFlyString const& name, bool strict)
+ThrowCompletionOr<Value> GlobalEnvironment::get_binding_value(VM& vm, FlyString const& name, bool strict)
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, then
     Optional<size_t> index;
-    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name)), &index))) {
+    if (MUST(m_declarative_record->has_binding(name))) {
         // a. Return ? DclRec.GetBindingValue(N, S).
         if (index.has_value())
             return m_declarative_record->get_binding_value_direct(vm, index.value(), strict);

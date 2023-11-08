@@ -1131,7 +1131,7 @@ Object* create_mapped_arguments_object(VM& vm, FunctionObject& function, Vector<
                 realm,
                 PropertyKey { index },
                 [&environment, name](VM& vm) -> ThrowCompletionOr<Value> {
-                    return MUST(environment.get_binding_value(vm, name, false));
+                    return MUST(environment.get_binding_value(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
                 },
                 [&environment, name](VM& vm) {
                     MUST(environment.set_mutable_binding(vm, name, vm.argument(0), false));

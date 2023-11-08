@@ -18,14 +18,14 @@ ModuleEnvironment::ModuleEnvironment(Environment* outer_environment)
 }
 
 // 9.1.1.5.1 GetBindingValue ( N, S ), https://tc39.es/ecma262/#sec-module-environment-records-getbindingvalue-n-s
-ThrowCompletionOr<Value> ModuleEnvironment::get_binding_value(VM& vm, DeprecatedFlyString const& name, bool strict)
+ThrowCompletionOr<Value> ModuleEnvironment::get_binding_value(VM& vm, FlyString const& name, bool strict)
 {
     // 1. Assert: S is true.
     VERIFY(strict);
 
     // 2. Assert: envRec has a binding for N.
-    auto* indirect_binding = get_indirect_binding(name);
-    VERIFY(indirect_binding || !DeclarativeEnvironment::has_binding(MUST(FlyString::from_deprecated_fly_string(name))).is_error());
+    auto* indirect_binding = get_indirect_binding(name.to_deprecated_fly_string());
+    VERIFY(indirect_binding || !DeclarativeEnvironment::has_binding(name).is_error());
 
     // 3. If the binding for N is an indirect binding, then
     if (indirect_binding) {
@@ -39,7 +39,7 @@ ThrowCompletionOr<Value> ModuleEnvironment::get_binding_value(VM& vm, Deprecated
             return vm.throw_completion<ReferenceError>(ErrorType::ModuleNoEnvironment);
 
         // d. Return ? targetEnv.GetBindingValue(N2, true).
-        return target_env->get_binding_value(vm, indirect_binding->binding_name, true);
+        return target_env->get_binding_value(vm, MUST(FlyString::from_deprecated_fly_string(indirect_binding->binding_name)), true);
     }
 
     // 4. If the binding for N in envRec is an uninitialized binding, throw a ReferenceError exception.

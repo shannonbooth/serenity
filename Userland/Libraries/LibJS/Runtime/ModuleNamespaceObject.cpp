@@ -178,7 +178,7 @@ ThrowCompletionOr<Value> ModuleNamespaceObject::internal_get(PropertyKey const& 
         return vm.throw_completion<ReferenceError>(ErrorType::ModuleNoEnvironment);
 
     // 12. Return ? targetEnv.GetBindingValue(binding.[[BindingName]], true).
-    return target_environment->get_binding_value(vm, binding.export_name, true);
+    return target_environment->get_binding_value(vm, MUST(FlyString::from_deprecated_fly_string(binding.export_name)), true);
 }
 
 // 10.4.6.9 [[Set]] ( P, V, Receiver ), https://tc39.es/ecma262/#sec-module-namespace-exotic-objects-set-p-v-receiver

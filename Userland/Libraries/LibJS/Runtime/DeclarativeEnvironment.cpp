@@ -180,10 +180,10 @@ ThrowCompletionOr<void> DeclarativeEnvironment::set_mutable_binding_direct(VM& v
 }
 
 // 9.1.1.1.6 GetBindingValue ( N, S ), https://tc39.es/ecma262/#sec-declarative-environment-records-getbindingvalue-n-s
-ThrowCompletionOr<Value> DeclarativeEnvironment::get_binding_value(VM& vm, DeprecatedFlyString const& name, bool strict)
+ThrowCompletionOr<Value> DeclarativeEnvironment::get_binding_value(VM& vm, FlyString const& name, bool strict)
 {
     // 1. Assert: envRec has a binding for N.
-    auto binding_and_index = find_binding_and_index(name);
+    auto binding_and_index = find_binding_and_index(name.to_deprecated_fly_string());
     VERIFY(binding_and_index.has_value());
 
     // 2-3. (extracted into a non-standard function below)
