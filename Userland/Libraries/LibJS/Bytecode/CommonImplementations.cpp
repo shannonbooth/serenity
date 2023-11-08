@@ -310,7 +310,7 @@ ThrowCompletionOr<void> put_by_value(VM& vm, Value base, Value property_key_valu
     return {};
 }
 
-ThrowCompletionOr<Value> get_variable(Bytecode::Interpreter& interpreter, DeprecatedFlyString const& name, EnvironmentVariableCache& cache)
+ThrowCompletionOr<Value> get_variable(Bytecode::Interpreter& interpreter, FlyString const& name, EnvironmentVariableCache& cache)
 {
     auto& vm = interpreter.vm();
 
@@ -326,7 +326,7 @@ ThrowCompletionOr<Value> get_variable(Bytecode::Interpreter& interpreter, Deprec
         cache = {};
     }
 
-    auto reference = TRY(vm.resolve_binding(name));
+    auto reference = TRY(vm.resolve_binding(name.to_deprecated_fly_string()));
     if (reference.environment_coordinate().has_value())
         cache = reference.environment_coordinate();
     return TRY(reference.get_value(vm));

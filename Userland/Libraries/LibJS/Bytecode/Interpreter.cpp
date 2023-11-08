@@ -685,7 +685,7 @@ ThrowCompletionOr<void> GetVariable::execute_impl(Bytecode::Interpreter& interpr
 {
     interpreter.accumulator() = TRY(get_variable(
         interpreter,
-        interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string(),
+        interpreter.current_executable().get_identifier(m_identifier),
         interpreter.current_executable().environment_variable_caches[m_cache_index]));
     return {};
 }

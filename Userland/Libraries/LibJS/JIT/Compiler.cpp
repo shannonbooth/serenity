@@ -1106,7 +1106,7 @@ void Compiler::compile_get_global(Bytecode::Op::GetGlobal const& op)
 
 static Value cxx_get_variable(VM& vm, FlyString const& name, Bytecode::EnvironmentVariableCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_variable(vm.bytecode_interpreter(), name.to_deprecated_fly_string(), cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_variable(vm.bytecode_interpreter(), name, cache));
 }
 
 void Compiler::compile_get_variable(Bytecode::Op::GetVariable const& op)
