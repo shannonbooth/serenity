@@ -886,7 +886,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
                     // ii. If bindingExists is false, then
                     if (!MUST(variable_environment->has_binding(MUST(FlyString::from_utf8(function_name))))) {
                         // i. Perform ! varEnv.CreateMutableBinding(F, true).
-                        MUST(variable_environment->create_mutable_binding(vm, function_name, true));
+                        MUST(variable_environment->create_mutable_binding(vm, MUST(FlyString::from_utf8(function_name)), true));
                         // ii. Perform ! varEnv.InitializeBinding(F, undefined, normal).
                         MUST(variable_environment->initialize_binding(vm, function_name, js_undefined(), Environment::InitializeBindingHint::Normal));
                     }
@@ -954,12 +954,12 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
             // i. If IsConstantDeclaration of d is true, then
             if (declaration.is_constant_declaration()) {
                 // 1. Perform ? lexEnv.CreateImmutableBinding(dn, true).
-                TRY(lexical_environment->create_immutable_binding(vm, name, true));
+                TRY(lexical_environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), true));
             }
             // ii. Else,
             else {
                 // 1. Perform ? lexEnv.CreateMutableBinding(dn, false).
-                TRY(lexical_environment->create_mutable_binding(vm, name, false));
+                TRY(lexical_environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
             }
             return {};
         });
@@ -988,7 +988,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
             if (!binding_exists) {
                 // 1. NOTE: The following invocation cannot return an abrupt completion because of the validation preceding step 14.
                 // 2. Perform ! varEnv.CreateMutableBinding(fn, true).
-                MUST(variable_environment->create_mutable_binding(vm, declaration.name(), true));
+                MUST(variable_environment->create_mutable_binding(vm, MUST(FlyString::from_utf8(declaration.name())), true));
 
                 // 3. Perform ! varEnv.InitializeBinding(fn, fo, normal).
                 MUST(variable_environment->initialize_binding(vm, declaration.name(), function, Environment::InitializeBindingHint::Normal));
@@ -1018,7 +1018,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
             if (!binding_exists) {
                 // 1. NOTE: The following invocation cannot return an abrupt completion because of the validation preceding step 14.
                 // 2. Perform ! varEnv.CreateMutableBinding(vn, true).
-                MUST(variable_environment->create_mutable_binding(vm, var_name, true));
+                MUST(variable_environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(var_name)), true));
 
                 // 3. Perform ! varEnv.InitializeBinding(vn, undefined, normal).
                 MUST(variable_environment->initialize_binding(vm, var_name, js_undefined(), Environment::InitializeBindingHint::Normal));

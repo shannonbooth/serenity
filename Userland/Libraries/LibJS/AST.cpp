@@ -100,7 +100,7 @@ Value FunctionExpression::instantiate_ordinary_function_expression(VM& vm, Depre
     if (has_own_name) {
         VERIFY(environment);
         environment = new_declarative_environment(*environment);
-        MUST(environment->create_immutable_binding(vm, name(), false));
+        MUST(environment->create_immutable_binding(vm, MUST(FlyString::from_utf8(name())), false));
     }
 
     auto private_environment = vm.running_execution_context().private_environment;
@@ -459,7 +459,7 @@ ThrowCompletionOr<ECMAScriptFunctionObject*> ClassExpression::class_definition_e
     Value super_class;
 
     if (!binding_name.is_null())
-        MUST(class_environment->create_immutable_binding(vm, binding_name, true));
+        MUST(class_environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(binding_name)), true));
 
     if (!m_super_class.is_null()) {
         vm.running_execution_context().lexical_environment = class_environment;
@@ -1646,13 +1646,13 @@ void ScopeNode::block_declaration_instantiation(VM& vm, Environment* environment
             // i. If IsConstantDeclaration of d is true, then
             if (is_constant_declaration) {
                 // 1. Perform ! env.CreateImmutableBinding(dn, true).
-                MUST(environment->create_immutable_binding(vm, name, true));
+                MUST(environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), true));
             }
             // ii. Else,
             else {
                 // 1. Perform ! env.CreateMutableBinding(dn, false). NOTE: This step is replaced in section B.3.2.6.
                 if (!MUST(environment->has_binding(MUST(FlyString::from_deprecated_fly_string(name)))))
-                    MUST(environment->create_mutable_binding(vm, name, false));
+                    MUST(environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
             }
         }));
 
@@ -1847,12 +1847,12 @@ ThrowCompletionOr<void> Program::global_declaration_instantiation(VM& vm, Global
             // i. If IsConstantDeclaration of d is true, then
             if (declaration.is_constant_declaration()) {
                 // 1. Perform ? env.CreateImmutableBinding(dn, true).
-                TRY(global_environment.create_immutable_binding(vm, name, true));
+                TRY(global_environment.create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), true));
             }
             // ii. Else,
             else {
                 // 1. Perform ? env.CreateMutableBinding(dn, false).
-                TRY(global_environment.create_mutable_binding(vm, name, false));
+                TRY(global_environment.create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
             }
 
             return {};

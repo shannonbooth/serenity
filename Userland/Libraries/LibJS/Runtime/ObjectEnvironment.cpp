@@ -61,18 +61,18 @@ ThrowCompletionOr<bool> ObjectEnvironment::has_binding(FlyString const& name, Op
 }
 
 // 9.1.1.2.2 CreateMutableBinding ( N, D ), https://tc39.es/ecma262/#sec-object-environment-records-createmutablebinding-n-d
-ThrowCompletionOr<void> ObjectEnvironment::create_mutable_binding(VM&, DeprecatedFlyString const& name, bool can_be_deleted)
+ThrowCompletionOr<void> ObjectEnvironment::create_mutable_binding(VM&, FlyString const& name, bool can_be_deleted)
 {
     // 1. Let bindingObject be envRec.[[BindingObject]].
     // 2. Perform ? DefinePropertyOrThrow(bindingObject, N, PropertyDescriptor { [[Value]]: undefined, [[Writable]]: true, [[Enumerable]]: true, [[Configurable]]: D }).
-    TRY(m_binding_object->define_property_or_throw(MUST(FlyString::from_deprecated_fly_string(name)), { .value = js_undefined(), .writable = true, .enumerable = true, .configurable = can_be_deleted }));
+    TRY(m_binding_object->define_property_or_throw(name, { .value = js_undefined(), .writable = true, .enumerable = true, .configurable = can_be_deleted }));
 
     // 3. Return unused.
     return {};
 }
 
 // 9.1.1.2.3 CreateImmutableBinding ( N, S ), https://tc39.es/ecma262/#sec-object-environment-records-createimmutablebinding-n-s
-ThrowCompletionOr<void> ObjectEnvironment::create_immutable_binding(VM&, DeprecatedFlyString const&, bool)
+ThrowCompletionOr<void> ObjectEnvironment::create_immutable_binding(VM&, FlyString const&, bool)
 {
     // "The CreateImmutableBinding concrete method of an object Environment Record is never used within this specification."
     VERIFY_NOT_REACHED();

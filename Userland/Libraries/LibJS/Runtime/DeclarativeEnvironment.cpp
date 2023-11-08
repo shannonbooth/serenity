@@ -61,14 +61,14 @@ ThrowCompletionOr<bool> DeclarativeEnvironment::has_binding(FlyString const& nam
 }
 
 // 9.1.1.1.2 CreateMutableBinding ( N, D ), https://tc39.es/ecma262/#sec-declarative-environment-records-createmutablebinding-n-d
-ThrowCompletionOr<void> DeclarativeEnvironment::create_mutable_binding(VM&, DeprecatedFlyString const& name, bool can_be_deleted)
+ThrowCompletionOr<void> DeclarativeEnvironment::create_mutable_binding(VM&, FlyString const& name, bool can_be_deleted)
 {
     // 1. Assert: envRec does not already have a binding for N.
     // NOTE: We skip this to avoid O(n) traversal of m_bindings.
 
     // 2. Create a mutable binding in envRec for N and record that it is uninitialized. If D is true, record that the newly created binding may be deleted by a subsequent DeleteBinding call.
     m_bindings.append(Binding {
-        .name = name,
+        .name = name.to_deprecated_fly_string(),
         .value = {},
         .strict = false,
         .mutable_ = true,
@@ -83,14 +83,14 @@ ThrowCompletionOr<void> DeclarativeEnvironment::create_mutable_binding(VM&, Depr
 }
 
 // 9.1.1.1.3 CreateImmutableBinding ( N, S ), https://tc39.es/ecma262/#sec-declarative-environment-records-createimmutablebinding-n-s
-ThrowCompletionOr<void> DeclarativeEnvironment::create_immutable_binding(VM&, DeprecatedFlyString const& name, bool strict)
+ThrowCompletionOr<void> DeclarativeEnvironment::create_immutable_binding(VM&, FlyString const& name, bool strict)
 {
     // 1. Assert: envRec does not already have a binding for N.
     // NOTE: We skip this to avoid O(n) traversal of m_bindings.
 
     // 2. Create an immutable binding in envRec for N and record that it is uninitialized. If S is true, record that the newly created binding is a strict binding.
     m_bindings.append(Binding {
-        .name = name,
+        .name = name.to_deprecated_fly_string(),
         .value = {},
         .strict = strict,
         .mutable_ = false,
@@ -140,7 +140,7 @@ ThrowCompletionOr<void> DeclarativeEnvironment::set_mutable_binding(VM& vm, Depr
             return vm.throw_completion<ReferenceError>(ErrorType::UnknownIdentifier, name);
 
         // b. Perform ! envRec.CreateMutableBinding(N, true).
-        MUST(create_mutable_binding(vm, name, true));
+        MUST(create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), true));
 
         // c. Perform ! envRec.InitializeBinding(N, V, normal).
         MUST(initialize_binding(vm, name, value, Environment::InitializeBindingHint::Normal));

@@ -52,11 +52,11 @@ ThrowCompletionOr<bool> GlobalEnvironment::has_binding(FlyString const& name, Op
 }
 
 // 9.1.1.4.2 CreateMutableBinding ( N, D ), https://tc39.es/ecma262/#sec-global-environment-records-createmutablebinding-n-d
-ThrowCompletionOr<void> GlobalEnvironment::create_mutable_binding(VM& vm, DeprecatedFlyString const& name, bool can_be_deleted)
+ThrowCompletionOr<void> GlobalEnvironment::create_mutable_binding(VM& vm, FlyString const& name, bool can_be_deleted)
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, throw a TypeError exception.
-    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name)))))
+    if (MUST(m_declarative_record->has_binding(name)))
         return vm.throw_completion<TypeError>(ErrorType::GlobalEnvironmentAlreadyHasBinding, name);
 
     // 3. Return ! DclRec.CreateMutableBinding(N, D).
@@ -64,11 +64,11 @@ ThrowCompletionOr<void> GlobalEnvironment::create_mutable_binding(VM& vm, Deprec
 }
 
 // 9.1.1.4.3 CreateImmutableBinding ( N, S ), https://tc39.es/ecma262/#sec-global-environment-records-createimmutablebinding-n-s
-ThrowCompletionOr<void> GlobalEnvironment::create_immutable_binding(VM& vm, DeprecatedFlyString const& name, bool strict)
+ThrowCompletionOr<void> GlobalEnvironment::create_immutable_binding(VM& vm, FlyString const& name, bool strict)
 {
     // 1. Let DclRec be envRec.[[DeclarativeRecord]].
     // 2. If ! DclRec.HasBinding(N) is true, throw a TypeError exception.
-    if (MUST(m_declarative_record->has_binding(MUST(FlyString::from_deprecated_fly_string(name)))))
+    if (MUST(m_declarative_record->has_binding(name)))
         return vm.throw_completion<TypeError>(ErrorType::GlobalEnvironmentAlreadyHasBinding, name);
 
     // 3. Return ! DclRec.CreateImmutableBinding(N, S).
@@ -264,7 +264,7 @@ ThrowCompletionOr<void> GlobalEnvironment::create_global_var_binding(DeprecatedF
     // 5. If hasProperty is false and extensible is true, then
     if (!has_property && extensible) {
         // a. Perform ? ObjRec.CreateMutableBinding(N, D).
-        TRY(m_object_record->create_mutable_binding(vm, name, can_be_deleted));
+        TRY(m_object_record->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), can_be_deleted));
 
         // b. Perform ? ObjRec.InitializeBinding(N, undefined, normal).
         TRY(m_object_record->initialize_binding(vm, name, js_undefined(), Environment::InitializeBindingHint::Normal));

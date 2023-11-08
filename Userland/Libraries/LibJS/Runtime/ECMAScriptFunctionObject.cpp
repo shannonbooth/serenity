@@ -616,7 +616,7 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
         // c. If alreadyDeclared is false, then
         // NOTE: alreadyDeclared is always false because we use hash table for parameterNames
         // i. Perform ! env.CreateMutableBinding(paramName, false).
-        MUST(environment->create_mutable_binding(vm, parameter_name, false));
+        MUST(environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(parameter_name)), false));
 
         // ii. If hasDuplicates is true, then
         if (m_has_duplicates) {
@@ -645,14 +645,14 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
         // c. If strict is true, then
         if (m_strict) {
             // i. Perform ! env.CreateImmutableBinding("arguments", false).
-            MUST(environment->create_immutable_binding(vm, vm.names.arguments.as_string().to_deprecated_fly_string(), false));
+            MUST(environment->create_immutable_binding(vm, vm.names.arguments.as_string(), false));
 
             // ii. NOTE: In strict mode code early errors prevent attempting to assign to this binding, so its mutability is not observable.
         }
         // b. Else,
         else {
             // i. Perform ! env.CreateMutableBinding("arguments", false).
-            MUST(environment->create_mutable_binding(vm, vm.names.arguments.as_string().to_deprecated_fly_string(), false));
+            MUST(environment->create_mutable_binding(vm, vm.names.arguments.as_string(), false));
         }
 
         // c. Perform ! env.InitializeBinding("arguments", ao).
@@ -745,7 +745,7 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
                 } else {
                     // 2. Perform ! env.CreateMutableBinding(n, false).
                     // 3. Perform ! env.InitializeBinding(n, undefined).
-                    MUST(environment->create_mutable_binding(vm, id.string(), false));
+                    MUST(environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(id.string())), false));
                     MUST(environment->initialize_binding(vm, id.string(), js_undefined(), Environment::InitializeBindingHint::Normal));
                 }
             }
@@ -783,7 +783,7 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
                 // 2. Perform ! varEnv.CreateMutableBinding(n, false).
                 // NOTE: We ignore locals because they are stored in ExecutionContext instead of environment.
                 if (!id.is_local())
-                    MUST(var_environment->create_mutable_binding(vm, id.string(), false));
+                    MUST(var_environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(id.string())), false));
 
                 Value initial_value;
 
@@ -821,7 +821,7 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
         // NOTE: Due to the use of MUST with `create_mutable_binding` and `initialize_binding` below,
         //       an exception should not result from `for_each_function_hoistable_with_annexB_extension`.
         for (auto const& function_name : m_function_names_to_initialize_binding) {
-            MUST(var_environment->create_mutable_binding(vm, function_name, false));
+            MUST(var_environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(function_name)), false));
             MUST(var_environment->initialize_binding(vm, function_name, js_undefined(), Environment::InitializeBindingHint::Normal));
         }
     }
@@ -877,12 +877,12 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
             // i. If IsConstantDeclaration of d is true, then
             if (declaration.is_constant_declaration()) {
                 // 1. Perform ! lexEnv.CreateImmutableBinding(dn, true).
-                MUST(lex_environment->create_immutable_binding(vm, id.string(), true));
+                MUST(lex_environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(id.string())), true));
             }
             // ii. Else,
             else {
                 // 1. Perform ! lexEnv.CreateMutableBinding(dn, false).
-                MUST(lex_environment->create_mutable_binding(vm, id.string(), false));
+                MUST(lex_environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(id.string())), false));
             }
         }));
     }));

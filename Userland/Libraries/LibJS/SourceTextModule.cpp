@@ -366,7 +366,7 @@ ThrowCompletionOr<void> SourceTextModule::initialize_environment(VM& vm)
             auto* namespace_ = TRY(imported_module->get_module_namespace(vm));
 
             // ii. Perform ! env.CreateImmutableBinding(in.[[LocalName]], true).
-            MUST(environment->create_immutable_binding(vm, import_entry.local_name, true));
+            MUST(environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(import_entry.local_name)), true));
 
             // iii. Perform ! env.InitializeBinding(in.[[LocalName]], namespace, normal).
             MUST(environment->initialize_binding(vm, import_entry.local_name, namespace_, Environment::InitializeBindingHint::Normal));
@@ -386,7 +386,7 @@ ThrowCompletionOr<void> SourceTextModule::initialize_environment(VM& vm)
                 auto* namespace_ = TRY(resolution.module->get_module_namespace(vm));
 
                 // 2. Perform ! env.CreateImmutableBinding(in.[[LocalName]], true).
-                MUST(environment->create_immutable_binding(vm, import_entry.local_name, true));
+                MUST(environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(import_entry.local_name)), true));
 
                 // 3. Perform ! env.InitializeBinding(in.[[LocalName]], namespace, normal).
                 MUST(environment->initialize_binding(vm, import_entry.local_name, namespace_, Environment::InitializeBindingHint::Normal));
@@ -444,7 +444,7 @@ ThrowCompletionOr<void> SourceTextModule::initialize_environment(VM& vm)
         // i. If dn is not an element of declaredVarNames, then
         if (!declared_var_names.contains_slow(name)) {
             // 1. Perform ! env.CreateMutableBinding(dn, false).
-            MUST(environment->create_mutable_binding(vm, name, false));
+            MUST(environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
 
             // 2. Perform ! env.InitializeBinding(dn, undefined, normal).
             MUST(environment->initialize_binding(vm, name, js_undefined(), Environment::InitializeBindingHint::Normal));
@@ -471,12 +471,12 @@ ThrowCompletionOr<void> SourceTextModule::initialize_environment(VM& vm)
             // i. If IsConstantDeclaration of d is true, then
             if (declaration.is_constant_declaration()) {
                 // 1. Perform ! env.CreateImmutableBinding(dn, true).
-                MUST(environment->create_immutable_binding(vm, name, true));
+                MUST(environment->create_immutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), true));
             }
             // ii. Else,
             else {
                 // 1. Perform ! env.CreateMutableBinding(dn, false).
-                MUST(environment->create_mutable_binding(vm, name, false));
+                MUST(environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
             }
 
             // iii. If d is a FunctionDeclaration, a GeneratorDeclaration, an AsyncFunctionDeclaration, or an AsyncGeneratorDeclaration, then
@@ -512,7 +512,7 @@ ThrowCompletionOr<void> SourceTextModule::initialize_environment(VM& vm)
             dbgln_if(JS_MODULE_DEBUG, "[JS MODULE] Adding default export to lexical declarations: local name: {}, Expression: {}", name, statement.class_name());
 
             // 1. Perform ! env.CreateMutableBinding(dn, false).
-            MUST(environment->create_mutable_binding(vm, name, false));
+            MUST(environment->create_mutable_binding(vm, MUST(FlyString::from_deprecated_fly_string(name)), false));
 
             // Note: Since this is not a function declaration 24.a.iii never applies
         }
