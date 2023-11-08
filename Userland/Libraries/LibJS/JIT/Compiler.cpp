@@ -1235,7 +1235,7 @@ static Value cxx_get_callee_and_this_from_environment(VM& vm, FlyString const& n
     auto& bytecode_interpreter = vm.bytecode_interpreter();
     auto callee_and_this = TRY_OR_SET_EXCEPTION(Bytecode::get_callee_and_this_from_environment(
         bytecode_interpreter,
-        name.to_deprecated_fly_string(),
+        name,
         cache_index));
 
     bytecode_interpreter.reg(callee_reg) = callee_and_this.callee;

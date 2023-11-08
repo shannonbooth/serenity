@@ -332,7 +332,7 @@ ThrowCompletionOr<Value> get_variable(Bytecode::Interpreter& interpreter, FlyStr
     return TRY(reference.get_value(vm));
 }
 
-ThrowCompletionOr<CalleeAndThis> get_callee_and_this_from_environment(Bytecode::Interpreter& interpreter, DeprecatedFlyString const& name, u32 cache_index)
+ThrowCompletionOr<CalleeAndThis> get_callee_and_this_from_environment(Bytecode::Interpreter& interpreter, FlyString const& name, u32 cache_index)
 {
     auto& vm = interpreter.vm();
 
@@ -359,7 +359,7 @@ ThrowCompletionOr<CalleeAndThis> get_callee_and_this_from_environment(Bytecode::
         cached_environment_coordinate = {};
     }
 
-    auto reference = TRY(vm.resolve_binding(name));
+    auto reference = TRY(vm.resolve_binding(name.to_deprecated_fly_string()));
     if (reference.environment_coordinate().has_value())
         cached_environment_coordinate = reference.environment_coordinate();
 

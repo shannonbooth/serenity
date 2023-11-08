@@ -692,7 +692,7 @@ ThrowCompletionOr<void> GetVariable::execute_impl(Bytecode::Interpreter& interpr
 
 ThrowCompletionOr<void> GetCalleeAndThisFromEnvironment::execute_impl(Bytecode::Interpreter& interpreter) const
 {
-    auto callee_and_this = TRY(get_callee_and_this_from_environment(interpreter, interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string(), m_cache_index));
+    auto callee_and_this = TRY(get_callee_and_this_from_environment(interpreter, interpreter.current_executable().get_identifier(m_identifier), m_cache_index));
     interpreter.reg(m_callee_reg) = callee_and_this.callee;
     interpreter.reg(m_this_reg) = callee_and_this.this_value;
     return {};
