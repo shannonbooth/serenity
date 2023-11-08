@@ -227,10 +227,10 @@ ThrowCompletionOr<void> throw_if_needed_for_call(Interpreter& interpreter, Value
     return {};
 }
 
-ThrowCompletionOr<Value> typeof_variable(VM& vm, DeprecatedFlyString const& string)
+ThrowCompletionOr<Value> typeof_variable(VM& vm, FlyString const& string)
 {
     // 1. Let val be the result of evaluating UnaryExpression.
-    auto reference = TRY(vm.resolve_binding(string));
+    auto reference = TRY(vm.resolve_binding(string.to_deprecated_fly_string()));
 
     // 2. If val is a Reference Record, then
     //    a. If IsUnresolvableReference(val) is true, return "undefined".

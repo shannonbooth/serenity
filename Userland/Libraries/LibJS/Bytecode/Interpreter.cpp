@@ -1228,7 +1228,7 @@ ThrowCompletionOr<void> NewClass::execute_impl(Bytecode::Interpreter& interprete
 ThrowCompletionOr<void> TypeofVariable::execute_impl(Bytecode::Interpreter& interpreter) const
 {
     auto& vm = interpreter.vm();
-    interpreter.accumulator() = TRY(typeof_variable(vm, interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string()));
+    interpreter.accumulator() = TRY(typeof_variable(vm, interpreter.current_executable().get_identifier(m_identifier)));
     return {};
 }
 

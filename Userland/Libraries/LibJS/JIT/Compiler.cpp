@@ -1415,7 +1415,7 @@ void Compiler::compile_call_with_argument_array(Bytecode::Op::CallWithArgumentAr
 
 static Value cxx_typeof_variable(VM& vm, FlyString const& identifier)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::typeof_variable(vm, identifier.to_deprecated_fly_string()));
+    return TRY_OR_SET_EXCEPTION(Bytecode::typeof_variable(vm, identifier));
 }
 
 void Compiler::compile_typeof_variable(Bytecode::Op::TypeofVariable const& op)
