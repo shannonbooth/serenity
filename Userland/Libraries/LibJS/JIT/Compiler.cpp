@@ -1055,7 +1055,7 @@ void Compiler::compile_new_class(Bytecode::Op::NewClass const& op)
 
 static Value cxx_get_by_id(VM& vm, Value base, FlyString const& property, Bytecode::PropertyLookupCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property.to_deprecated_fly_string(), base, base, cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property, base, base, cache));
 }
 
 void Compiler::compile_get_by_id(Bytecode::Op::GetById const& op)
@@ -1819,7 +1819,7 @@ void Compiler::compile_resolve_super_base(Bytecode::Op::ResolveSuperBase const&)
 
 static Value cxx_get_by_id_with_this(VM& vm, FlyString const& property, Value base_value, Value this_value, Bytecode::PropertyLookupCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property.to_deprecated_fly_string(), base_value, this_value, cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property, base_value, this_value, cache));
 }
 
 void Compiler::compile_get_by_id_with_this(Bytecode::Op::GetByIdWithThis const& op)

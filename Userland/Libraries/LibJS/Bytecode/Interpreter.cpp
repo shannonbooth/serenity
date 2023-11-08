@@ -767,7 +767,7 @@ ThrowCompletionOr<void> GetById::execute_impl(Bytecode::Interpreter& interpreter
 {
     auto base_value = interpreter.accumulator();
     auto& cache = interpreter.current_executable().property_lookup_caches[m_cache_index];
-    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string(), base_value, base_value, cache));
+    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property), base_value, base_value, cache));
     return {};
 }
 
@@ -776,7 +776,7 @@ ThrowCompletionOr<void> GetByIdWithThis::execute_impl(Bytecode::Interpreter& int
     auto base_value = interpreter.accumulator();
     auto this_value = interpreter.reg(m_this_value);
     auto& cache = interpreter.current_executable().property_lookup_caches[m_cache_index];
-    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string(), base_value, this_value, cache));
+    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property), base_value, this_value, cache));
     return {};
 }
 

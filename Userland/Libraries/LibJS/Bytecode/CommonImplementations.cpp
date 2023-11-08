@@ -34,11 +34,10 @@ ThrowCompletionOr<NonnullGCPtr<Object>> base_object_for_get(VM& vm, Value base_v
     return base_value.to_object(vm);
 }
 
-ThrowCompletionOr<Value> get_by_id(VM& vm, DeprecatedFlyString const& property, Value base_value, Value this_value, PropertyLookupCache& cache)
+ThrowCompletionOr<Value> get_by_id(VM& vm, FlyString const& property, Value base_value, Value this_value, PropertyLookupCache& cache)
 {
-    auto deprecated_property = MUST(FlyString::from_deprecated_fly_string(property));
     if (base_value.is_string()) {
-        auto string_value = TRY(base_value.as_string().get(vm, deprecated_property));
+        auto string_value = TRY(base_value.as_string().get(vm, property));
         if (string_value.has_value())
             return *string_value;
     }
@@ -54,7 +53,7 @@ ThrowCompletionOr<Value> get_by_id(VM& vm, DeprecatedFlyString const& property, 
     }
 
     CacheablePropertyMetadata cacheable_metadata;
-    auto value = TRY(base_obj->internal_get(deprecated_property, this_value, &cacheable_metadata));
+    auto value = TRY(base_obj->internal_get(property, this_value, &cacheable_metadata));
 
     if (cacheable_metadata.type == CacheablePropertyMetadata::Type::OwnProperty) {
         cache.shape = shape;
