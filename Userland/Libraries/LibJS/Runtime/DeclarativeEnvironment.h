@@ -41,7 +41,7 @@ public:
     virtual ThrowCompletionOr<void> initialize_binding(VM&, DeprecatedFlyString const& name, Value, InitializeBindingHint) override final;
     virtual ThrowCompletionOr<void> set_mutable_binding(VM&, DeprecatedFlyString const& name, Value, bool strict) override final;
     virtual ThrowCompletionOr<Value> get_binding_value(VM&, DeprecatedFlyString const& name, bool strict) override;
-    virtual ThrowCompletionOr<bool> delete_binding(VM&, DeprecatedFlyString const& name) override;
+    virtual ThrowCompletionOr<bool> delete_binding(VM&, FlyString const& name) override;
 
     void initialize_or_set_mutable_binding(Badge<ScopeNode>, VM&, DeprecatedFlyString const& name, Value value);
     ThrowCompletionOr<void> initialize_or_set_mutable_binding(VM&, DeprecatedFlyString const& name, Value value);

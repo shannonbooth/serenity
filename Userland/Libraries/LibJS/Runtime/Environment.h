@@ -39,7 +39,7 @@ public:
     virtual ThrowCompletionOr<void> initialize_binding(VM&, [[maybe_unused]] DeprecatedFlyString const& name, Value, InitializeBindingHint) { return {}; }
     virtual ThrowCompletionOr<void> set_mutable_binding(VM&, [[maybe_unused]] DeprecatedFlyString const& name, Value, [[maybe_unused]] bool strict) { return {}; }
     virtual ThrowCompletionOr<Value> get_binding_value(VM&, [[maybe_unused]] DeprecatedFlyString const& name, [[maybe_unused]] bool strict) { return Value {}; }
-    virtual ThrowCompletionOr<bool> delete_binding(VM&, [[maybe_unused]] DeprecatedFlyString const& name) { return false; }
+    virtual ThrowCompletionOr<bool> delete_binding(VM&, [[maybe_unused]] FlyString const& name) { return false; }
 
     // [[OuterEnv]]
     Environment* outer_environment() { return m_outer_environment; }

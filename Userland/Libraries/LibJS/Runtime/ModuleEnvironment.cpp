@@ -49,7 +49,7 @@ ThrowCompletionOr<Value> ModuleEnvironment::get_binding_value(VM& vm, Deprecated
 }
 
 // 9.1.1.5.2 DeleteBinding ( N ), https://tc39.es/ecma262/#sec-module-environment-records-deletebinding-n
-ThrowCompletionOr<bool> ModuleEnvironment::delete_binding(VM&, DeprecatedFlyString const&)
+ThrowCompletionOr<bool> ModuleEnvironment::delete_binding(VM&, FlyString const&)
 {
     // The DeleteBinding concrete method of a module Environment Record is never used within this specification.
     VERIFY_NOT_REACHED();

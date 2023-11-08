@@ -169,11 +169,11 @@ ThrowCompletionOr<Value> ObjectEnvironment::get_binding_value(VM&, DeprecatedFly
 }
 
 // 9.1.1.2.7 DeleteBinding ( N ), https://tc39.es/ecma262/#sec-object-environment-records-deletebinding-n
-ThrowCompletionOr<bool> ObjectEnvironment::delete_binding(VM&, DeprecatedFlyString const& name)
+ThrowCompletionOr<bool> ObjectEnvironment::delete_binding(VM&, FlyString const& name)
 {
     // 1. Let bindingObject be envRec.[[BindingObject]].
     // 2. Return ? bindingObject.[[Delete]](N).
-    return m_binding_object->internal_delete(MUST(FlyString::from_deprecated_fly_string(name)));
+    return m_binding_object->internal_delete(name);
 }
 
 }

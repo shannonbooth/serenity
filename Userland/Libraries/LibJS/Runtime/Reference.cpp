@@ -191,7 +191,7 @@ ThrowCompletionOr<bool> Reference::delete_(VM& vm)
     VERIFY(m_base_type == BaseType::Environment);
 
     //    c. Return ? base.DeleteBinding(ref.[[ReferencedName]]).
-    return m_base_environment->delete_binding(vm, m_name.as_string().to_deprecated_fly_string());
+    return m_base_environment->delete_binding(vm, m_name.as_string());
 }
 
 // 6.2.4.8 InitializeReferencedBinding ( V, W ), https://tc39.es/ecma262/#sec-object.prototype.hasownproperty

@@ -206,10 +206,10 @@ ThrowCompletionOr<Value> DeclarativeEnvironment::get_binding_value_direct(VM&, B
 }
 
 // 9.1.1.1.7 DeleteBinding ( N ), https://tc39.es/ecma262/#sec-declarative-environment-records-deletebinding-n
-ThrowCompletionOr<bool> DeclarativeEnvironment::delete_binding(VM&, DeprecatedFlyString const& name)
+ThrowCompletionOr<bool> DeclarativeEnvironment::delete_binding(VM&, FlyString const& name)
 {
     // 1. Assert: envRec has a binding for the name that is the value of N.
-    auto binding_and_index = find_binding_and_index(name);
+    auto binding_and_index = find_binding_and_index(name.to_deprecated_fly_string());
     VERIFY(binding_and_index.has_value());
 
     // 2. If the binding for N in envRec cannot be deleted, return false.
