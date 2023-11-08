@@ -783,7 +783,7 @@ ThrowCompletionOr<void> GetByIdWithThis::execute_impl(Bytecode::Interpreter& int
 ThrowCompletionOr<void> GetPrivateById::execute_impl(Bytecode::Interpreter& interpreter) const
 {
     auto& vm = interpreter.vm();
-    auto const& name = interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string();
+    auto const& name = interpreter.current_executable().get_identifier(m_property);
     auto base_value = interpreter.accumulator();
     auto private_reference = make_private_reference(vm, base_value, name);
     interpreter.accumulator() = TRY(private_reference.get_value(vm));
@@ -834,7 +834,7 @@ ThrowCompletionOr<void> PutPrivateById::execute_impl(Bytecode::Interpreter& inte
     // NOTE: Get the value from the accumulator before side effects have a chance to overwrite it.
     auto value = interpreter.accumulator();
     auto object = TRY(interpreter.reg(m_base).to_object(vm));
-    auto name = interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string();
+    auto name = interpreter.current_executable().get_identifier(m_property);
     auto private_reference = make_private_reference(vm, object, name);
     TRY(private_reference.put_value(vm, value));
     interpreter.accumulator() = value;

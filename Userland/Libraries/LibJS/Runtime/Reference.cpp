@@ -204,7 +204,7 @@ ThrowCompletionOr<void> Reference::initialize_referenced_binding(VM& vm, Value v
 }
 
 // 6.2.4.9 MakePrivateReference ( baseValue, privateIdentifier ), https://tc39.es/ecma262/#sec-makeprivatereference
-Reference make_private_reference(VM& vm, Value base_value, DeprecatedFlyString const& private_identifier)
+Reference make_private_reference(VM& vm, Value base_value, FlyString const& private_identifier)
 {
     // 1. Let privEnv be the running execution context's PrivateEnvironment.
     auto private_environment = vm.running_execution_context().private_environment;
@@ -213,7 +213,7 @@ Reference make_private_reference(VM& vm, Value base_value, DeprecatedFlyString c
     VERIFY(private_environment);
 
     // 3. Let privateName be ResolvePrivateIdentifier(privEnv, privateIdentifier).
-    auto private_name = private_environment->resolve_private_identifier(private_identifier);
+    auto private_name = private_environment->resolve_private_identifier(private_identifier.to_deprecated_fly_string());
 
     // 4. Return the Reference Record { [[Base]]: baseValue, [[ReferencedName]]: privateName, [[Strict]]: true, [[ThisValue]]: empty }.
     return Reference { base_value, private_name };

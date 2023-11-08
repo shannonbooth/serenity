@@ -1783,7 +1783,7 @@ void Compiler::compile_get_object_property_iterator(Bytecode::Op::GetObjectPrope
 
 static Value cxx_get_private_by_id(VM& vm, Value base_value, FlyString const& name)
 {
-    auto private_reference = make_private_reference(vm, base_value, name.to_deprecated_fly_string());
+    auto private_reference = make_private_reference(vm, base_value, name);
     return TRY_OR_SET_EXCEPTION(private_reference.get_value(vm));
 }
 
@@ -1895,7 +1895,7 @@ void Compiler::compile_put_by_id_with_this(Bytecode::Op::PutByIdWithThis const& 
 static Value cxx_put_private_by_id(VM& vm, Value base, Value value, FlyString const& name)
 {
     auto object = TRY_OR_SET_EXCEPTION(base.to_object(vm));
-    auto private_reference = make_private_reference(vm, object, name.to_deprecated_fly_string());
+    auto private_reference = make_private_reference(vm, object, name);
     TRY_OR_SET_EXCEPTION(private_reference.put_value(vm, value));
     return value;
 }

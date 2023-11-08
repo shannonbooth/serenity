@@ -13,7 +13,7 @@
 
 namespace JS {
 
-Reference make_private_reference(VM&, Value base_value, DeprecatedFlyString const& private_identifier);
+Reference make_private_reference(VM&, Value base_value, FlyString const& private_identifier);
 
 class Reference {
 public:
