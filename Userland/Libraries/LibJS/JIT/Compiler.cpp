@@ -1053,9 +1053,9 @@ void Compiler::compile_new_class(Bytecode::Op::NewClass const& op)
     store_accumulator(RET);
 }
 
-static Value cxx_get_by_id(VM& vm, Value base, DeprecatedFlyString const& property, Bytecode::PropertyLookupCache& cache)
+static Value cxx_get_by_id(VM& vm, Value base, FlyString const& property, Bytecode::PropertyLookupCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property, base, base, cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property.to_deprecated_fly_string(), base, base, cache));
 }
 
 void Compiler::compile_get_by_id(Bytecode::Op::GetById const& op)
@@ -1086,9 +1086,9 @@ void Compiler::compile_get_by_value(Bytecode::Op::GetByValue const& op)
     check_exception();
 }
 
-static Value cxx_get_global(VM& vm, DeprecatedFlyString const& identifier, Bytecode::GlobalVariableCache& cache)
+static Value cxx_get_global(VM& vm, FlyString const& identifier, Bytecode::GlobalVariableCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_global(vm.bytecode_interpreter(), identifier, cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_global(vm.bytecode_interpreter(), identifier.to_deprecated_fly_string(), cache));
 }
 
 void Compiler::compile_get_global(Bytecode::Op::GetGlobal const& op)
@@ -1104,9 +1104,9 @@ void Compiler::compile_get_global(Bytecode::Op::GetGlobal const& op)
     check_exception();
 }
 
-static Value cxx_get_variable(VM& vm, DeprecatedFlyString const& name, Bytecode::EnvironmentVariableCache& cache)
+static Value cxx_get_variable(VM& vm, FlyString const& name, Bytecode::EnvironmentVariableCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_variable(vm.bytecode_interpreter(), name, cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_variable(vm.bytecode_interpreter(), name.to_deprecated_fly_string(), cache));
 }
 
 void Compiler::compile_get_variable(Bytecode::Op::GetVariable const& op)
@@ -1230,12 +1230,12 @@ void Compiler::compile_get_variable(Bytecode::Op::GetVariable const& op)
     end.link(m_assembler);
 }
 
-static Value cxx_get_callee_and_this_from_environment(VM& vm, DeprecatedFlyString const& name, u32 cache_index, Bytecode::Register callee_reg, Bytecode::Register this_reg)
+static Value cxx_get_callee_and_this_from_environment(VM& vm, FlyString const& name, u32 cache_index, Bytecode::Register callee_reg, Bytecode::Register this_reg)
 {
     auto& bytecode_interpreter = vm.bytecode_interpreter();
     auto callee_and_this = TRY_OR_SET_EXCEPTION(Bytecode::get_callee_and_this_from_environment(
         bytecode_interpreter,
-        name,
+        name.to_deprecated_fly_string(),
         cache_index));
 
     bytecode_interpreter.reg(callee_reg) = callee_and_this.callee;
@@ -1318,7 +1318,7 @@ void Compiler::compile_resolve_this_binding(Bytecode::Op::ResolveThisBinding con
 
 static Value cxx_put_by_id(VM& vm, Value base, Bytecode::IdentifierTableIndex property, Value value, Bytecode::Op::PropertyKind kind)
 {
-    PropertyKey name = MUST(FlyString::from_deprecated_fly_string(vm.bytecode_interpreter().current_executable().get_identifier(property)));
+    PropertyKey name = vm.bytecode_interpreter().current_executable().get_identifier(property);
     TRY_OR_SET_EXCEPTION(Bytecode::put_by_property_key(vm, base, base, value, name, kind));
     return value;
 }
@@ -1413,9 +1413,9 @@ void Compiler::compile_call_with_argument_array(Bytecode::Op::CallWithArgumentAr
     check_exception();
 }
 
-static Value cxx_typeof_variable(VM& vm, DeprecatedFlyString const& identifier)
+static Value cxx_typeof_variable(VM& vm, FlyString const& identifier)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::typeof_variable(vm, identifier));
+    return TRY_OR_SET_EXCEPTION(Bytecode::typeof_variable(vm, identifier.to_deprecated_fly_string()));
 }
 
 void Compiler::compile_typeof_variable(Bytecode::Op::TypeofVariable const& op)
@@ -1430,13 +1430,13 @@ void Compiler::compile_typeof_variable(Bytecode::Op::TypeofVariable const& op)
 
 static Value cxx_create_variable(
     VM& vm,
-    DeprecatedFlyString const& name,
+    FlyString const& name,
     Bytecode::Op::EnvironmentMode mode,
     bool is_global,
     bool is_immutable,
     bool is_strict)
 {
-    TRY_OR_SET_EXCEPTION(Bytecode::create_variable(vm, name, mode, is_global, is_immutable, is_strict));
+    TRY_OR_SET_EXCEPTION(Bytecode::create_variable(vm, name.to_deprecated_fly_string(), mode, is_global, is_immutable, is_strict));
     return {};
 }
 
@@ -1463,12 +1463,12 @@ void Compiler::compile_create_variable(Bytecode::Op::CreateVariable const& op)
 
 static Value cxx_set_variable(
     VM& vm,
-    DeprecatedFlyString const& identifier,
+    FlyString const& identifier,
     Value value,
     Bytecode::Op::EnvironmentMode environment_mode,
     Bytecode::Op::SetVariable::InitializationMode initialization_mode)
 {
-    TRY_OR_SET_EXCEPTION(Bytecode::set_variable(vm, identifier, value, environment_mode, initialization_mode));
+    TRY_OR_SET_EXCEPTION(Bytecode::set_variable(vm, identifier.to_deprecated_fly_string(), value, environment_mode, initialization_mode));
     return {};
 }
 
@@ -1781,9 +1781,9 @@ void Compiler::compile_get_object_property_iterator(Bytecode::Op::GetObjectPrope
     check_exception();
 }
 
-static Value cxx_get_private_by_id(VM& vm, Value base_value, DeprecatedFlyString& name)
+static Value cxx_get_private_by_id(VM& vm, Value base_value, FlyString const& name)
 {
-    auto private_reference = make_private_reference(vm, base_value, name);
+    auto private_reference = make_private_reference(vm, base_value, name.to_deprecated_fly_string());
     return TRY_OR_SET_EXCEPTION(private_reference.get_value(vm));
 }
 
@@ -1817,9 +1817,9 @@ void Compiler::compile_resolve_super_base(Bytecode::Op::ResolveSuperBase const&)
     check_exception();
 }
 
-static Value cxx_get_by_id_with_this(VM& vm, DeprecatedFlyString const& property, Value base_value, Value this_value, Bytecode::PropertyLookupCache& cache)
+static Value cxx_get_by_id_with_this(VM& vm, FlyString const& property, Value base_value, Value this_value, Bytecode::PropertyLookupCache& cache)
 {
-    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property, base_value, this_value, cache));
+    return TRY_OR_SET_EXCEPTION(Bytecode::get_by_id(vm, property.to_deprecated_fly_string(), base_value, this_value, cache));
 }
 
 void Compiler::compile_get_by_id_with_this(Bytecode::Op::GetByIdWithThis const& op)
@@ -1854,9 +1854,9 @@ void Compiler::compile_get_by_value_with_this(Bytecode::Op::GetByValueWithThis c
     check_exception();
 }
 
-static Value cxx_delete_by_id_with_this(VM& vm, Value base_value, DeprecatedFlyString const& identifier, Value this_value)
+static Value cxx_delete_by_id_with_this(VM& vm, Value base_value, FlyString const& identifier, Value this_value)
 {
-    auto reference = Reference { base_value, MUST(FlyString::from_deprecated_fly_string(identifier)), this_value, vm.in_strict_mode() };
+    auto reference = Reference { base_value, identifier, this_value, vm.in_strict_mode() };
     return Value(TRY_OR_SET_EXCEPTION(reference.delete_(vm)));
 }
 
@@ -1871,9 +1871,9 @@ void Compiler::compile_delete_by_id_with_this(Bytecode::Op::DeleteByIdWithThis c
     store_accumulator(RET);
 }
 
-static Value cxx_put_by_id_with_this(VM& vm, Value base, Value value, DeprecatedFlyString const& name, Value this_value, Bytecode::Op::PropertyKind kind)
+static Value cxx_put_by_id_with_this(VM& vm, Value base, Value value, FlyString const& name, Value this_value, Bytecode::Op::PropertyKind kind)
 {
-    TRY_OR_SET_EXCEPTION(Bytecode::put_by_property_key(vm, base, this_value, value, MUST(FlyString::from_deprecated_fly_string(name)), kind));
+    TRY_OR_SET_EXCEPTION(Bytecode::put_by_property_key(vm, base, this_value, value, name, kind));
     return {};
 }
 
@@ -1892,10 +1892,10 @@ void Compiler::compile_put_by_id_with_this(Bytecode::Op::PutByIdWithThis const& 
     check_exception();
 }
 
-static Value cxx_put_private_by_id(VM& vm, Value base, Value value, DeprecatedFlyString const& name)
+static Value cxx_put_private_by_id(VM& vm, Value base, Value value, FlyString const& name)
 {
     auto object = TRY_OR_SET_EXCEPTION(base.to_object(vm));
-    auto private_reference = make_private_reference(vm, object, name);
+    auto private_reference = make_private_reference(vm, object, name.to_deprecated_fly_string());
     TRY_OR_SET_EXCEPTION(private_reference.put_value(vm, value));
     return value;
 }
@@ -1937,9 +1937,9 @@ void Compiler::compile_get_import_meta(Bytecode::Op::GetImportMeta const&)
     store_accumulator(RET);
 }
 
-static Value cxx_delete_variable(VM& vm, DeprecatedFlyString const& identifier)
+static Value cxx_delete_variable(VM& vm, FlyString const& identifier)
 {
-    auto reference = TRY_OR_SET_EXCEPTION(vm.resolve_binding(identifier));
+    auto reference = TRY_OR_SET_EXCEPTION(vm.resolve_binding(identifier.to_deprecated_fly_string()));
     return Value(TRY_OR_SET_EXCEPTION(reference.delete_(vm)));
 }
 
@@ -1953,9 +1953,9 @@ void Compiler::compile_delete_variable(Bytecode::Op::DeleteVariable const& op)
     check_exception();
 }
 
-static Value cxx_get_method(VM& vm, Value value, DeprecatedFlyString const& identifier)
+static Value cxx_get_method(VM& vm, Value value, FlyString const& identifier)
 {
-    auto method = TRY_OR_SET_EXCEPTION(value.get_method(vm, MUST(FlyString::from_deprecated_fly_string(identifier))));
+    auto method = TRY_OR_SET_EXCEPTION(value.get_method(vm, identifier));
     return method ?: js_undefined();
 }
 
@@ -1981,14 +1981,14 @@ void Compiler::compile_get_new_target(Bytecode::Op::GetNewTarget const&)
     store_accumulator(RET);
 }
 
-static Value cxx_has_private_id(VM& vm, Value object, DeprecatedFlyString const& identifier)
+static Value cxx_has_private_id(VM& vm, Value object, FlyString const& identifier)
 {
     if (!object.is_object())
         TRY_OR_SET_EXCEPTION(vm.throw_completion<TypeError>(ErrorType::InOperatorWithObject));
 
     auto private_environment = vm.running_execution_context().private_environment;
     VERIFY(private_environment);
-    auto private_name = private_environment->resolve_private_identifier(identifier);
+    auto private_name = private_environment->resolve_private_identifier(identifier.to_deprecated_fly_string());
     return Value(object.as_object().private_element_find(private_name) != nullptr);
 }
 

@@ -272,7 +272,7 @@ Value new_function(VM& vm, FunctionExpression const& function_node, Optional<Ide
     if (!function_node.has_name()) {
         DeprecatedFlyString name = {};
         if (lhs_name.has_value())
-            name = vm.bytecode_interpreter().current_executable().get_identifier(lhs_name.value());
+            name = vm.bytecode_interpreter().current_executable().get_identifier(lhs_name.value()).to_deprecated_fly_string();
         value = function_node.instantiate_ordinary_function_expression(vm, name);
     } else {
         value = ECMAScriptFunctionObject::create(*vm.current_realm(), function_node.name(), function_node.source_text(), function_node.body(), function_node.parameters(), function_node.function_length(), function_node.local_variables_names(), vm.lexical_environment(), vm.running_execution_context().private_environment, function_node.kind(), function_node.is_strict_mode(), function_node.might_need_arguments_object(), function_node.contains_direct_call_to_eval(), function_node.is_arrow_function());
@@ -461,7 +461,7 @@ ThrowCompletionOr<ECMAScriptFunctionObject*> new_class(VM& vm, Value super_class
     DeprecatedFlyString binding_name;
     DeprecatedFlyString class_name;
     if (!class_expression.has_name() && lhs_name.has_value()) {
-        class_name = interpreter.current_executable().get_identifier(lhs_name.value());
+        class_name = interpreter.current_executable().get_identifier(lhs_name.value()).to_deprecated_fly_string();
     } else {
         binding_name = name;
         class_name = name.is_null() ? ""sv : name;
@@ -625,7 +625,7 @@ ThrowCompletionOr<Value> delete_by_id(Bytecode::Interpreter& interpreter, Value 
 {
     auto& vm = interpreter.vm();
 
-    auto const& identifier = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(property)));
+    auto const& identifier = interpreter.current_executable().get_identifier(property);
     bool strict = vm.in_strict_mode();
     auto reference = Reference { base, identifier, {}, strict };
 

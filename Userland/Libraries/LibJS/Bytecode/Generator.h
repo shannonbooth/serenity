@@ -160,7 +160,7 @@ public:
 
     IdentifierTableIndex intern_identifier(DeprecatedFlyString string)
     {
-        return m_identifier_table->insert(move(string));
+        return m_identifier_table->insert(MUST(FlyString::from_deprecated_fly_string(string)));
     }
 
     bool is_in_generator_or_async_function() const { return m_enclosing_function_kind == FunctionKind::Async || m_enclosing_function_kind == FunctionKind::Generator || m_enclosing_function_kind == FunctionKind::AsyncGenerator; }

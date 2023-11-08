@@ -685,14 +685,14 @@ ThrowCompletionOr<void> GetVariable::execute_impl(Bytecode::Interpreter& interpr
 {
     interpreter.accumulator() = TRY(get_variable(
         interpreter,
-        interpreter.current_executable().get_identifier(m_identifier),
+        interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string(),
         interpreter.current_executable().environment_variable_caches[m_cache_index]));
     return {};
 }
 
 ThrowCompletionOr<void> GetCalleeAndThisFromEnvironment::execute_impl(Bytecode::Interpreter& interpreter) const
 {
-    auto callee_and_this = TRY(get_callee_and_this_from_environment(interpreter, interpreter.current_executable().get_identifier(m_identifier), m_cache_index));
+    auto callee_and_this = TRY(get_callee_and_this_from_environment(interpreter, interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string(), m_cache_index));
     interpreter.reg(m_callee_reg) = callee_and_this.callee;
     interpreter.reg(m_this_reg) = callee_and_this.this_value;
     return {};
@@ -702,7 +702,7 @@ ThrowCompletionOr<void> GetGlobal::execute_impl(Bytecode::Interpreter& interpret
 {
     interpreter.accumulator() = TRY(get_global(
         interpreter,
-        interpreter.current_executable().get_identifier(m_identifier),
+        interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string(),
         interpreter.current_executable().global_variable_caches[m_cache_index]));
     return {};
 }
@@ -716,7 +716,7 @@ ThrowCompletionOr<void> GetLocal::execute_impl(Bytecode::Interpreter&) const
 ThrowCompletionOr<void> DeleteVariable::execute_impl(Bytecode::Interpreter& interpreter) const
 {
     auto& vm = interpreter.vm();
-    auto const& string = interpreter.current_executable().get_identifier(m_identifier);
+    auto const& string = interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string();
     auto reference = TRY(vm.resolve_binding(string));
     interpreter.accumulator() = Value(TRY(reference.delete_(vm)));
     return {};
@@ -745,14 +745,14 @@ ThrowCompletionOr<void> EnterObjectEnvironment::execute_impl(Bytecode::Interpret
 
 ThrowCompletionOr<void> CreateVariable::execute_impl(Bytecode::Interpreter& interpreter) const
 {
-    auto const& name = interpreter.current_executable().get_identifier(m_identifier);
+    auto const& name = interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string();
     return create_variable(interpreter.vm(), name, m_mode, m_is_global, m_is_immutable, m_is_strict);
 }
 
 ThrowCompletionOr<void> SetVariable::execute_impl(Bytecode::Interpreter& interpreter) const
 {
     auto& vm = interpreter.vm();
-    auto const& name = interpreter.current_executable().get_identifier(m_identifier);
+    auto const& name = interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string();
     TRY(set_variable(vm, name, interpreter.accumulator(), m_mode, m_initialization_mode));
     return {};
 }
@@ -767,7 +767,7 @@ ThrowCompletionOr<void> GetById::execute_impl(Bytecode::Interpreter& interpreter
 {
     auto base_value = interpreter.accumulator();
     auto& cache = interpreter.current_executable().property_lookup_caches[m_cache_index];
-    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property), base_value, base_value, cache));
+    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string(), base_value, base_value, cache));
     return {};
 }
 
@@ -776,14 +776,14 @@ ThrowCompletionOr<void> GetByIdWithThis::execute_impl(Bytecode::Interpreter& int
     auto base_value = interpreter.accumulator();
     auto this_value = interpreter.reg(m_this_value);
     auto& cache = interpreter.current_executable().property_lookup_caches[m_cache_index];
-    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property), base_value, this_value, cache));
+    interpreter.accumulator() = TRY(get_by_id(interpreter.vm(), interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string(), base_value, this_value, cache));
     return {};
 }
 
 ThrowCompletionOr<void> GetPrivateById::execute_impl(Bytecode::Interpreter& interpreter) const
 {
     auto& vm = interpreter.vm();
-    auto const& name = interpreter.current_executable().get_identifier(m_property);
+    auto const& name = interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string();
     auto base_value = interpreter.accumulator();
     auto private_reference = make_private_reference(vm, base_value, name);
     interpreter.accumulator() = TRY(private_reference.get_value(vm));
@@ -799,7 +799,7 @@ ThrowCompletionOr<void> HasPrivateId::execute_impl(Bytecode::Interpreter& interp
 
     auto private_environment = vm.running_execution_context().private_environment;
     VERIFY(private_environment);
-    auto private_name = private_environment->resolve_private_identifier(interpreter.current_executable().get_identifier(m_property));
+    auto private_name = private_environment->resolve_private_identifier(interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string());
     interpreter.accumulator() = Value(interpreter.accumulator().as_object().private_element_find(private_name) != nullptr);
     return {};
 }
@@ -810,7 +810,7 @@ ThrowCompletionOr<void> PutById::execute_impl(Bytecode::Interpreter& interpreter
     // NOTE: Get the value from the accumulator before side effects have a chance to overwrite it.
     auto value = interpreter.accumulator();
     auto base = interpreter.reg(m_base);
-    PropertyKey name = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(m_property)));
+    PropertyKey name = interpreter.current_executable().get_identifier(m_property);
     TRY(put_by_property_key(vm, base, base, value, name, m_kind));
     interpreter.accumulator() = value;
     return {};
@@ -822,7 +822,7 @@ ThrowCompletionOr<void> PutByIdWithThis::execute_impl(Bytecode::Interpreter& int
     // NOTE: Get the value from the accumulator before side effects have a chance to overwrite it.
     auto value = interpreter.accumulator();
     auto base = interpreter.reg(m_base);
-    PropertyKey name = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(m_property)));
+    PropertyKey name = interpreter.current_executable().get_identifier(m_property);
     TRY(put_by_property_key(vm, base, interpreter.reg(m_this_value), value, name, m_kind));
     interpreter.accumulator() = value;
     return {};
@@ -834,7 +834,7 @@ ThrowCompletionOr<void> PutPrivateById::execute_impl(Bytecode::Interpreter& inte
     // NOTE: Get the value from the accumulator before side effects have a chance to overwrite it.
     auto value = interpreter.accumulator();
     auto object = TRY(interpreter.reg(m_base).to_object(vm));
-    auto name = interpreter.current_executable().get_identifier(m_property);
+    auto name = interpreter.current_executable().get_identifier(m_property).to_deprecated_fly_string();
     auto private_reference = make_private_reference(vm, object, name);
     TRY(private_reference.put_value(vm, value));
     interpreter.accumulator() = value;
@@ -852,7 +852,7 @@ ThrowCompletionOr<void> DeleteByIdWithThis::execute_impl(Bytecode::Interpreter& 
 {
     auto& vm = interpreter.vm();
     auto base_value = interpreter.accumulator();
-    auto const& identifier = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(m_property)));
+    auto const& identifier = interpreter.current_executable().get_identifier(m_property);
     bool strict = vm.in_strict_mode();
     auto reference = Reference { base_value, identifier, interpreter.reg(m_this_value), strict };
     interpreter.accumulator() = Value(TRY(reference.delete_(vm)));
@@ -1156,7 +1156,7 @@ ThrowCompletionOr<void> GetMethod::execute_impl(Bytecode::Interpreter& interpret
 {
     auto& vm = interpreter.vm();
     auto identifier = interpreter.current_executable().get_identifier(m_property);
-    auto method = TRY(interpreter.accumulator().get_method(vm, MUST(FlyString::from_deprecated_fly_string(identifier))));
+    auto method = TRY(interpreter.accumulator().get_method(vm, identifier));
     interpreter.accumulator() = method ?: js_undefined();
     return {};
 }
@@ -1228,7 +1228,7 @@ ThrowCompletionOr<void> NewClass::execute_impl(Bytecode::Interpreter& interprete
 ThrowCompletionOr<void> TypeofVariable::execute_impl(Bytecode::Interpreter& interpreter) const
 {
     auto& vm = interpreter.vm();
-    interpreter.accumulator() = TRY(typeof_variable(vm, interpreter.current_executable().get_identifier(m_identifier)));
+    interpreter.accumulator() = TRY(typeof_variable(vm, interpreter.current_executable().get_identifier(m_identifier).to_deprecated_fly_string()));
     return {};
 }
 
