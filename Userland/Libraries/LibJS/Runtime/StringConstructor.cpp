@@ -165,10 +165,8 @@ JS_DEFINE_NATIVE_FUNCTION(StringConstructor::raw)
     // 7. Let nextIndex be 0.
     // 8. Repeat,
     for (size_t i = 0; i < literal_count; ++i) {
-        auto next_key = DeprecatedString::number(i);
-
         // a. Let nextLiteralVal be ? Get(literals, ! ToString(𝔽(nextIndex))).
-        auto next_literal_value = TRY(literals->get(next_key));
+        auto next_literal_value = TRY(literals->get(i));
 
         // b. Let nextLiteral be ? ToString(nextLiteralVal).
         auto next_literal = TRY(next_literal_value.to_deprecated_string(vm));

@@ -977,7 +977,7 @@ ThrowCompletionOr<void> eval_declaration_instantiation(VM& vm, Program const& pr
         // c. If varEnv is a global Environment Record, then
         if (global_var_environment) {
             // i. Perform ? varEnv.CreateGlobalFunctionBinding(fn, fo, true).
-            TRY(global_var_environment->create_global_function_binding(declaration.name(), function, true));
+            TRY(global_var_environment->create_global_function_binding(MUST(FlyString::from_utf8(declaration.name())), function, true));
         }
         // d. Else,
         else {
@@ -1167,7 +1167,7 @@ CanonicalIndex canonical_numeric_index_string(PropertyKey const& property_key, C
     if (mode != CanonicalIndexMode::DetectNumericRoundtrip)
         return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
 
-    auto& argument = property_key.as_string();
+    auto const& argument = property_key.as_string();
 
     // Handle trivial cases without a full round trip test
     // We do not need to check for argument == "0" at this point because we
@@ -1175,19 +1175,19 @@ CanonicalIndex canonical_numeric_index_string(PropertyKey const& property_key, C
     if (argument.is_empty())
         return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
     u32 current_index = 0;
-    if (argument.characters()[current_index] == '-') {
+    if (argument.bytes_as_string_view()[current_index] == '-') {
         current_index++;
-        if (current_index == argument.length())
+        if (current_index == argument.bytes_as_string_view().length())
             return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
     }
-    if (argument.characters()[current_index] == '0') {
+    if (argument.bytes_as_string_view()[current_index] == '0') {
         current_index++;
-        if (current_index == argument.length())
+        if (current_index == argument.bytes_as_string_view().length())
             return CanonicalIndex(CanonicalIndex::Type::Numeric, 0);
-        if (argument.characters()[current_index] != '.')
+        if (argument.bytes_as_string_view()[current_index] != '.')
             return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
         current_index++;
-        if (current_index == argument.length())
+        if (current_index == argument.bytes_as_string_view().length())
             return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
     }
 
@@ -1196,17 +1196,17 @@ CanonicalIndex canonical_numeric_index_string(PropertyKey const& property_key, C
         return CanonicalIndex(CanonicalIndex::Type::Numeric, 0);
 
     // Short circuit any string that doesn't start with digits
-    if (char first_non_zero = argument.characters()[current_index]; first_non_zero < '0' || first_non_zero > '9')
+    if (char first_non_zero = argument.bytes_as_string_view()[current_index]; first_non_zero < '0' || first_non_zero > '9')
         return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
 
     // 2. Let n be ! ToNumber(argument).
-    auto maybe_double = argument.to_double(AK::TrimWhitespace::No);
+    auto maybe_double = argument.bytes_as_string_view().to_double(AK::TrimWhitespace::No);
     if (!maybe_double.has_value())
         return CanonicalIndex(CanonicalIndex::Type::Undefined, 0);
 
     // FIXME: We return 0 instead of n but it might not observable?
     // 3. If SameValue(! ToString(n), argument) is true, return n.
-    if (number_to_string(*maybe_double) == argument.view())
+    if (number_to_string(*maybe_double) == argument)
         return CanonicalIndex(CanonicalIndex::Type::Numeric, 0);
 
     // 4. Return undefined.
@@ -1290,7 +1290,7 @@ ThrowCompletionOr<String> get_substitution(VM& vm, Utf16View const& matched, Utf
                 TRY_OR_THROW_OOM(vm, result.try_append(curr));
             } else {
                 auto group_name_view = replace_view.substring_view(start_position, *end_position - start_position);
-                auto group_name = TRY_OR_THROW_OOM(vm, group_name_view.to_deprecated_string(Utf16View::AllowInvalidCodeUnits::Yes));
+                auto group_name = TRY_OR_THROW_OOM(vm, group_name_view.to_utf8(Utf16View::AllowInvalidCodeUnits::Yes));
 
                 auto capture = TRY(named_captures.as_object().get(group_name));
 
@@ -1539,7 +1539,7 @@ ThrowCompletionOr<Value> perform_import_call(VM& vm, Value specifier, Value opti
                 // 4. If supportedAssertions contains key, then
                 if (supported_assertions.contains_slow(property_key.to_string())) {
                     // a. Append { [[Key]]: key, [[Value]]: value } to assertions.
-                    assertions.empend(property_key.to_string(), value.as_string().deprecated_string());
+                    assertions.empend(property_key.to_string().to_deprecated_string(), value.as_string().deprecated_string());
                 }
             }
         }

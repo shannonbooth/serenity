@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <AK/FlyString.h>
 #include <LibJS/Runtime/GlobalObject.h>
 #include <LibJS/Runtime/ObjectEnvironment.h>
 #include <LibJS/Runtime/ValueInlines.h>
@@ -25,9 +26,11 @@ void ObjectEnvironment::visit_edges(Cell::Visitor& visitor)
 }
 
 // 9.1.1.2.1 HasBinding ( N ), https://tc39.es/ecma262/#sec-object-environment-records-hasbinding-n
-ThrowCompletionOr<bool> ObjectEnvironment::has_binding(DeprecatedFlyString const& name, Optional<size_t>*) const
+ThrowCompletionOr<bool> ObjectEnvironment::has_binding(DeprecatedFlyString const& deprecated_name, Optional<size_t>*) const
 {
     auto& vm = this->vm();
+
+    auto name = MUST(FlyString::from_deprecated_fly_string(deprecated_name));
 
     // 1. Let bindingObject be envRec.[[BindingObject]].
 
@@ -64,7 +67,7 @@ ThrowCompletionOr<void> ObjectEnvironment::create_mutable_binding(VM&, Deprecate
 {
     // 1. Let bindingObject be envRec.[[BindingObject]].
     // 2. Perform ? DefinePropertyOrThrow(bindingObject, N, PropertyDescriptor { [[Value]]: undefined, [[Writable]]: true, [[Enumerable]]: true, [[Configurable]]: D }).
-    TRY(m_binding_object->define_property_or_throw(name, { .value = js_undefined(), .writable = true, .enumerable = true, .configurable = can_be_deleted }));
+    TRY(m_binding_object->define_property_or_throw(MUST(FlyString::from_deprecated_fly_string(name)), { .value = js_undefined(), .writable = true, .enumerable = true, .configurable = can_be_deleted }));
 
     // 3. Return unused.
     return {};
@@ -91,9 +94,11 @@ ThrowCompletionOr<void> ObjectEnvironment::initialize_binding(VM& vm, Deprecated
 }
 
 // 9.1.1.2.5 SetMutableBinding ( N, V, S ), https://tc39.es/ecma262/#sec-object-environment-records-setmutablebinding-n-v-s
-ThrowCompletionOr<void> ObjectEnvironment::set_mutable_binding(VM&, DeprecatedFlyString const& name, Value value, bool strict)
+ThrowCompletionOr<void> ObjectEnvironment::set_mutable_binding(VM&, DeprecatedFlyString const& deprecated_name, Value value, bool strict)
 {
     auto& vm = this->vm();
+
+    auto name = MUST(FlyString::from_deprecated_fly_string(deprecated_name));
 
     // OPTIMIZATION: For non-with environments in non-strict mode, we don't need the separate HasProperty check since we only use that
     //               information to throw errors in strict mode.
@@ -133,9 +138,11 @@ ThrowCompletionOr<void> ObjectEnvironment::set_mutable_binding(VM&, DeprecatedFl
 }
 
 // 9.1.1.2.6 GetBindingValue ( N, S ), https://tc39.es/ecma262/#sec-object-environment-records-getbindingvalue-n-s
-ThrowCompletionOr<Value> ObjectEnvironment::get_binding_value(VM&, DeprecatedFlyString const& name, bool strict)
+ThrowCompletionOr<Value> ObjectEnvironment::get_binding_value(VM&, DeprecatedFlyString const& deprecated_name, bool strict)
 {
     auto& vm = this->vm();
+
+    auto name = MUST(FlyString::from_deprecated_fly_string(deprecated_name));
 
     // OPTIMIZATION: For non-with environments in non-strict mode, we don't need the separate HasProperty check
     //               since Get will return undefined for missing properties anyway. So we take advantage of this
@@ -166,7 +173,7 @@ ThrowCompletionOr<bool> ObjectEnvironment::delete_binding(VM&, DeprecatedFlyStri
 {
     // 1. Let bindingObject be envRec.[[BindingObject]].
     // 2. Return ? bindingObject.[[Delete]](N).
-    return m_binding_object->internal_delete(name);
+    return m_binding_object->internal_delete(MUST(FlyString::from_deprecated_fly_string(name)));
 }
 
 }

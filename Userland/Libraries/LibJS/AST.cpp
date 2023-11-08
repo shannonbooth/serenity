@@ -166,7 +166,7 @@ ThrowCompletionOr<ClassElement::ClassValue> ClassMethod::class_element_evaluatio
                         return "";
                     return DeprecatedString::formatted("[{}]", *description);
                 } else {
-                    return property_key.to_string();
+                    return property_key.to_string().to_deprecated_string();
                 }
             },
             [&](PrivateName const& private_name) -> DeprecatedString {
@@ -231,7 +231,7 @@ ThrowCompletionOr<ClassElement::ClassValue> ClassField::class_element_evaluation
         auto copy_initializer = m_initializer;
         auto name = property_key_or_private_name.visit(
             [&](PropertyKey const& property_key) -> DeprecatedString {
-                return property_key.is_number() ? property_key.to_string() : property_key.to_string_or_symbol().to_display_string();
+                return property_key.is_number() ? property_key.to_string().to_deprecated_string() : property_key.to_string_or_symbol().to_display_string();
             },
             [&](PrivateName const& private_name) -> DeprecatedString {
                 return private_name.description;
@@ -1869,7 +1869,7 @@ ThrowCompletionOr<void> Program::global_declaration_instantiation(VM& vm, Global
         auto function = ECMAScriptFunctionObject::create(realm, declaration.name(), declaration.source_text(), declaration.body(), declaration.parameters(), declaration.function_length(), declaration.local_variables_names(), &global_environment, private_environment, declaration.kind(), declaration.is_strict_mode(), declaration.might_need_arguments_object(), declaration.contains_direct_call_to_eval());
 
         // c. Perform ? env.CreateGlobalFunctionBinding(fn, fo, false).
-        TRY(global_environment.create_global_function_binding(declaration.name(), function, false));
+        TRY(global_environment.create_global_function_binding(MUST(FlyString::from_utf8(declaration.name())), function, false));
     }
 
     // 17. For each String vn of declaredVarNames, do

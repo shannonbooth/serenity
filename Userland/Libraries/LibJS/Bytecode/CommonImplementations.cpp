@@ -36,8 +36,9 @@ ThrowCompletionOr<NonnullGCPtr<Object>> base_object_for_get(VM& vm, Value base_v
 
 ThrowCompletionOr<Value> get_by_id(VM& vm, DeprecatedFlyString const& property, Value base_value, Value this_value, PropertyLookupCache& cache)
 {
+    auto deprecated_property = MUST(FlyString::from_deprecated_fly_string(property));
     if (base_value.is_string()) {
-        auto string_value = TRY(base_value.as_string().get(vm, property));
+        auto string_value = TRY(base_value.as_string().get(vm, deprecated_property));
         if (string_value.has_value())
             return *string_value;
     }
@@ -53,7 +54,7 @@ ThrowCompletionOr<Value> get_by_id(VM& vm, DeprecatedFlyString const& property, 
     }
 
     CacheablePropertyMetadata cacheable_metadata;
-    auto value = TRY(base_obj->internal_get(property, this_value, &cacheable_metadata));
+    auto value = TRY(base_obj->internal_get(deprecated_property, this_value, &cacheable_metadata));
 
     if (cacheable_metadata.type == CacheablePropertyMetadata::Type::OwnProperty) {
         cache.shape = shape;
@@ -123,9 +124,10 @@ ThrowCompletionOr<Value> get_global(Bytecode::Interpreter& interpreter, Deprecat
         return TRY(declarative_record.get_binding_value(vm, identifier, vm.in_strict_mode()));
     }
 
-    if (TRY(binding_object.has_property(identifier))) {
+    auto deprecated_identifier = MUST(FlyString::from_deprecated_fly_string(identifier));
+    if (TRY(binding_object.has_property(deprecated_identifier))) {
         CacheablePropertyMetadata cacheable_metadata;
-        auto value = TRY(binding_object.internal_get(identifier, js_undefined(), &cacheable_metadata));
+        auto value = TRY(binding_object.internal_get(deprecated_identifier, js_undefined(), &cacheable_metadata));
         if (cacheable_metadata.type == CacheablePropertyMetadata::Type::OwnProperty) {
             cache.shape = shape;
             cache.property_offset = cacheable_metadata.property_offset.value();
@@ -623,7 +625,7 @@ ThrowCompletionOr<Value> delete_by_id(Bytecode::Interpreter& interpreter, Value 
 {
     auto& vm = interpreter.vm();
 
-    auto const& identifier = interpreter.current_executable().get_identifier(property);
+    auto const& identifier = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(property)));
     bool strict = vm.in_strict_mode();
     auto reference = Reference { base, identifier, {}, strict };
 

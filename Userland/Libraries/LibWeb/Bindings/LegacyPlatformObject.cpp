@@ -62,7 +62,7 @@ JS::ThrowCompletionOr<Optional<JS::PropertyDescriptor>> LegacyPlatformObject::le
         // 1. If the result of running the named property visibility algorithm with property name P and object O is true, then:
         if (TRY(WebIDL::is_named_property_exposed_on_object({ this }, property_name))) {
             // FIXME: It's unfortunate that this is done twice, once in is_named_property_exposed_on_object and here.
-            auto property_name_string = MUST(FlyString::from_deprecated_fly_string(property_name.to_string()));
+            auto property_name_string = property_name.to_string();
 
             // 1. Let operation be the operation used to declare the named property getter.
             // 2. Let value be an uninitialized variable.
@@ -174,7 +174,7 @@ JS::ThrowCompletionOr<bool> LegacyPlatformObject::internal_set(JS::PropertyKey c
         // 2. If O implements an interface with a named property setter and Type(P) is String, then:
         if (has_named_property_setter() && property_name.is_string()) {
             // 1. Invoke the named property setter on O with P and V.
-            TRY(throw_dom_exception_if_needed(vm, [&] { return invoke_named_property_setter(property_name.as_string(), value); }));
+            TRY(throw_dom_exception_if_needed(vm, [&] { return invoke_named_property_setter(property_name.as_string().to_deprecated_fly_string(), value); }));
 
             // 2. Return true.
             return true;
@@ -215,7 +215,7 @@ JS::ThrowCompletionOr<bool> LegacyPlatformObject::internal_define_own_property(J
     // 2. If O supports named properties, O does not implement an interface with the [Global] extended attribute, Type(P) is String, and P is not an unforgeable property name of O, then:
     // FIXME: Check if P is not an unforgeable property name of O
     if (supports_named_properties() && !has_global_interface_extended_attribute() && property_name.is_string()) {
-        auto const& property_name_as_string = property_name.as_string();
+        auto const& property_name_as_string = property_name.as_string().to_deprecated_fly_string();
 
         // 1. Let creating be true if P is not a supported property name, and false otherwise.
         // NOTE: This is in it's own variable to enforce the type.
@@ -282,7 +282,7 @@ JS::ThrowCompletionOr<bool> LegacyPlatformObject::internal_delete(JS::PropertyKe
             return false;
 
         // FIXME: It's unfortunate that this is done twice, once in is_named_property_exposed_on_object and here.
-        auto property_name_string = property_name.to_string();
+        auto property_name_string = property_name.to_string().to_deprecated_string();
 
         // 2. Let operation be the operation used to declare the named property deleter.
         // 3. If operation was defined without an identifier, then:
@@ -348,7 +348,7 @@ JS::ThrowCompletionOr<JS::MarkedVector<JS::Value>> LegacyPlatformObject::interna
     // 3. If O supports named properties, then for each P of O’s supported property names that is visible according to the named property visibility algorithm, append P to keys.
     if (supports_named_properties()) {
         for (auto& named_property : supported_property_names()) {
-            if (TRY(WebIDL::is_named_property_exposed_on_object({ this }, named_property)))
+            if (TRY(WebIDL::is_named_property_exposed_on_object({ this }, MUST(FlyString::from_deprecated_fly_string(named_property)))))
                 keys.append(JS::PrimitiveString::create(vm, named_property));
         }
     }

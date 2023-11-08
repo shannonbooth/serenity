@@ -164,7 +164,7 @@ JS::ThrowCompletionOr<size_t> instantiate_module(JS::VM& vm, Wasm::Module const&
         dbgln("Trying to resolve stuff because import object was specified");
         for (Wasm::Linker::Name const& import_name : linker.unresolved_imports()) {
             dbgln("Trying to resolve {}::{}", import_name.module, import_name.name);
-            auto value_or_error = import_object->get(import_name.module);
+            auto value_or_error = import_object->get(MUST(FlyString::from_deprecated_fly_string(import_name.module)));
             if (value_or_error.is_error())
                 break;
             auto value = value_or_error.release_value();
@@ -172,7 +172,7 @@ JS::ThrowCompletionOr<size_t> instantiate_module(JS::VM& vm, Wasm::Module const&
             if (object_or_error.is_error())
                 break;
             auto object = object_or_error.release_value();
-            auto import_or_error = object->get(import_name.name);
+            auto import_or_error = object->get(MUST(FlyString::from_deprecated_fly_string(import_name.name)));
             if (import_or_error.is_error())
                 break;
             auto import_ = import_or_error.release_value();
@@ -341,7 +341,7 @@ JS::NativeFunction* create_native_function(JS::VM& vm, Wasm::FunctionAddress add
 
     auto function = JS::NativeFunction::create(
         realm,
-        name,
+        MUST(FlyString::from_deprecated_fly_string(name)),
         [address, type = type.release_value()](JS::VM& vm) -> JS::ThrowCompletionOr<JS::Value> {
             auto& realm = *vm.current_realm();
             Vector<Wasm::Value> values;

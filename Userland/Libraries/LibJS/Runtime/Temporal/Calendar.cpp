@@ -995,7 +995,7 @@ ThrowCompletionOr<Object*> default_merge_calendar_fields(VM& vm, Object const& f
         }
 
         // See comment above.
-        additional_fields_keys_contains_month_or_month_code_property |= key.as_string().deprecated_string() == vm.names.month.as_string() || key.as_string().deprecated_string() == vm.names.monthCode.as_string();
+        additional_fields_keys_contains_month_or_month_code_property |= key.as_string().utf8_string() == vm.names.month.as_string() || key.as_string().utf8_string() == vm.names.monthCode.as_string();
     }
 
     // 6. If additionalFieldsKeys does not contain either "month" or "monthCode", then

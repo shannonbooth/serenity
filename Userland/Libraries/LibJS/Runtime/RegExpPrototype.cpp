@@ -154,7 +154,7 @@ static Value make_match_indices_index_pair_array(VM& vm, Utf16View const& string
         // e. If i > 0 and groupNames[i - 1] is not undefined, then
         //     i. Assert: groups is not undefined.
         //     ii. Perform ! CreateDataPropertyOrThrow(groups, groupNames[i - 1], matchIndicesArray).
-        MUST(groups.as_object().create_data_property_or_throw(entry.key, match_indices_array));
+        MUST(groups.as_object().create_data_property_or_throw(MUST(FlyString::from_deprecated_fly_string(entry.key)), match_indices_array));
     }
 
     // 8. Perform ! CreateDataPropertyOrThrow(A, "groups", groups).
@@ -331,7 +331,7 @@ static ThrowCompletionOr<Value> regexp_builtin_exec(VM& vm, RegExpObject& regexp
             auto group_name = capture.capture_group_name.release_value();
 
             // ii. Perform ! CreateDataPropertyOrThrow(groups, s, capturedValue).
-            MUST(groups_object->create_data_property_or_throw(group_name, captured_value));
+            MUST(groups_object->create_data_property_or_throw(MUST(FlyString::from_deprecated_fly_string(group_name)), captured_value));
 
             // iii. Append s to groupNames.
             group_names.set(move(group_name), Match::create(capture));

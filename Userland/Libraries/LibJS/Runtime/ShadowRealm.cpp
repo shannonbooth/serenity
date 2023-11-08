@@ -87,7 +87,7 @@ ThrowCompletionOr<void> copy_name_and_length(VM& vm, FunctionObject& function, F
         target_name = PrimitiveString::create(vm, String {});
 
     // 8. Perform SetFunctionName(F, targetName, prefix).
-    function.set_function_name({ target_name.as_string().deprecated_string() }, move(prefix));
+    function.set_function_name({ target_name.as_string().utf8_string() }, move(prefix));
 
     return {};
 }
@@ -255,14 +255,14 @@ ThrowCompletionOr<Value> shadow_realm_import_value(VM& vm, DeprecatedString spec
         // 4. Assert: Type(string) is String.
 
         // 5. Let hasOwn be ? HasOwnProperty(exports, string).
-        auto has_own = TRY(exports.has_own_property(string));
+        auto has_own = TRY(exports.has_own_property(MUST(FlyString::from_deprecated_fly_string(string))));
 
         // 6. If hasOwn is false, throw a TypeError exception.
         if (!has_own)
             return vm.template throw_completion<TypeError>(ErrorType::MissingRequiredProperty, string);
 
         // 7. Let value be ? Get(exports, string).
-        auto value = TRY(exports.get(string));
+        auto value = TRY(exports.get(MUST(FlyString::from_deprecated_fly_string(string))));
 
         // 8. Let realm be f.[[Realm]].
         auto* realm = function->realm();

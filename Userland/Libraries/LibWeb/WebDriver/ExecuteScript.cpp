@@ -207,7 +207,7 @@ static ErrorOr<JsonValue, ExecuteScriptResultType> clone_an_object(JS::Realm& re
                         array.set(name.as_number(), cloned_property_result.value());
                 },
                 [&](JsonObject& object) {
-                    object.set(name.to_string(), cloned_property_result.value());
+                    object.set(name.to_string().to_deprecated_string(), cloned_property_result.value());
                 });
         }
         // 5. Otherwise, return cloned property result.

@@ -1792,9 +1792,9 @@ ThrowCompletionOr<Object*> prepare_temporal_fields(VM& vm, Object const& fields,
     auto any = false;
 
     // 3. For each value property of fieldNames, do
-    for (auto& property : field_names) {
+    for (auto const& property : field_names) {
         // a. Let value be ? Get(fields, property).
-        auto value = TRY(fields.get(property.to_deprecated_string()));
+        auto value = TRY(fields.get(property));
 
         // b. If value is not undefined, then
         if (!value.is_undefined()) {
@@ -1823,7 +1823,7 @@ ThrowCompletionOr<Object*> prepare_temporal_fields(VM& vm, Object const& fields,
             }
 
             // iii. Perform ! CreateDataPropertyOrThrow(result, property, value).
-            MUST(result->create_data_property_or_throw(property.to_deprecated_string(), value));
+            MUST(result->create_data_property_or_throw(property, value));
         }
         // c. Else if requiredFields is a List, then
         else if (required_fields.has<Vector<StringView>>()) {
@@ -1840,7 +1840,7 @@ ThrowCompletionOr<Object*> prepare_temporal_fields(VM& vm, Object const& fields,
             }
 
             // iii. Perform ! CreateDataPropertyOrThrow(result, property, value).
-            MUST(result->create_data_property_or_throw(property.to_deprecated_string(), value));
+            MUST(result->create_data_property_or_throw(property, value));
         }
     }
 

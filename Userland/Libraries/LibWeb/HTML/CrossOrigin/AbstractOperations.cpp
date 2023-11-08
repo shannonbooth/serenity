@@ -31,26 +31,26 @@ Vector<CrossOriginProperty> cross_origin_properties(Variant<HTML::Location const
         // 2. If O is a Location object, then return « { [[Property]]: "href", [[NeedsGet]]: false, [[NeedsSet]]: true }, { [[Property]]: "replace" } ».
         [](HTML::Location const*) -> Vector<CrossOriginProperty> {
             return {
-                { .property = "href"sv, .needs_get = false, .needs_set = true },
-                { .property = "replace"sv },
+                { .property = "href"_fly_string, .needs_get = false, .needs_set = true },
+                { .property = "replace"_fly_string },
             };
         },
         // 3. Return « { [[Property]]: "window", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "self", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "location", [[NeedsGet]]: true, [[NeedsSet]]: true }, { [[Property]]: "close" }, { [[Property]]: "closed", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "focus" }, { [[Property]]: "blur" }, { [[Property]]: "frames", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "length", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "top", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "opener", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "parent", [[NeedsGet]]: true, [[NeedsSet]]: false }, { [[Property]]: "postMessage" } ».
         [](HTML::Window const*) -> Vector<CrossOriginProperty> {
             return {
-                { .property = "window"sv, .needs_get = true, .needs_set = false },
-                { .property = "self"sv, .needs_get = true, .needs_set = false },
-                { .property = "location"sv, .needs_get = true, .needs_set = true },
-                { .property = "close"sv },
-                { .property = "closed"sv, .needs_get = true, .needs_set = false },
-                { .property = "focus"sv },
-                { .property = "blur"sv },
-                { .property = "frames"sv, .needs_get = true, .needs_set = false },
-                { .property = "length"sv, .needs_get = true, .needs_set = false },
-                { .property = "top"sv, .needs_get = true, .needs_set = false },
-                { .property = "opener"sv, .needs_get = true, .needs_set = false },
-                { .property = "parent"sv, .needs_get = true, .needs_set = false },
-                { .property = "postMessage"sv },
+                { .property = "window"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "self"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "location"_fly_string, .needs_get = true, .needs_set = true },
+                { .property = "close"_fly_string },
+                { .property = "closed"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "focus"_fly_string },
+                { .property = "blur"_fly_string },
+                { .property = "frames"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "length"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "top"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "opener"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "parent"_fly_string, .needs_get = true, .needs_set = false },
+                { .property = "postMessage"_fly_string },
             };
         });
 }
@@ -59,8 +59,8 @@ Vector<CrossOriginProperty> cross_origin_properties(Variant<HTML::Location const
 bool is_cross_origin_accessible_window_property_name(JS::PropertyKey const& property_key)
 {
     // A JavaScript property name P is a cross-origin accessible window property name if it is "window", "self", "location", "close", "closed", "focus", "blur", "frames", "length", "top", "opener", "parent", "postMessage", or an array index property name.
-    static Array<DeprecatedFlyString, 13> property_names {
-        "window"sv, "self"sv, "location"sv, "close"sv, "closed"sv, "focus"sv, "blur"sv, "frames"sv, "length"sv, "top"sv, "opener"sv, "parent"sv, "postMessage"sv
+    static Array<FlyString, 13> property_names {
+        "window"_fly_string, "self"_fly_string, "location"_fly_string, "close"_fly_string, "closed"_fly_string, "focus"_fly_string, "blur"_fly_string, "frames"_fly_string, "length"_fly_string, "top"_fly_string, "opener"_fly_string, "parent"_fly_string, "postMessage"_fly_string
     };
     return (property_key.is_string() && any_of(property_names, [&](auto const& name) { return property_key.as_string() == name; })) || property_key.is_number();
 }

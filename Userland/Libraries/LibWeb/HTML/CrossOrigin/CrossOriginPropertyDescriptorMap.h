@@ -16,7 +16,7 @@
 namespace Web::HTML {
 
 struct CrossOriginProperty {
-    DeprecatedString property;
+    FlyString property;
     Optional<bool> needs_get {};
     Optional<bool> needs_set {};
 };

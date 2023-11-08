@@ -21,7 +21,7 @@ namespace JS {
 RefPtr<::JS::VM> g_vm;
 bool g_collect_on_every_allocation = false;
 DeprecatedString g_currently_running_test;
-HashMap<DeprecatedString, FunctionWithLength> s_exposed_global_functions;
+HashMap<FlyString, FunctionWithLength> s_exposed_global_functions;
 Function<void()> g_main_hook;
 HashMap<bool*, Tuple<DeprecatedString, DeprecatedString, char>> g_extra_args;
 IntermediateRunFileResult (*g_run_file)(DeprecatedString const&, JS::Realm&, JS::ExecutionContext&) = nullptr;

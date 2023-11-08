@@ -21,7 +21,7 @@ class NativeFunction : public FunctionObject {
 
 public:
     static NonnullGCPtr<NativeFunction> create(Realm&, Function<ThrowCompletionOr<Value>(VM&)> behaviour, i32 length, PropertyKey const& name, Optional<Realm*> = {}, Optional<Object*> prototype = {}, Optional<StringView> const& prefix = {});
-    static NonnullGCPtr<NativeFunction> create(Realm&, DeprecatedFlyString const& name, Function<ThrowCompletionOr<Value>(VM&)>);
+    static NonnullGCPtr<NativeFunction> create(Realm&, FlyString const& name, Function<ThrowCompletionOr<Value>(VM&)>);
 
     virtual ~NativeFunction() override = default;
 
@@ -42,9 +42,9 @@ public:
     void set_initial_name(Badge<FunctionObject>, DeprecatedFlyString initial_name) { m_initial_name = move(initial_name); }
 
 protected:
-    NativeFunction(DeprecatedFlyString name, Object& prototype);
+    NativeFunction(FlyString const& name, Object& prototype);
     NativeFunction(JS::GCPtr<JS::HeapFunction<ThrowCompletionOr<Value>(VM&)>>, Object* prototype, Realm& realm);
-    NativeFunction(DeprecatedFlyString name, JS::GCPtr<JS::HeapFunction<ThrowCompletionOr<Value>(VM&)>>, Object& prototype);
+    NativeFunction(FlyString const& name, JS::GCPtr<JS::HeapFunction<ThrowCompletionOr<Value>(VM&)>>, Object& prototype);
     explicit NativeFunction(Object& prototype);
 
     virtual void visit_edges(Cell::Visitor& visitor) override

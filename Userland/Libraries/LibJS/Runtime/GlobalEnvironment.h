@@ -35,7 +35,7 @@ public:
     ThrowCompletionOr<bool> can_declare_global_var(DeprecatedFlyString const& name) const;
     ThrowCompletionOr<bool> can_declare_global_function(DeprecatedFlyString const& name) const;
     ThrowCompletionOr<void> create_global_var_binding(DeprecatedFlyString const& name, bool can_be_deleted);
-    ThrowCompletionOr<void> create_global_function_binding(DeprecatedFlyString const& name, Value, bool can_be_deleted);
+    ThrowCompletionOr<void> create_global_function_binding(FlyString const& name, Value, bool can_be_deleted);
 
 private:
     GlobalEnvironment(Object&, Object& this_value);

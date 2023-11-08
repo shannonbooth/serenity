@@ -110,10 +110,10 @@ VM::VM(OwnPtr<CustomData> custom_data, ErrorMessages error_messages)
         promise->reject(Error::create(realm, ErrorType::DynamicImportNotAllowed.message()));
 
         promise->perform_then(
-            NativeFunction::create(realm, "", [](auto&) -> ThrowCompletionOr<Value> {
+            NativeFunction::create(realm, FlyString {}, [](auto&) -> ThrowCompletionOr<Value> {
                 VERIFY_NOT_REACHED();
             }),
-            NativeFunction::create(realm, "", [&promise_capability](auto& vm) -> ThrowCompletionOr<Value> {
+            NativeFunction::create(realm, FlyString {}, [&promise_capability](auto& vm) -> ThrowCompletionOr<Value> {
                 auto error = vm.argument(0);
 
                 // a. Perform ! Call(promiseCapability.[[Reject]], undefined, « error »).
@@ -549,7 +549,7 @@ ThrowCompletionOr<Reference> VM::get_identifier_reference(Environment* environme
     // 1. If env is the value null, then
     if (!environment) {
         // a. Return the Reference Record { [[Base]]: unresolvable, [[ReferencedName]]: name, [[Strict]]: strict, [[ThisValue]]: empty }.
-        return Reference { Reference::BaseType::Unresolvable, move(name), strict };
+        return Reference { Reference::BaseType::Unresolvable, MUST(FlyString::from_deprecated_fly_string(name)), strict };
     }
 
     // 2. Let exists be ? env.HasBinding(name).

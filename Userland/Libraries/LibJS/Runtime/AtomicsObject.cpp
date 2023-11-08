@@ -26,7 +26,7 @@ static ThrowCompletionOr<ArrayBuffer*> validate_integer_typed_array(VM& vm, Type
     // 3. Let buffer be typedArray.[[ViewedArrayBuffer]].
     auto* buffer = typed_array.viewed_array_buffer();
 
-    auto const& type_name = typed_array.element_name();
+    auto const& type_name = MUST(FlyString::from_deprecated_fly_string(typed_array.element_name()));
 
     // 4. If waitable is true, then
     if (waitable) {

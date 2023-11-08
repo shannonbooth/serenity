@@ -53,7 +53,7 @@ void FunctionObject::set_function_name(Variant<PropertyKey, PrivateName> const& 
     }
     // NOTE: This is necessary as we use a different parameter name.
     else {
-        name = name_arg.get<PropertyKey>().to_string();
+        name = name_arg.get<PropertyKey>().to_string().to_deprecated_string();
     }
 
     // 4. If F has an [[InitialName]] internal slot, then

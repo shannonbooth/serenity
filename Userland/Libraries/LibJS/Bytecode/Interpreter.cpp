@@ -810,7 +810,7 @@ ThrowCompletionOr<void> PutById::execute_impl(Bytecode::Interpreter& interpreter
     // NOTE: Get the value from the accumulator before side effects have a chance to overwrite it.
     auto value = interpreter.accumulator();
     auto base = interpreter.reg(m_base);
-    PropertyKey name = interpreter.current_executable().get_identifier(m_property);
+    PropertyKey name = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(m_property)));
     TRY(put_by_property_key(vm, base, base, value, name, m_kind));
     interpreter.accumulator() = value;
     return {};
@@ -822,7 +822,7 @@ ThrowCompletionOr<void> PutByIdWithThis::execute_impl(Bytecode::Interpreter& int
     // NOTE: Get the value from the accumulator before side effects have a chance to overwrite it.
     auto value = interpreter.accumulator();
     auto base = interpreter.reg(m_base);
-    PropertyKey name = interpreter.current_executable().get_identifier(m_property);
+    PropertyKey name = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(m_property)));
     TRY(put_by_property_key(vm, base, interpreter.reg(m_this_value), value, name, m_kind));
     interpreter.accumulator() = value;
     return {};
@@ -852,7 +852,7 @@ ThrowCompletionOr<void> DeleteByIdWithThis::execute_impl(Bytecode::Interpreter& 
 {
     auto& vm = interpreter.vm();
     auto base_value = interpreter.accumulator();
-    auto const& identifier = interpreter.current_executable().get_identifier(m_property);
+    auto const& identifier = MUST(FlyString::from_deprecated_fly_string(interpreter.current_executable().get_identifier(m_property)));
     bool strict = vm.in_strict_mode();
     auto reference = Reference { base_value, identifier, interpreter.reg(m_this_value), strict };
     interpreter.accumulator() = Value(TRY(reference.delete_(vm)));
@@ -1156,7 +1156,7 @@ ThrowCompletionOr<void> GetMethod::execute_impl(Bytecode::Interpreter& interpret
 {
     auto& vm = interpreter.vm();
     auto identifier = interpreter.current_executable().get_identifier(m_property);
-    auto method = TRY(interpreter.accumulator().get_method(vm, identifier));
+    auto method = TRY(interpreter.accumulator().get_method(vm, MUST(FlyString::from_deprecated_fly_string(identifier))));
     interpreter.accumulator() = method ?: js_undefined();
     return {};
 }

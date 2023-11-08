@@ -57,7 +57,7 @@ void Instance::initialize(JS::Realm& realm)
                     cache.function_instances.set(address, *object);
                 }
 
-                m_exports->define_direct_property(export_.name(), *object, JS::default_attributes);
+                m_exports->define_direct_property(MUST(FlyString::from_deprecated_fly_string(export_.name())), *object, JS::default_attributes);
             },
             [&](Wasm::MemoryAddress const& address) {
                 Optional<JS::GCPtr<Memory>> object = cache.memory_instances.get(address);
@@ -66,7 +66,7 @@ void Instance::initialize(JS::Realm& realm)
                     cache.memory_instances.set(address, *object);
                 }
 
-                m_exports->define_direct_property(export_.name(), *object, JS::default_attributes);
+                m_exports->define_direct_property(MUST(FlyString::from_deprecated_fly_string(export_.name())), *object, JS::default_attributes);
             },
             [&](Wasm::TableAddress const& address) {
                 Optional<JS::GCPtr<Table>> object = cache.table_instances.get(address);
@@ -75,7 +75,7 @@ void Instance::initialize(JS::Realm& realm)
                     cache.table_instances.set(address, *object);
                 }
 
-                m_exports->define_direct_property(export_.name(), *object, JS::default_attributes);
+                m_exports->define_direct_property(MUST(FlyString::from_deprecated_fly_string(export_.name())), *object, JS::default_attributes);
             },
             [&](auto const&) {
                 // FIXME: Implement other exports!

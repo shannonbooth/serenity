@@ -1,12 +1,13 @@
 /*
  * Copyright (c) 2020, Andreas Kling <kling@serenityos.org>
+ * Copyright (c) 2023, Shannon Booth <shannon@serenityos.org>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #pragma once
 
-#include <AK/DeprecatedFlyString.h>
+#include <AK/FlyString.h>
 #include <LibJS/Heap/Handle.h>
 #include <LibJS/Runtime/Completion.h>
 #include <LibJS/Runtime/StringOrSymbol.h>
@@ -35,7 +36,7 @@ public:
             return PropertyKey { value.as_symbol() };
         if (value.is_integral_number() && value.as_double() >= 0 && value.as_double() < NumericLimits<u32>::max())
             return static_cast<u32>(value.as_double());
-        return TRY(value.to_deprecated_string(vm));
+        return TRY(value.to_string(vm));
     }
 
     PropertyKey() = default;
@@ -48,7 +49,7 @@ public:
         VERIFY(index >= 0);
         if constexpr (NumericLimits<T>::max() >= NumericLimits<u32>::max()) {
             if (index >= NumericLimits<u32>::max()) {
-                m_string = DeprecatedString::number(index);
+                m_string = MUST(String::number(index));
                 m_type = Type::String;
                 m_string_may_be_number = false;
                 return;
@@ -61,23 +62,21 @@ public:
 
     PropertyKey(char const* chars)
         : m_type(Type::String)
-        , m_string(DeprecatedFlyString(chars))
+        , m_string(MUST(FlyString::from_utf8({ chars, strlen(chars) })))
     {
     }
 
-    PropertyKey(DeprecatedString const& string)
+    PropertyKey(String const& string)
         : m_type(Type::String)
-        , m_string(DeprecatedFlyString(string))
+        , m_string(string)
     {
-        VERIFY(!m_string.is_null());
     }
 
-    PropertyKey(DeprecatedFlyString string, StringMayBeNumber string_may_be_number = StringMayBeNumber::Yes)
+    PropertyKey(FlyString string, StringMayBeNumber string_may_be_number = StringMayBeNumber::Yes)
         : m_string_may_be_number(string_may_be_number == StringMayBeNumber::Yes)
         , m_type(Type::String)
         , m_string(move(string))
     {
-        VERIFY(!m_string.is_null());
     }
 
     PropertyKey(NonnullGCPtr<Symbol> symbol)
@@ -89,7 +88,7 @@ public:
     PropertyKey(StringOrSymbol const& string_or_symbol)
     {
         if (string_or_symbol.is_string()) {
-            m_string = string_or_symbol.as_string();
+            m_string = MUST(FlyString::from_deprecated_fly_string(string_or_symbol.as_string()));
             m_type = Type::String;
         } else if (string_or_symbol.is_symbol()) {
             m_symbol = const_cast<Symbol*>(string_or_symbol.as_symbol());
@@ -128,15 +127,15 @@ public:
             return false;
         }
 
-        if (char first = m_string.characters()[0]; first < '0' || first > '9') {
+        if (char first = m_string.bytes_as_string_view()[0]; first < '0' || first > '9') {
             m_string_may_be_number = false;
             return false;
-        } else if (m_string.length() > 1 && first == '0') {
+        } else if (m_string.bytes().size() > 1 && first == '0') {
             m_string_may_be_number = false;
             return false;
         }
 
-        auto property_index = m_string.to_uint(TrimWhitespace::No);
+        auto property_index = m_string.bytes_as_string_view().to_uint(TrimWhitespace::No);
         if (!property_index.has_value() || property_index.value() == NumericLimits<u32>::max()) {
             m_string_may_be_number = false;
             return false;
@@ -152,7 +151,7 @@ public:
         return m_number;
     }
 
-    DeprecatedFlyString const& as_string() const
+    FlyString const& as_string() const
     {
         VERIFY(is_string());
         return m_string;
@@ -164,13 +163,13 @@ public:
         return m_symbol;
     }
 
-    DeprecatedString to_string() const
+    String to_string() const
     {
         VERIFY(is_valid());
         VERIFY(!is_symbol());
         if (is_string())
-            return as_string();
-        return DeprecatedString::number(as_number());
+            return as_string().to_string();
+        return MUST(String::number(as_number()));
     }
 
     StringOrSymbol to_string_or_symbol() const
@@ -178,7 +177,7 @@ public:
         VERIFY(is_valid());
         VERIFY(!is_number());
         if (is_string())
-            return StringOrSymbol(as_string());
+            return StringOrSymbol(as_string().to_deprecated_fly_string());
         return StringOrSymbol(as_symbol());
     }
 
@@ -186,7 +185,7 @@ private:
     bool m_string_may_be_number { true };
     Type m_type { Type::Invalid };
     u32 m_number { 0 };
-    DeprecatedFlyString m_string;
+    FlyString m_string;
     Handle<Symbol> m_symbol;
 };
 
@@ -226,7 +225,7 @@ struct Traits<JS::PropertyKey> : public GenericTraits<JS::PropertyKey> {
 
 template<>
 struct Formatter<JS::PropertyKey> : Formatter<StringView> {
-    ErrorOr<void> format(FormatBuilder& builder, JS::PropertyKey const& property_key)
+    static ErrorOr<void> format(FormatBuilder& builder, JS::PropertyKey const& property_key)
     {
         if (!property_key.is_valid())
             return builder.put_string("<invalid PropertyKey>"sv);

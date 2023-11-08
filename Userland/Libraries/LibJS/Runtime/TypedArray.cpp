@@ -455,7 +455,9 @@ void TypedArrayBase::visit_edges(Visitor& visitor)
                                                                                                                             \
     DeprecatedFlyString const& ClassName::element_name() const                                                              \
     {                                                                                                                       \
-        return vm().names.ClassName.as_string();                                                                            \
+        if (m_deprecated_string.is_empty())                                                                                 \
+            m_deprecated_string = vm().names.ClassName.as_string().to_deprecated_fly_string();                              \
+        return m_deprecated_string;                                                                                         \
     }                                                                                                                       \
                                                                                                                             \
     PrototypeName::PrototypeName(Object& prototype)                                                                         \

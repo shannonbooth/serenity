@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <AK/DeprecatedFlyString.h>
 #include <LibJS/Runtime/AbstractOperations.h>
 #include <LibJS/Runtime/ArrayBuffer.h>
 #include <LibJS/Runtime/Completion.h>
@@ -476,6 +477,7 @@ ThrowCompletionOr<double> compare_typed_array_elements(VM&, Value x, Value y, Fu
                                                                                                                   \
     protected:                                                                                                    \
         ClassName(Object& prototype, u32 length, ArrayBuffer& array_buffer);                                      \
+        mutable DeprecatedFlyString m_deprecated_string;                                                          \
     };                                                                                                            \
     class PrototypeName final : public Object {                                                                   \
         JS_OBJECT(PrototypeName, Object);                                                                         \

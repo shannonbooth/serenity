@@ -140,7 +140,7 @@ ThrowCompletionOr<bool> GlobalEnvironment::delete_binding(VM& vm, DeprecatedFlyS
     // 4. Let globalObject be ObjRec.[[BindingObject]].
 
     // 5. Let existingProp be ? HasOwnProperty(globalObject, N).
-    bool existing_prop = TRY(m_object_record->binding_object().has_own_property(name));
+    bool existing_prop = TRY(m_object_record->binding_object().has_own_property(MUST(FlyString::from_deprecated_fly_string(name))));
 
     // 6. If existingProp is true, then
     if (existing_prop) {
@@ -187,7 +187,7 @@ ThrowCompletionOr<bool> GlobalEnvironment::has_restricted_global_property(Deprec
     auto& global_object = m_object_record->binding_object();
 
     // 3. Let existingProp be ? globalObject.[[GetOwnProperty]](N).
-    auto existing_prop = TRY(global_object.internal_get_own_property(name));
+    auto existing_prop = TRY(global_object.internal_get_own_property(MUST(FlyString::from_deprecated_fly_string(name))));
 
     // 4. If existingProp is undefined, return false.
     if (!existing_prop.has_value())
@@ -209,7 +209,7 @@ ThrowCompletionOr<bool> GlobalEnvironment::can_declare_global_var(DeprecatedFlyS
     auto& global_object = m_object_record->binding_object();
 
     // 3. Let hasProperty be ? HasOwnProperty(globalObject, N).
-    bool has_property = TRY(global_object.has_own_property(name));
+    bool has_property = TRY(global_object.has_own_property(MUST(FlyString::from_deprecated_fly_string(name))));
 
     // 4. If hasProperty is true, return true.
     if (has_property)
@@ -227,7 +227,7 @@ ThrowCompletionOr<bool> GlobalEnvironment::can_declare_global_function(Deprecate
     auto& global_object = m_object_record->binding_object();
 
     // 3. Let existingProp be ? globalObject.[[GetOwnProperty]](N).
-    auto existing_prop = TRY(global_object.internal_get_own_property(name));
+    auto existing_prop = TRY(global_object.internal_get_own_property(MUST(FlyString::from_deprecated_fly_string(name))));
 
     // 4. If existingProp is undefined, return ? IsExtensible(globalObject).
     if (!existing_prop.has_value())
@@ -255,7 +255,7 @@ ThrowCompletionOr<void> GlobalEnvironment::create_global_var_binding(DeprecatedF
     auto& global_object = m_object_record->binding_object();
 
     // 3. Let hasProperty be ? HasOwnProperty(globalObject, N).
-    auto has_property = TRY(global_object.has_own_property(name));
+    auto has_property = TRY(global_object.has_own_property(MUST(FlyString::from_deprecated_fly_string(name))));
 
     // 4. Let extensible be ? IsExtensible(globalObject).
     auto extensible = TRY(global_object.is_extensible());
@@ -281,7 +281,7 @@ ThrowCompletionOr<void> GlobalEnvironment::create_global_var_binding(DeprecatedF
 }
 
 // 9.1.1.4.18 CreateGlobalFunctionBinding ( N, V, D ), https://tc39.es/ecma262/#sec-createglobalfunctionbinding
-ThrowCompletionOr<void> GlobalEnvironment::create_global_function_binding(DeprecatedFlyString const& name, Value value, bool can_be_deleted)
+ThrowCompletionOr<void> GlobalEnvironment::create_global_function_binding(FlyString const& name, Value value, bool can_be_deleted)
 {
     // 1. Let ObjRec be envRec.[[ObjectRecord]].
     // 2. Let globalObject be ObjRec.[[BindingObject]].
@@ -311,9 +311,9 @@ ThrowCompletionOr<void> GlobalEnvironment::create_global_function_binding(Deprec
 
     // 8. Let varDeclaredNames be envRec.[[VarNames]].
     // 9. If varDeclaredNames does not contain N, then
-    if (!m_var_names.contains_slow(name)) {
+    if (!m_var_names.contains_slow(name.to_deprecated_fly_string())) {
         // a. Append N to varDeclaredNames.
-        m_var_names.append(name);
+        m_var_names.append(name.to_deprecated_fly_string());
     }
 
     // 10. Return unused.

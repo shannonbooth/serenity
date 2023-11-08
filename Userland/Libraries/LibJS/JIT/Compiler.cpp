@@ -1318,7 +1318,7 @@ void Compiler::compile_resolve_this_binding(Bytecode::Op::ResolveThisBinding con
 
 static Value cxx_put_by_id(VM& vm, Value base, Bytecode::IdentifierTableIndex property, Value value, Bytecode::Op::PropertyKind kind)
 {
-    PropertyKey name = vm.bytecode_interpreter().current_executable().get_identifier(property);
+    PropertyKey name = MUST(FlyString::from_deprecated_fly_string(vm.bytecode_interpreter().current_executable().get_identifier(property)));
     TRY_OR_SET_EXCEPTION(Bytecode::put_by_property_key(vm, base, base, value, name, kind));
     return value;
 }
@@ -1856,7 +1856,7 @@ void Compiler::compile_get_by_value_with_this(Bytecode::Op::GetByValueWithThis c
 
 static Value cxx_delete_by_id_with_this(VM& vm, Value base_value, DeprecatedFlyString const& identifier, Value this_value)
 {
-    auto reference = Reference { base_value, identifier, this_value, vm.in_strict_mode() };
+    auto reference = Reference { base_value, MUST(FlyString::from_deprecated_fly_string(identifier)), this_value, vm.in_strict_mode() };
     return Value(TRY_OR_SET_EXCEPTION(reference.delete_(vm)));
 }
 
@@ -1873,7 +1873,7 @@ void Compiler::compile_delete_by_id_with_this(Bytecode::Op::DeleteByIdWithThis c
 
 static Value cxx_put_by_id_with_this(VM& vm, Value base, Value value, DeprecatedFlyString const& name, Value this_value, Bytecode::Op::PropertyKind kind)
 {
-    TRY_OR_SET_EXCEPTION(Bytecode::put_by_property_key(vm, base, this_value, value, name, kind));
+    TRY_OR_SET_EXCEPTION(Bytecode::put_by_property_key(vm, base, this_value, value, MUST(FlyString::from_deprecated_fly_string(name)), kind));
     return {};
 }
 
@@ -1955,7 +1955,7 @@ void Compiler::compile_delete_variable(Bytecode::Op::DeleteVariable const& op)
 
 static Value cxx_get_method(VM& vm, Value value, DeprecatedFlyString const& identifier)
 {
-    auto method = TRY_OR_SET_EXCEPTION(value.get_method(vm, identifier));
+    auto method = TRY_OR_SET_EXCEPTION(value.get_method(vm, MUST(FlyString::from_deprecated_fly_string(identifier))));
     return method ?: js_undefined();
 }
 

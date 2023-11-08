@@ -987,7 +987,7 @@ JS_DEFINE_NATIVE_FUNCTION(TypedArrayPrototype::reduce)
     auto length = typed_array->array_length();
 
     // 4. If IsCallable(callbackfn) is false, throw a TypeError exception.
-    auto* callback_function = TRY(callback_from_args(vm, vm.names.reduce.as_string()));
+    auto* callback_function = TRY(callback_from_args(vm, vm.names.reduce.as_string().to_deprecated_fly_string()));
 
     // 5. If len = 0 and initialValue is not present, throw a TypeError exception.
     if (length == 0 && vm.argument_count() <= 1)
@@ -1041,7 +1041,7 @@ JS_DEFINE_NATIVE_FUNCTION(TypedArrayPrototype::reduce_right)
     auto length = typed_array->array_length();
 
     // 4. If IsCallable(callbackfn) is false, throw a TypeError exception.
-    auto* callback_function = TRY(callback_from_args(vm, vm.names.reduce.as_string()));
+    auto* callback_function = TRY(callback_from_args(vm, vm.names.reduce.as_string().to_deprecated_fly_string()));
 
     // 5. If len is 0 and initialValue is not present, throw a TypeError exception.
     if (length == 0 && vm.argument_count() <= 1)

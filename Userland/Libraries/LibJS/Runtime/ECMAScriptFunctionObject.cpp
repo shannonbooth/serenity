@@ -148,7 +148,7 @@ ECMAScriptFunctionObject::ECMAScriptFunctionObject(DeprecatedFlyString name, Dep
         m_arguments_object_needed = false;
     }
     // 17. Else if parameterNames contains "arguments", then
-    else if (m_parameter_names.contains(vm().names.arguments.as_string())) {
+    else if (m_parameter_names.contains(vm().names.arguments.as_string().to_deprecated_fly_string())) {
         // a. Set argumentsObjectNeeded to false.
         m_arguments_object_needed = false;
     }
@@ -166,7 +166,7 @@ ECMAScriptFunctionObject::ECMAScriptFunctionObject(DeprecatedFlyString name, Dep
                 m_functions_to_initialize.append(function);
         }));
 
-        auto const& arguments_name = vm().names.arguments.as_string();
+        auto const& arguments_name = vm().names.arguments.as_string().to_deprecated_fly_string();
 
         if (!m_has_parameter_expressions && function_names.contains(arguments_name))
             m_arguments_object_needed = false;
@@ -208,7 +208,7 @@ ECMAScriptFunctionObject::ECMAScriptFunctionObject(DeprecatedFlyString name, Dep
     if (m_arguments_object_needed) {
         // f. Let parameterBindings be the list-concatenation of parameterNames and « "arguments" ».
         parameter_bindings = m_parameter_names;
-        parameter_bindings.set(vm().names.arguments.as_string());
+        parameter_bindings.set(vm().names.arguments.as_string().to_deprecated_fly_string());
 
         (*environment_size)++;
     } else {
@@ -645,18 +645,18 @@ ThrowCompletionOr<void> ECMAScriptFunctionObject::function_declaration_instantia
         // c. If strict is true, then
         if (m_strict) {
             // i. Perform ! env.CreateImmutableBinding("arguments", false).
-            MUST(environment->create_immutable_binding(vm, vm.names.arguments.as_string(), false));
+            MUST(environment->create_immutable_binding(vm, vm.names.arguments.as_string().to_deprecated_fly_string(), false));
 
             // ii. NOTE: In strict mode code early errors prevent attempting to assign to this binding, so its mutability is not observable.
         }
         // b. Else,
         else {
             // i. Perform ! env.CreateMutableBinding("arguments", false).
-            MUST(environment->create_mutable_binding(vm, vm.names.arguments.as_string(), false));
+            MUST(environment->create_mutable_binding(vm, vm.names.arguments.as_string().to_deprecated_fly_string(), false));
         }
 
         // c. Perform ! env.InitializeBinding("arguments", ao).
-        MUST(environment->initialize_binding(vm, vm.names.arguments.as_string(), arguments_object, Environment::InitializeBindingHint::Normal));
+        MUST(environment->initialize_binding(vm, vm.names.arguments.as_string().to_deprecated_fly_string(), arguments_object, Environment::InitializeBindingHint::Normal));
 
         // f. Let parameterBindings be the list-concatenation of parameterNames and « "arguments" ».
     }
@@ -1069,7 +1069,7 @@ void async_block_start(VM& vm, T const& async_body, PromiseCapability const& pro
     auto& running_context = vm.running_execution_context();
 
     // 3. Set the code evaluation state of asyncContext such that when evaluation is resumed for that execution context the following steps will be performed:
-    auto execution_steps = NativeFunction::create(realm, "", [&async_body, &promise_capability, &async_context](auto& vm) -> ThrowCompletionOr<Value> {
+    auto execution_steps = NativeFunction::create(realm, FlyString {}, [&async_body, &promise_capability, &async_context](auto& vm) -> ThrowCompletionOr<Value> {
         Completion result;
 
         // a. If asyncBody is a Parse Node, then

@@ -104,8 +104,8 @@ ThrowCompletionOr<Optional<DeprecatedString>> JSONObject::stringify_impl(VM& vm,
     }
 
     auto wrapper = Object::create(realm, realm.intrinsics().object_prototype());
-    MUST(wrapper->create_data_property_or_throw(DeprecatedString::empty(), value));
-    return serialize_json_property(vm, state, DeprecatedString::empty(), wrapper);
+    MUST(wrapper->create_data_property_or_throw(FlyString {}, value));
+    return serialize_json_property(vm, state, FlyString {}, wrapper);
 }
 
 // 25.5.2 JSON.stringify ( value [ , replacer [ , space ] ] ), https://tc39.es/ecma262/#sec-json.stringify
@@ -237,7 +237,7 @@ ThrowCompletionOr<DeprecatedString> JSONObject::serialize_json_object(VM& vm, St
         if (serialized_property_string.has_value()) {
             property_strings.append(DeprecatedString::formatted(
                 "{}:{}{}",
-                quote_json_string(key.to_string()),
+                quote_json_string(key.to_string().to_deprecated_string()),
                 state.gap.is_empty() ? "" : " ",
                 serialized_property_string));
         }
@@ -247,11 +247,11 @@ ThrowCompletionOr<DeprecatedString> JSONObject::serialize_json_object(VM& vm, St
     if (state.property_list.has_value()) {
         auto property_list = state.property_list.value();
         for (auto& property : property_list)
-            TRY(process_property(property));
+            TRY(process_property(MUST(FlyString::from_deprecated_fly_string(property))));
     } else {
         auto property_list = TRY(object.enumerable_own_property_names(PropertyKind::Key));
         for (auto& property : property_list)
-            TRY(process_property(property.as_string().deprecated_string()));
+            TRY(process_property(property.as_string().utf8_string()));
     }
     StringBuilder builder;
     if (property_strings.is_empty()) {
@@ -417,7 +417,7 @@ JS_DEFINE_NATIVE_FUNCTION(JSONObject::parse)
     Value unfiltered = parse_json_value(vm, json.value());
     if (reviver.is_function()) {
         auto root = Object::create(realm, realm.intrinsics().object_prototype());
-        auto root_name = DeprecatedString::empty();
+        auto root_name = FlyString {};
         MUST(root->create_data_property_or_throw(root_name, unfiltered));
         return internalize_json_property(vm, root, root_name, reviver.as_function());
     }
@@ -448,7 +448,7 @@ Object* JSONObject::parse_json_object(VM& vm, JsonObject const& json_object)
     auto& realm = *vm.current_realm();
     auto object = Object::create(realm, realm.intrinsics().object_prototype());
     json_object.for_each_member([&](auto& key, auto& value) {
-        object->define_direct_property(key, parse_json_value(vm, value), default_attributes);
+        object->define_direct_property(MUST(FlyString::from_deprecated_fly_string(key)), parse_json_value(vm, value), default_attributes);
     });
     return object;
 }
@@ -488,7 +488,7 @@ ThrowCompletionOr<Value> JSONObject::internalize_json_property(VM& vm, Object* h
         } else {
             auto property_list = TRY(value_object.enumerable_own_property_names(Object::PropertyKind::Key));
             for (auto& property_key : property_list)
-                TRY(process_property(property_key.as_string().deprecated_string()));
+                TRY(process_property(property_key.as_string().utf8_string()));
         }
     }
 
