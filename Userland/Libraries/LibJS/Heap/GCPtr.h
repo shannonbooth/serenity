@@ -187,25 +187,25 @@ private:
 };
 
 template<typename T, typename U>
-inline bool operator==(GCPtr<T> const& a, GCPtr<U> const& b)
+constexpr bool operator==(GCPtr<T> const& a, GCPtr<U> const& b)
 {
     return a.ptr() == b.ptr();
 }
 
 template<typename T, typename U>
-inline bool operator==(GCPtr<T> const& a, NonnullGCPtr<U> const& b)
+constexpr bool operator==(GCPtr<T> const& a, NonnullGCPtr<U> const& b)
 {
     return a.ptr() == b.ptr();
 }
 
 template<typename T, typename U>
-inline bool operator==(NonnullGCPtr<T> const& a, NonnullGCPtr<U> const& b)
+constexpr bool operator==(NonnullGCPtr<T> const& a, NonnullGCPtr<U> const& b)
 {
     return a.ptr() == b.ptr();
 }
 
 template<typename T, typename U>
-inline bool operator==(NonnullGCPtr<T> const& a, GCPtr<U> const& b)
+constexpr bool operator==(NonnullGCPtr<T> const& a, GCPtr<U> const& b)
 {
     return a.ptr() == b.ptr();
 }
