@@ -12,6 +12,7 @@
 #include <AK/Vector.h>
 #include <LibIPC/Decoder.h>
 #include <LibIPC/Encoder.h>
+#include <LibWeb/Infra/Strings.h>
 #include <ctype.h>
 
 namespace Web::Cookie {
@@ -23,7 +24,7 @@ static void process_attribute(ParsedCookie& parsed_cookie, StringView attribute_
 static void on_expires_attribute(ParsedCookie& parsed_cookie, StringView attribute_value);
 static void on_max_age_attribute(ParsedCookie& parsed_cookie, StringView attribute_value);
 static void on_domain_attribute(ParsedCookie& parsed_cookie, StringView attribute_value);
-static void on_path_attribute(ParsedCookie& parsed_cookie, StringView attribute_value);
+static void on_path_attribute(ParsedCookie& parsed_cookie, String attribute_value);
 static void on_secure_attribute(ParsedCookie& parsed_cookie);
 static void on_http_only_attribute(ParsedCookie& parsed_cookie);
 static void on_same_site_attribute(ParsedCookie& parsed_cookie, StringView attribute_value);
@@ -75,7 +76,7 @@ Optional<ParsedCookie> parse_cookie(StringView cookie_string)
         return {};
 
     // 6. The cookie-name is the name string, and the cookie-value is the value string.
-    ParsedCookie parsed_cookie { name, value };
+    ParsedCookie parsed_cookie { MUST(String::from_utf8(name)), MUST(String::from_utf8(value)) };
 
     parse_attributes(parsed_cookie, unparsed_attributes);
     return parsed_cookie;
@@ -140,7 +141,7 @@ void process_attribute(ParsedCookie& parsed_cookie, StringView attribute_name, S
     } else if (attribute_name.equals_ignoring_ascii_case("Domain"sv)) {
         on_domain_attribute(parsed_cookie, attribute_value);
     } else if (attribute_name.equals_ignoring_ascii_case("Path"sv)) {
-        on_path_attribute(parsed_cookie, attribute_value);
+        on_path_attribute(parsed_cookie, MUST(String::from_utf8(attribute_value)));
     } else if (attribute_name.equals_ignoring_ascii_case("Secure"sv)) {
         on_secure_attribute(parsed_cookie);
     } else if (attribute_name.equals_ignoring_ascii_case("HttpOnly"sv)) {
@@ -197,20 +198,20 @@ void on_domain_attribute(ParsedCookie& parsed_cookie, StringView attribute_value
     }
 
     // Convert the cookie-domain to lower case.
-    parsed_cookie.domain = DeprecatedString(cookie_domain).to_lowercase();
+    parsed_cookie.domain = MUST(Infra::to_ascii_lowercase(cookie_domain));
 }
 
-void on_path_attribute(ParsedCookie& parsed_cookie, StringView attribute_value)
+void on_path_attribute(ParsedCookie& parsed_cookie, String attribute_value)
 {
     // https://tools.ietf.org/html/rfc6265#section-5.2.4
 
     // If the attribute-value is empty or if the first character of the attribute-value is not %x2F ("/"):
-    if (attribute_value.is_empty() || attribute_value[0] != '/')
+    if (attribute_value.is_empty() || attribute_value.bytes_as_string_view()[0] != '/')
         // Let cookie-path be the default-path.
         return;
 
     // Let cookie-path be the attribute-value
-    parsed_cookie.path = attribute_value;
+    parsed_cookie.path = move(attribute_value);
 }
 
 void on_secure_attribute(ParsedCookie& parsed_cookie)
@@ -373,12 +374,12 @@ ErrorOr<void> IPC::encode(Encoder& encoder, Web::Cookie::ParsedCookie const& coo
 template<>
 ErrorOr<Web::Cookie::ParsedCookie> IPC::decode(Decoder& decoder)
 {
-    auto name = TRY(decoder.decode<DeprecatedString>());
-    auto value = TRY(decoder.decode<DeprecatedString>());
+    auto name = TRY(decoder.decode<String>());
+    auto value = TRY(decoder.decode<String>());
     auto expiry_time_from_expires_attribute = TRY(decoder.decode<Optional<UnixDateTime>>());
     auto expiry_time_from_max_age_attribute = TRY(decoder.decode<Optional<UnixDateTime>>());
-    auto domain = TRY(decoder.decode<Optional<DeprecatedString>>());
-    auto path = TRY(decoder.decode<Optional<DeprecatedString>>());
+    auto domain = TRY(decoder.decode<Optional<String>>());
+    auto path = TRY(decoder.decode<Optional<String>>());
     auto secure_attribute_present = TRY(decoder.decode<bool>());
     auto http_only_attribute_present = TRY(decoder.decode<bool>());
     auto same_site_attribute = TRY(decoder.decode<Web::Cookie::SameSite>());
