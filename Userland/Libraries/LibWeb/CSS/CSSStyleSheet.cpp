@@ -146,19 +146,19 @@ void CSSStyleSheet::set_style_sheet_list(Badge<StyleSheetList>, StyleSheetList* 
     m_style_sheet_list = list;
 }
 
-Optional<StringView> CSSStyleSheet::default_namespace() const
+Optional<String> CSSStyleSheet::default_namespace() const
 {
     if (m_default_namespace_rule)
-        return m_default_namespace_rule->namespace_uri().view();
+        return m_default_namespace_rule->namespace_uri();
 
     return {};
 }
 
-Optional<StringView> CSSStyleSheet::namespace_uri(StringView namespace_prefix) const
+Optional<String> CSSStyleSheet::namespace_uri(StringView namespace_prefix) const
 {
     return m_namespace_rules.get(namespace_prefix)
         .map([](JS::GCPtr<CSSNamespaceRule> namespace_) {
-            return namespace_->namespace_uri().view();
+            return namespace_->namespace_uri();
         });
 }
 
@@ -189,7 +189,7 @@ void CSSStyleSheet::recalculate_namespaces()
         if (!namespace_rule.namespace_uri().is_empty() && namespace_rule.prefix().is_empty())
             m_default_namespace_rule = namespace_rule;
 
-        m_namespace_rules.set(FlyString::from_deprecated_fly_string(namespace_rule.prefix()).release_value_but_fixme_should_propagate_errors(), namespace_rule);
+        m_namespace_rules.set(namespace_rule.prefix(), namespace_rule);
     }
 }
 

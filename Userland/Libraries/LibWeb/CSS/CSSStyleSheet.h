@@ -50,8 +50,8 @@ public:
 
     void set_style_sheet_list(Badge<StyleSheetList>, StyleSheetList*);
 
-    Optional<StringView> default_namespace() const;
-    Optional<StringView> namespace_uri(StringView namespace_prefix) const;
+    Optional<String> default_namespace() const;
+    Optional<String> namespace_uri(StringView namespace_prefix) const;
 
 private:
     CSSStyleSheet(JS::Realm&, CSSRuleList&, MediaList&, Optional<AK::URL> location);

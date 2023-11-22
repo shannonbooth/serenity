@@ -15,24 +15,24 @@ class CSSNamespaceRule final : public CSSRule {
     JS_DECLARE_ALLOCATOR(CSSNamespaceRule);
 
 public:
-    [[nodiscard]] static JS::NonnullGCPtr<CSSNamespaceRule> create(JS::Realm&, Optional<DeprecatedString> prefix, StringView namespace_uri);
+    [[nodiscard]] static JS::NonnullGCPtr<CSSNamespaceRule> create(JS::Realm&, Optional<String> const& prefix, String namespace_uri);
 
     virtual ~CSSNamespaceRule() = default;
 
-    void set_namespace_uri(DeprecatedString value) { m_namespace_uri = move(value); }
-    DeprecatedString namespace_uri() const { return m_namespace_uri; }
-    void set_prefix(DeprecatedString value) { m_prefix = move(value); }
-    DeprecatedString prefix() const { return m_prefix; }
+    void set_namespace_uri(String value) { m_namespace_uri = move(value); }
+    String namespace_uri() const { return m_namespace_uri; }
+    void set_prefix(String value) { m_prefix = move(value); }
+    String prefix() const { return m_prefix; }
     virtual Type type() const override { return Type::Namespace; }
 
 private:
-    CSSNamespaceRule(JS::Realm&, Optional<DeprecatedString> prefix, StringView namespace_uri);
+    CSSNamespaceRule(JS::Realm&, Optional<String> const& prefix, String namespace_uri);
 
     virtual void initialize(JS::Realm&) override;
 
     virtual String serialized() const override;
-    DeprecatedString m_namespace_uri;
-    DeprecatedString m_prefix;
+    String m_namespace_uri;
+    String m_prefix;
 };
 
 }
