@@ -77,6 +77,7 @@ public:
         return *Utf8View(m_value.bytes_as_string_view()).begin();
     }
 
+    // FIXME: This should return FlyString const&
     StringView string() const
     {
         VERIFY(m_type == Type::String);

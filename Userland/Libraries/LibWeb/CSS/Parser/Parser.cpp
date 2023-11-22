@@ -2178,7 +2178,7 @@ Optional<Color> Parser::parse_color(ComponentValue const& component_value)
             return color;
 
     } else if (component_value.is(Token::Type::Hash)) {
-        auto color = Color::from_string(DeprecatedString::formatted("#{}", component_value.token().hash_value()));
+        auto color = Color::from_string(MUST(String::formatted("#{}", component_value.token().hash_value())));
         if (color.has_value())
             return color;
         return {};
@@ -2197,7 +2197,7 @@ Optional<Color> Parser::parse_color(ComponentValue const& component_value)
 
         // 1. Let cv be the component value.
         auto const& cv = component_value;
-        DeprecatedString serialization;
+        String serialization;
         // 2. If cv is a <number-token> or a <dimension-token>, follow these substeps:
         if (cv.is(Token::Type::Number) || cv.is(Token::Type::Dimension)) {
             // 1. If cv’s type flag is not "integer", return an error.
@@ -2219,35 +2219,34 @@ Optional<Color> Parser::parse_color(ComponentValue const& component_value)
                 serialization_builder.append(cv.token().dimension_unit());
 
             // 5. If serialization consists of fewer than six characters, prepend zeros (U+0030) so that it becomes six characters.
-            serialization = serialization_builder.to_deprecated_string();
+            serialization = MUST(serialization_builder.to_string());
             if (serialization_builder.length() < 6) {
                 StringBuilder builder;
                 for (size_t i = 0; i < (6 - serialization_builder.length()); i++)
                     builder.append('0');
                 builder.append(serialization_builder.string_view());
-                serialization = builder.to_deprecated_string();
+                serialization = MUST(builder.to_string());
             }
         }
         // 3. Otherwise, cv is an <ident-token>; let serialization be cv’s value.
         else {
             if (!cv.is(Token::Type::Ident))
                 return {};
-            serialization = cv.token().ident().bytes_as_string_view();
+            serialization = cv.token().ident().to_string();
         }
 
         // 4. If serialization does not consist of three or six characters, return an error.
-        if (serialization.length() != 3 && serialization.length() != 6)
+        if (serialization.bytes().size() != 3 && serialization.bytes().size() != 6)
             return {};
 
         // 5. If serialization contains any characters not in the range [0-9A-Fa-f] (U+0030 to U+0039, U+0041 to U+0046, U+0061 to U+0066), return an error.
-        for (auto c : serialization) {
+        for (auto c : serialization.bytes_as_string_view()) {
             if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')))
                 return {};
         }
 
         // 6. Return the concatenation of "#" (U+0023) and serialization.
-        DeprecatedString concatenation = DeprecatedString::formatted("#{}", serialization);
-        return Color::from_string(concatenation);
+        return Color::from_string(MUST(String::formatted("#{}", serialization)));
     }
 
     return {};
@@ -4048,7 +4047,7 @@ RefPtr<StyleValue> Parser::parse_font_family_value(TokenStream<ComponentValue>& 
     //     font-family: my cool     font\!, serif;
     //     font-family: "my cool font!", serif;
     StyleValueVector font_families;
-    Vector<DeprecatedString> current_name_parts;
+    Vector<String> current_name_parts;
     while (tokens.has_next_token()) {
         auto const& peek = tokens.peek_token();
 
@@ -4083,7 +4082,7 @@ RefPtr<StyleValue> Parser::parse_font_family_value(TokenStream<ComponentValue>& 
                 (void)tokens.next_token(); // Comma
                 continue;
             }
-            current_name_parts.append(tokens.next_token().token().ident().bytes_as_string_view());
+            current_name_parts.append(tokens.next_token().token().ident().to_string());
             continue;
         }
 
@@ -4148,7 +4147,7 @@ CSSRule* Parser::parse_font_face_rule(TokenStream<ComponentValue>& tokens)
         if (declaration.name().equals_ignoring_ascii_case("font-family"sv)) {
             // FIXME: This is very similar to, but different from, the logic in parse_font_family_value().
             //        Ideally they could share code.
-            Vector<DeprecatedString> font_family_parts;
+            Vector<String> font_family_parts;
             bool had_syntax_error = false;
             for (size_t i = 0; i < declaration.values().size(); ++i) {
                 auto const& part = declaration.values()[i];
@@ -4160,7 +4159,7 @@ CSSRule* Parser::parse_font_face_rule(TokenStream<ComponentValue>& tokens)
                         had_syntax_error = true;
                         break;
                     }
-                    font_family_parts.append(part.token().string());
+                    font_family_parts.append(MUST(String::from_utf8(part.token().string())));
                     continue;
                 }
                 if (part.is(Token::Type::Ident)) {
@@ -4175,7 +4174,7 @@ CSSRule* Parser::parse_font_face_rule(TokenStream<ComponentValue>& tokens)
                         had_syntax_error = true;
                         break;
                     }
-                    font_family_parts.append(part.token().ident().bytes_as_string_view());
+                    font_family_parts.append(part.token().ident().to_string());
                     continue;
                 }
 
