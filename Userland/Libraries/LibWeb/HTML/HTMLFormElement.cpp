@@ -158,7 +158,7 @@ WebIDL::ExceptionOr<void> HTMLFormElement::submit_form(JS::NonnullGCPtr<HTMLElem
     }
 
     // 12. Let action be the submitter element's action.
-    auto action = action_from_form_element(submitter);
+    auto action = MUST(String::from_deprecated_string(action_from_form_element(submitter)));
 
     // 13. If action is the empty string, let action be the URL of the form document.
     if (action.is_empty())
