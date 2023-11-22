@@ -7,10 +7,10 @@
 #pragma once
 
 #include <AK/Badge.h>
-#include <AK/DeprecatedString.h>
 #include <AK/FlyString.h>
 #include <AK/JsonObjectSerializer.h>
 #include <AK/RefPtr.h>
+#include <AK/String.h>
 #include <AK/TypeCasts.h>
 #include <AK/Vector.h>
 #include <LibWeb/DOM/AccessibilityTreeNode.h>
@@ -160,7 +160,7 @@ public:
     const HTML::HTMLElement* enclosing_html_element() const;
     const HTML::HTMLElement* enclosing_html_element_with_attribute(FlyString const&) const;
 
-    DeprecatedString child_text_content() const;
+    String child_text_content() const;
 
     Node& root();
     Node const& root() const
@@ -241,7 +241,7 @@ public:
     WebIDL::ExceptionOr<String> serialize_fragment(DOMParsing::RequireWellFormed) const;
 
     void replace_all(JS::GCPtr<Node>);
-    void string_replace_all(DeprecatedString const&);
+    void string_replace_all(String const&);
 
     bool is_same_node(Node const*) const;
     bool is_equal_node(Node const*) const;
@@ -250,7 +250,7 @@ public:
 
     bool is_uninteresting_whitespace_node() const;
 
-    DeprecatedString debug_description() const;
+    String debug_description() const;
 
     size_t length() const;
 
@@ -706,7 +706,7 @@ private:
     void append_child_impl(JS::NonnullGCPtr<Node>);
     void remove_child_impl(JS::NonnullGCPtr<Node>);
 
-    static Optional<StringView> first_valid_id(DeprecatedString const&, Document const&);
+    static Optional<StringView> first_valid_id(String const&, Document const&);
     static ErrorOr<void> append_without_space(StringBuilder, StringView const&);
     static ErrorOr<void> append_with_space(StringBuilder, StringView const&);
     static ErrorOr<void> prepend_without_space(StringBuilder, StringView const&);

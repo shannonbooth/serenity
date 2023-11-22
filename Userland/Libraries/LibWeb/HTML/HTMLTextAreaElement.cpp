@@ -83,7 +83,7 @@ void HTMLTextAreaElement::reset_algorithm()
     // The reset algorithm for textarea elements is to set the dirty value flag back to false,
     m_dirty = false;
     // and set the raw value of element to its child text content.
-    m_raw_value = child_text_content();
+    m_raw_value = child_text_content().to_deprecated_string();
 }
 
 void HTMLTextAreaElement::form_associated_element_was_inserted()
@@ -120,7 +120,7 @@ void HTMLTextAreaElement::children_changed()
     // The children changed steps for textarea elements must, if the element's dirty value flag is false,
     // set the element's raw value to its child text content.
     if (!m_dirty) {
-        m_raw_value = child_text_content();
+        m_raw_value = child_text_content().to_deprecated_string();
         if (m_text_node)
             m_text_node->set_text_content(MUST(String::from_deprecated_string(m_raw_value)));
     }
