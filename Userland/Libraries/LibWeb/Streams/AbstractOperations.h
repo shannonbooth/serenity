@@ -70,6 +70,11 @@ WebIDL::ExceptionOr<void> readable_stream_default_controller_can_pull_if_needed(
 bool readable_stream_default_controller_should_call_pull(ReadableStreamDefaultController&);
 void readable_stream_default_controller_clear_algorithms(ReadableStreamDefaultController&);
 
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond_internal(ReadableByteStreamController&, u32 bytes_written);
+
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond(ReadableByteStreamController&, u64 bytes_written);
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond_with_new_view(ReadableByteStreamController&, WebIDL::ArrayBufferView&);
+
 void readable_stream_default_controller_error(ReadableStreamDefaultController&, JS::Value error);
 Optional<double> readable_stream_default_controller_get_desired_size(ReadableStreamDefaultController&);
 bool readable_stream_default_controller_can_close_or_enqueue(ReadableStreamDefaultController&);
@@ -167,6 +172,7 @@ WebIDL::ExceptionOr<void> transform_stream_error_writable_and_unblock_write(Tran
 WebIDL::ExceptionOr<void> transform_stream_set_backpressure(TransformStream&, bool backpressure);
 
 bool is_non_negative_number(JS::Value);
+bool can_transfer_array_buffer(JS::ArrayBuffer& array_buffer);
 
 JS::Value create_close_sentinel();
 bool is_close_sentinel(JS::Value);

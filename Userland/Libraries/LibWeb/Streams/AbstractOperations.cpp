@@ -1091,6 +1091,221 @@ void readable_stream_default_controller_clear_algorithms(ReadableStreamDefaultCo
     // controller.set_strategy_size_algorithm({});
 }
 
+// https://streams.spec.whatwg.org/#readable-byte-stream-controller-respond-in-readable-state
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond_in_readable_state(ReadableByteStreamController& controller, u32 bytes_written, PullIntoDescriptor& pull_into_descriptor)
+{
+    // 1. Assert: pullIntoDescriptor’s bytes filled + bytesWritten ≤ pullIntoDescriptor’s byte length.
+    VERIFY(pull_into_descriptor.bytes_filled + bytes_written <= pull_into_descriptor.byte_length);
+
+    // 2. Perform ! ReadableByteStreamControllerFillHeadPullIntoDescriptor(controller, bytesWritten, pullIntoDescriptor).
+    readable_byte_stream_controller_fill_head_pull_into_descriptor(controller, bytes_written, pull_into_descriptor);
+
+    // 3. If pullIntoDescriptor’s reader type is "none",
+    if (pull_into_descriptor.reader_type == ReaderType::None) {
+        // 1. Perform ? ReadableByteStreamControllerEnqueueDetachedPullIntoToQueue(controller, pullIntoDescriptor).
+        TRY(readable_byte_stream_controller_enqueue_detached_pull_into_queue(controller, pull_into_descriptor));
+
+        // 2. Perform ! ReadableByteStreamControllerProcessPullIntoDescriptorsUsingQueue(controller).
+        readable_byte_stream_controller_process_pull_into_descriptors_using_queue(controller);
+
+        // 3. Return.
+        return {};
+    }
+
+    // 4. If pullIntoDescriptor’s bytes filled < pullIntoDescriptor’s minimum fill, return.
+    if (pull_into_descriptor.bytes_filled < pull_into_descriptor.buffer_byte_length) // FIXME: This is not minimum fill
+        return {};
+
+    // NOTE: A descriptor for a read() request that is not yet filled up to its minimum length will stay at the head of the queue, so the underlying source can keep filling it.
+
+    // 5. Perform ! ReadableByteStreamControllerShiftPendingPullInto(controller).
+    readable_byte_stream_controller_shift_pending_pull_into(controller);
+
+    // 6. Let remainderSize be the remainder after dividing pullIntoDescriptor’s bytes filled by pullIntoDescriptor’s element size.
+    auto remainder_size = pull_into_descriptor.bytes_filled / pull_into_descriptor.element_size;
+
+    // 7. If remainderSize > 0,
+    if (remainder_size > 0) {
+        // 1. Let end be pullIntoDescriptor’s byte offset + pullIntoDescriptor’s bytes filled.
+        auto end = pull_into_descriptor.byte_offset + pull_into_descriptor.bytes_filled;
+
+        // 2. Perform ? ReadableByteStreamControllerEnqueueClonedChunkToQueue(controller, pullIntoDescriptor’s buffer, end − remainderSize, remainderSize).
+        TRY(readable_byte_stream_controller_enqueue_cloned_chunk_to_queue(controller, *pull_into_descriptor.buffer, end - remainder_size, remainder_size));
+    }
+
+    // 8. Set pullIntoDescriptor’s bytes filled to pullIntoDescriptor’s bytes filled − remainderSize.
+    pull_into_descriptor.bytes_filled -= remainder_size;
+
+    // 9. Perform ! ReadableByteStreamControllerCommitPullIntoDescriptor(controller.[[stream]], pullIntoDescriptor).
+    readable_byte_stream_controller_commit_pull_into_descriptor(*controller.stream(), pull_into_descriptor);
+    return {};
+}
+
+// https://streams.spec.whatwg.org/#readable-byte-stream-controller-respond-in-closed-state
+void readable_byte_stream_controller_respond_in_closed_state(ReadableByteStreamController& controller, PullIntoDescriptor& first_descriptor)
+{
+    // 1. Assert: the remainder after dividing firstDescriptor’s bytes filled by firstDescriptor’s element size is 0.
+    VERIFY(first_descriptor.bytes_filled / first_descriptor.element_size == 0);
+
+    // 2. If firstDescriptor’s reader type is "none", perform ! ReadableByteStreamControllerShiftPendingPullInto(controller).
+    if (first_descriptor.reader_type == ReaderType::None)
+        readable_byte_stream_controller_shift_pending_pull_into(controller);
+
+    // 3. Let stream be controller.[[stream]].
+    auto& stream = *controller.stream();
+
+    // 4. If ! ReadableStreamHasBYOBReader(stream) is true,
+    if (readable_stream_has_default_reader(stream)) {
+        // 1. While ! ReadableStreamGetNumReadIntoRequests(stream) > 0,
+        while (readable_stream_get_num_read_requests(stream) > 0) {
+            // 1. Let pullIntoDescriptor be ! ReadableByteStreamControllerShiftPendingPullInto(controller).
+            auto pull_into_descriptor = readable_byte_stream_controller_shift_pending_pull_into(controller);
+
+            // 2. Perform ! ReadableByteStreamControllerCommitPullIntoDescriptor(stream, pullIntoDescriptor).
+            readable_byte_stream_controller_commit_pull_into_descriptor(stream, pull_into_descriptor);
+        }
+    }
+}
+
+// https://streams.spec.whatwg.org/#readable-byte-stream-controller-respond-internal
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond_internal(ReadableByteStreamController& controller, u32 bytes_written)
+{
+    // 1. Let firstDescriptor be controller.[[pendingPullIntos]][0].
+    auto& first_descriptor = controller.pending_pull_intos().first();
+
+    // 2. Assert: ! CanTransferArrayBuffer(firstDescriptor’s buffer) is true.
+    VERIFY(can_transfer_array_buffer(*first_descriptor.buffer));
+
+    // 3. Perform ! ReadableByteStreamControllerInvalidateBYOBRequest(controller).
+    readable_byte_stream_controller_invalidate_byob_request(controller);
+
+    // 4. Let state be controller.[[stream]].[[state]].
+    auto state = controller.stream()->state();
+
+    // 5. If state is "closed",
+    if (state == ReadableStream::State::Closed) {
+        // 1. Assert: bytesWritten is 0.
+        VERIFY(bytes_written == 0);
+
+        // 2. Perform ! ReadableByteStreamControllerRespondInClosedState(controller, firstDescriptor).
+        readable_byte_stream_controller_respond_in_closed_state(controller, first_descriptor);
+    }
+
+    // 6. Otherwise,
+    else {
+        // 1. Assert: state is "readable".
+        VERIFY(state == ReadableStream::State::Readable);
+
+        // 2. Assert: bytesWritten > 0.
+        VERIFY(bytes_written > 0);
+
+        // 3. Perform ? ReadableByteStreamControllerRespondInReadableState(controller, bytesWritten, firstDescriptor).
+        TRY(readable_byte_stream_controller_respond_in_readable_state(controller, bytes_written, first_descriptor));
+    }
+
+    // 7. Perform ! ReadableByteStreamControllerCallPullIfNeeded(controller).
+    MUST(readable_byte_stream_controller_call_pull_if_needed(controller));
+    return {};
+}
+
+// https://streams.spec.whatwg.org/#readable-byte-stream-controller-respond
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond(ReadableByteStreamController& controller, u64 bytes_written)
+{
+    auto& realm = controller.realm();
+
+    // 1. Assert: controller.[[pendingPullIntos]] is not empty.
+    VERIFY(!controller.pending_pull_intos().is_empty());
+
+    // 2. Let firstDescriptor be controller.[[pendingPullIntos]][0].
+    auto& first_descriptor = controller.pending_pull_intos().first();
+
+    // 3. Let state be controller.[[stream]].[[state]].
+    auto state = controller.stream()->state();
+
+    // 4. If state is "closed",
+    if (state == ReadableStream::State::Closed) {
+        // 1. If bytesWritten is not 0, throw a TypeError exception.
+        if (bytes_written != 0)
+            return WebIDL::SimpleException { WebIDL::SimpleExceptionType::TypeError, "No bytes written"sv };
+    }
+
+    // 5. Otherwise,
+    else {
+        // 1. Assert: state is "readable".
+        VERIFY(state == ReadableStream::State::Readable);
+
+        // 2. If bytesWritten is 0, throw a TypeError exception.
+        if (bytes_written == 0)
+            return WebIDL::SimpleException { WebIDL::SimpleExceptionType::TypeError, "Bytes have been written"sv };
+
+        // 3. If firstDescriptor’s bytes filled + bytesWritten > firstDescriptor’s byte length, throw a RangeError exception.
+        if (first_descriptor.bytes_filled + bytes_written > first_descriptor.byte_length)
+            return WebIDL::SimpleException { WebIDL::SimpleExceptionType::RangeError, "Some range error"sv };
+    }
+
+    // 6. Set firstDescriptor’s buffer to ! TransferArrayBuffer(firstDescriptor’s buffer).
+    first_descriptor.buffer = MUST(transfer_array_buffer(realm, *first_descriptor.buffer));
+
+    // 7. Perform ? ReadableByteStreamControllerRespondInternal(controller, bytesWritten).
+    return readable_byte_stream_controller_respond_internal(controller, bytes_written);
+}
+
+// https://streams.spec.whatwg.org/#readable-byte-stream-controller-respond-with-new-view
+WebIDL::ExceptionOr<void> readable_byte_stream_controller_respond_with_new_view(ReadableByteStreamController& controller, WebIDL::ArrayBufferView& view)
+{
+    auto& realm = controller.realm();
+
+    // 1. Assert: controller.[[pendingPullIntos]] is not empty.
+    VERIFY(!controller.pending_pull_intos().is_empty());
+
+    // 2. Assert: ! IsDetachedBuffer(view.[[ViewedArrayBuffer]]) is false.
+    VERIFY(!view.viewed_array_buffer()->is_detached());
+
+    // 3. Let firstDescriptor be controller.[[pendingPullIntos]][0].
+    auto& first_descriptor = controller.pending_pull_intos().first();
+
+    // 4. Let state be controller.[[stream]].[[state]].
+    auto state = controller.stream()->state();
+
+    // 5. If state is "closed",
+    if (state == ReadableStream::State::Closed) {
+        // 1. If view.[[ByteLength]] is not 0, throw a TypeError exception.
+        if (view.byte_length() != 0)
+            return WebIDL::SimpleException { WebIDL::SimpleExceptionType::TypeError, "View is not empty"sv };
+    }
+
+    // 6. Otherwise,
+    else {
+        // 1. Assert: state is "readable".
+        VERIFY(state == ReadableStream::State::Readable);
+
+        // 2. If view.[[ByteLength]] is 0, throw a TypeError exception.
+        if (view.byte_length() != 0)
+            return WebIDL::SimpleException { WebIDL::SimpleExceptionType::TypeError, "View has a byte length of zero"sv };
+    }
+
+    // 7. If firstDescriptor’s byte offset + firstDescriptor’ bytes filled is not view.[[ByteOffset]], throw a RangeError exception.
+    if (first_descriptor.byte_offset + first_descriptor.bytes_filled != view.byte_offset())
+        return WebIDL::SimpleException { WebIDL::SimpleExceptionType::RangeError, "Descriptors byte offset does not match view"sv };
+
+    // 8. If firstDescriptor’s buffer byte length is not view.[[ViewedArrayBuffer]].[[ByteLength]], throw a RangeError exception.
+    if (first_descriptor.buffer_byte_length != view.viewed_array_buffer()->byte_length())
+        return WebIDL::SimpleException { WebIDL::SimpleExceptionType::RangeError, "Descriptors byte length does not match view"sv };
+
+    // 9. If firstDescriptor’s bytes filled + view.[[ByteLength]] > firstDescriptor’s byte length, throw a RangeError exception.
+    if (first_descriptor.bytes_filled + view.byte_length() > first_descriptor.byte_length)
+        return WebIDL::SimpleException { WebIDL::SimpleExceptionType::RangeError, "Bytes filled is greater than descriptors byte length"sv };
+
+    // 10. Let viewByteLength be view.[[ByteLength]].
+    auto view_byte_length = view.byte_length();
+
+    // 11. Set firstDescriptor’s buffer to ? TransferArrayBuffer(view.[[ViewedArrayBuffer]]).
+    first_descriptor.buffer = TRY(transfer_array_buffer(realm, *view.viewed_array_buffer()));
+
+    // 12. Perform ? ReadableByteStreamControllerRespondInternal(controller, viewByteLength).
+    return readable_byte_stream_controller_respond_internal(controller, view_byte_length);
+}
+
 // https://streams.spec.whatwg.org/#readable-stream-default-controller-error
 void readable_stream_default_controller_error(ReadableStreamDefaultController& controller, JS::Value error)
 {
@@ -3719,6 +3934,24 @@ bool is_non_negative_number(JS::Value value)
     return true;
 }
 
+// https://streams.spec.whatwg.org/#can-transfer-array-buffer
+bool can_transfer_array_buffer(JS::ArrayBuffer& array_buffer)
+{
+    // 1. Assert: Type(O) is Object.
+    // 2. Assert: O has an [[ArrayBufferData]] internal slot.
+
+    // 3. If ! IsDetachedBuffer(O) is true, return false.
+    if (array_buffer.is_detached())
+        return false;
+
+    // 4. If SameValue(O.[[ArrayBufferDetachKey]], undefined) is false, return false.
+    if (!JS::same_value(array_buffer.detach_key(), JS::js_undefined()))
+        return false;
+
+    // 5. Return true.
+    return true;
+}
+
 // https://streams.spec.whatwg.org/#close-sentinel
 // Non-standard function that implements the "close sentinel" value.
 JS::Value create_close_sentinel()
@@ -3809,5 +4042,4 @@ WebIDL::ExceptionOr<void> set_up_readable_byte_stream_controller_from_underlying
     // 10. Perform ? SetUpReadableByteStreamController(stream, controller, startAlgorithm, pullAlgorithm, cancelAlgorithm, highWaterMark, autoAllocateChunkSize).
     return set_up_readable_byte_stream_controller(stream, controller, move(start_algorithm), move(pull_algorithm), move(cancel_algorithm), high_water_mark, auto_allocate_chunk_size);
 }
-
 }

@@ -507,6 +507,30 @@ static void generate_to_cpp(SourceGenerator& generator, ParameterType& parameter
 )~~~");
         }
         scoped_generator.append(R"~~~(
+    @cpp_name@ = TRY(@js_name@@js_suffix@.to_bigint_uint64(vm));
+)~~~");
+        if (optional_default_value.has_value()) {
+            scoped_generator.append(R"~~~(
+    else
+        @cpp_name@ = @parameter.optional_default_value@ULL;
+)~~~");
+        }
+    } else if (parameter.type->name() == "unsigned long long") {
+        if (!optional || optional_default_value.has_value()) {
+            scoped_generator.append(R"~~~(
+    u64 @cpp_name@;
+)~~~");
+        } else {
+            scoped_generator.append(R"~~~(
+    Optional<u64> @cpp_name@;
+)~~~");
+        }
+        if (optional) {
+            scoped_generator.append(R"~~~(
+    if (!@js_name@@js_suffix@.is_undefined())
+)~~~");
+        }
+        scoped_generator.append(R"~~~(
     @cpp_name@ = TRY(@js_name@@js_suffix@.to_u32(vm));
 )~~~");
         if (optional_default_value.has_value()) {
