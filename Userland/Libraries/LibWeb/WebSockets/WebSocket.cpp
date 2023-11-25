@@ -148,7 +148,7 @@ ErrorOr<void> WebSocket::establish_web_socket_connection(AK::URL& url_record, Ve
     for (auto const& protocol : protocols)
         TRY(protcol_deprecated_strings.try_append(protocol.to_deprecated_string()));
 
-    m_websocket = WebSocketClientManager::the().connect(url_record, origin_string, protcol_deprecated_strings);
+    m_websocket = WebSocketClientManager::the().connect(url_record, origin_string.to_deprecated_string(), protcol_deprecated_strings);
     m_websocket->on_open = [weak_this = make_weak_ptr<WebSocket>()] {
         if (!weak_this)
             return;

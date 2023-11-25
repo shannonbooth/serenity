@@ -1082,7 +1082,7 @@ WebIDL::ExceptionOr<void> Window::window_post_message_steps(JS::Value message, W
         // with the origin attribute initialized to origin and the source attribute initialized to source, and then return.
         if (deserialize_record_or_error.is_exception()) {
             MessageEventInit message_event_init {};
-            message_event_init.origin = MUST(String::from_deprecated_string(origin));
+            message_event_init.origin = origin;
             message_event_init.source = JS::make_handle(source);
 
             auto message_error_event = MessageEvent::create(target_realm, EventNames::messageerror, message_event_init);
@@ -1102,7 +1102,7 @@ WebIDL::ExceptionOr<void> Window::window_post_message_steps(JS::Value message, W
         //    initialized to newPorts.
         // FIXME: Set the ports attribute to newPorts.
         MessageEventInit message_event_init {};
-        message_event_init.origin = MUST(String::from_deprecated_string(origin));
+        message_event_init.origin = origin;
         message_event_init.source = JS::make_handle(source);
         message_event_init.data = message_clone;
 

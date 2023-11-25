@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <AK/DeprecatedString.h>
+#include <AK/String.h>
 #include <AK/URL.h>
 #include <AK/URLParser.h>
 
@@ -16,7 +16,7 @@ namespace Web::HTML {
 class Origin {
 public:
     Origin() = default;
-    Origin(Optional<DeprecatedString> const& scheme, AK::URL::Host const& host, u16 port)
+    Origin(Optional<String> const& scheme, AK::URL::Host const& host, u16 port)
         : m_scheme(scheme)
         , m_host(host)
         , m_port(port)
@@ -72,11 +72,11 @@ public:
     }
 
     // https://html.spec.whatwg.org/multipage/origin.html#ascii-serialisation-of-an-origin
-    DeprecatedString serialize() const
+    String serialize() const
     {
         // 1. If origin is an opaque origin, then return "null"
         if (is_opaque())
-            return "null";
+            return "null"_string;
 
         // 2. Otherwise, let result be origin's scheme.
         StringBuilder result;
@@ -91,10 +91,10 @@ public:
         // 5. If origin's port is non-null, append a U+003A COLON character (:), and origin's port, serialized, to result.
         if (port() != 0) {
             result.append(':');
-            result.append(DeprecatedString::number(port()));
+            result.append(MUST(String::number(port())));
         }
         // 6. Return result
-        return result.to_deprecated_string();
+        return MUST(result.to_string());
     }
 
     // https://html.spec.whatwg.org/multipage/origin.html#concept-origin-effective-domain

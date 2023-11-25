@@ -33,7 +33,7 @@ public:
     virtual Bindings::PlatformObject const& this_impl() const = 0;
 
     // JS API functions
-    WebIDL::ExceptionOr<String> origin() const;
+    String origin() const;
     bool is_secure_context() const;
     bool cross_origin_isolated() const;
     WebIDL::ExceptionOr<String> btoa(String const& data) const;
