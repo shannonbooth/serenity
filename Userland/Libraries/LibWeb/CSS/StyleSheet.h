@@ -39,7 +39,7 @@ public:
         return m_media;
     }
 
-    void set_media(DeprecatedString media)
+    void set_media(StringView media)
     {
         m_media->set_media_text(media);
     }
