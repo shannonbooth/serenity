@@ -20,7 +20,6 @@ namespace Web::HTML {
 
 HTMLTextAreaElement::HTMLTextAreaElement(DOM::Document& document, DOM::QualifiedName qualified_name)
     : HTMLElement(document, move(qualified_name))
-    , m_raw_value(DeprecatedString::empty())
 {
 }
 
@@ -83,7 +82,7 @@ void HTMLTextAreaElement::reset_algorithm()
     // The reset algorithm for textarea elements is to set the dirty value flag back to false,
     m_dirty = false;
     // and set the raw value of element to its child text content.
-    m_raw_value = child_text_content().to_deprecated_string();
+    m_raw_value = child_text_content();
 }
 
 void HTMLTextAreaElement::form_associated_element_was_inserted()
@@ -106,7 +105,7 @@ void HTMLTextAreaElement::create_shadow_tree_if_needed()
     m_text_node->set_editable_text_node_owner(Badge<HTMLTextAreaElement> {}, *this);
     // NOTE: If `children_changed()` was called before now, `m_raw_value` will hold the text content.
     //       Otherwise, it will get filled in whenever that does get called.
-    m_text_node->set_text_content(MUST(String::from_deprecated_string(m_raw_value)));
+    m_text_node->set_text_content(m_raw_value);
 
     MUST(m_inner_text_element->append_child(*m_text_node));
     MUST(element->append_child(*m_inner_text_element));
@@ -120,9 +119,9 @@ void HTMLTextAreaElement::children_changed()
     // The children changed steps for textarea elements must, if the element's dirty value flag is false,
     // set the element's raw value to its child text content.
     if (!m_dirty) {
-        m_raw_value = child_text_content().to_deprecated_string();
+        m_raw_value = child_text_content();
         if (m_text_node)
-            m_text_node->set_text_content(MUST(String::from_deprecated_string(m_raw_value)));
+            m_text_node->set_text_content(m_raw_value);
     }
 }
 
