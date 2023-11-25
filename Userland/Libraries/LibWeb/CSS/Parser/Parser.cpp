@@ -1152,7 +1152,7 @@ Optional<AK::URL> Parser::parse_url_function(ComponentValue const& component_val
 {
     // FIXME: Handle list of media queries. https://www.w3.org/TR/css-cascade-3/#conditional-import
 
-    auto convert_string_to_url = [&](StringView& url_string) -> Optional<AK::URL> {
+    auto convert_string_to_url = [&](StringView url_string) -> Optional<AK::URL> {
         auto url = m_context.complete_url(url_string);
         if (url.is_valid())
             return url;
@@ -1367,7 +1367,7 @@ CSSRule* Parser::convert_to_rule(NonnullRefPtr<Rule> rule)
 
             DeprecatedString namespace_uri;
             if (token.is(Token::Type::String)) {
-                namespace_uri = token.token().string();
+                namespace_uri = token.token().string().to_deprecated_fly_string();
             } else if (auto url = parse_url_function(token); url.has_value()) {
                 namespace_uri = url.value().to_deprecated_string();
             } else {
@@ -4144,7 +4144,7 @@ CSSRule* Parser::parse_font_face_rule(TokenStream<ComponentValue>& tokens)
         if (declaration.name().equals_ignoring_ascii_case("font-family"sv)) {
             // FIXME: This is very similar to, but different from, the logic in parse_font_family_value().
             //        Ideally they could share code.
-            Vector<DeprecatedString> font_family_parts;
+            Vector<FlyString> font_family_parts;
             bool had_syntax_error = false;
             for (size_t i = 0; i < declaration.values().size(); ++i) {
                 auto const& part = declaration.values()[i];
@@ -4171,7 +4171,7 @@ CSSRule* Parser::parse_font_face_rule(TokenStream<ComponentValue>& tokens)
                         had_syntax_error = true;
                         break;
                     }
-                    font_family_parts.append(part.token().ident().bytes_as_string_view());
+                    font_family_parts.append(part.token().ident());
                     continue;
                 }
 
