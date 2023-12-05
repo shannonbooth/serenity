@@ -7,7 +7,6 @@
  */
 
 #include <AK/Base64.h>
-#include <AK/DeprecatedString.h>
 #include <AK/GenericLexer.h>
 #include <AK/Utf8View.h>
 #include <LibJS/Runtime/AbstractOperations.h>
@@ -132,29 +131,29 @@ void Window::visit_edges(JS::Cell::Visitor& visitor)
 Window::~Window() = default;
 
 // https://html.spec.whatwg.org/multipage/nav-history-apis.html#normalizing-the-feature-name
-static StringView normalize_feature_name(StringView name)
+static String normalize_feature_name(String const& name)
 {
     // For legacy reasons, there are some aliases of some feature names. To normalize a feature name name, switch on name:
 
     // "screenx"
     if (name == "screenx"sv) {
         // Return "left".
-        return "left"sv;
+        return "left"_string;
     }
     // "screeny"
     else if (name == "screeny"sv) {
         // Return "top".
-        return "top"sv;
+        return "top"_string;
     }
     // "innerwidth"
     else if (name == "innerwidth"sv) {
         // Return "width".
-        return "width"sv;
+        return "width"_string;
     }
     // "innerheight"
     else if (name == "innerheight") {
         // Return "height".
-        return "height"sv;
+        return "height"_string;
     }
     // Anything else
     else {
@@ -164,10 +163,10 @@ static StringView normalize_feature_name(StringView name)
 }
 
 // https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-window-open-features-tokenize
-static OrderedHashMap<DeprecatedString, DeprecatedString> tokenize_open_features(StringView features)
+static OrderedHashMap<String, String> tokenize_open_features(StringView features)
 {
     // 1. Let tokenizedFeatures be a new ordered map.
-    OrderedHashMap<DeprecatedString, DeprecatedString> tokenized_features;
+    OrderedHashMap<String, String> tokenized_features;
 
     // 2. Let position point at the first code point of features.
     GenericLexer lexer(features);
@@ -180,16 +179,16 @@ static OrderedHashMap<DeprecatedString, DeprecatedString> tokenize_open_features
     // 3. While position is not past the end of features:
     while (!lexer.is_eof()) {
         // 1. Let name be the empty string.
-        DeprecatedString name;
+        String name;
 
         // 2. Let value be the empty string.
-        DeprecatedString value;
+        String value;
 
         // 3. Collect a sequence of code points that are feature separators from features given position. This skips past leading separators before the name.
         lexer.ignore_while(is_feature_separator);
 
         // 4. Collect a sequence of code points that are not feature separators from features given position. Set name to the collected characters, converted to ASCII lowercase.
-        name = lexer.consume_until(is_feature_separator).to_lowercase_string();
+        name = MUST(String::from_deprecated_string(lexer.consume_until(is_feature_separator).to_lowercase_string()));
 
         // 5. Set name to the result of normalizing the feature name name.
         name = normalize_feature_name(name);
@@ -206,7 +205,7 @@ static OrderedHashMap<DeprecatedString, DeprecatedString> tokenize_open_features
         lexer.ignore_while([](auto character) { return Infra::is_ascii_whitespace(character) || character == '='; });
 
         // 2. Collect a sequence of code points that are not feature separators code points from features given position. Set value to the collected code points, converted to ASCII lowercase.
-        value = lexer.consume_until(is_feature_separator).to_lowercase_string();
+        value = MUST(String::from_deprecated_string(lexer.consume_until(is_feature_separator).to_lowercase_string()));
 
         // 8. If name is not the empty string, then set tokenizedFeatures[name] to value.
         if (!name.is_empty())
@@ -245,7 +244,7 @@ static T parse_boolean_feature(StringView value)
 }
 
 //  https://html.spec.whatwg.org/multipage/window-object.html#popup-window-is-requested
-static TokenizedFeature::Popup check_if_a_popup_window_is_requested(OrderedHashMap<DeprecatedString, DeprecatedString> const& tokenized_features)
+static TokenizedFeature::Popup check_if_a_popup_window_is_requested(OrderedHashMap<String, String> const& tokenized_features)
 {
     // 1. If tokenizedFeatures is empty, then return false.
     if (tokenized_features.is_empty())
