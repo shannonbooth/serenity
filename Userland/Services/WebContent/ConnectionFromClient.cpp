@@ -775,7 +775,7 @@ Messages::WebContentServer::TakeDocumentScreenshotResponse ConnectionFromClient:
 
 Messages::WebContentServer::GetSelectedTextResponse ConnectionFromClient::get_selected_text()
 {
-    return page().page().focused_context().selected_text();
+    return page().page().focused_context().selected_text().to_deprecated_string();
 }
 
 void ConnectionFromClient::select_all()
