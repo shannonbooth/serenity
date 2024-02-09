@@ -9,6 +9,7 @@
 #include <LibJS/Runtime/AbstractOperations.h>
 #include <LibJS/Runtime/Date.h>
 #include <LibJS/Runtime/GlobalObject.h>
+#include <LibJS/Runtime/PrimitiveString.h>
 #include <LibJS/Runtime/Temporal/Calendar.h>
 #include <LibJS/Runtime/Temporal/Duration.h>
 #include <LibJS/Runtime/Temporal/Instant.h>
@@ -23,11 +24,11 @@ namespace JS::Temporal {
 JS_DEFINE_ALLOCATOR(ZonedDateTime);
 
 // 6 Temporal.ZonedDateTime Objects, https://tc39.es/proposal-temporal/#sec-temporal-zoneddatetime-objects
-ZonedDateTime::ZonedDateTime(BigInt const& nanoseconds, Object& time_zone, Object& calendar, Object& prototype)
+ZonedDateTime::ZonedDateTime(BigInt const& nanoseconds, Object& time_zone, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype)
     : Object(ConstructWithPrototypeTag::Tag, prototype)
     , m_nanoseconds(nanoseconds)
     , m_time_zone(time_zone)
-    , m_calendar(calendar)
+    , m_calendar(move(calendar))
 {
 }
 
@@ -37,7 +38,8 @@ void ZonedDateTime::visit_edges(Cell::Visitor& visitor)
 
     visitor.visit(m_nanoseconds);
     visitor.visit(m_time_zone);
-    visitor.visit(m_calendar);
+    if (auto const* calander = m_calendar.get_pointer<NonnullGCPtr<Object>>())
+        visitor.visit(*calander);
 }
 
 // 6.5.1 InterpretISODateTimeOffset ( year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetBehaviour, offsetNanoseconds, timeZone, disambiguation, offsetOption, matchBehaviour ), https://tc39.es/proposal-temporal/#sec-temporal-interpretisodatetimeoffset
@@ -398,7 +400,8 @@ ThrowCompletionOr<BigInt*> add_zoned_date_time(VM& vm, BigInt const& epoch_nanos
     return add_instant(vm, intermediate_instant->nanoseconds(), hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
 }
 
-// 6.5.6 DifferenceZonedDateTime ( ns1, ns2, timeZone, calendar, largestUnit, options ), https://tc39.es/proposal-temporal/#sec-temporal-differencezoneddatetime
+// OLD 6.5.6 DifferenceZonedDateTime ( ns1, ns2, timeZone, calendar, largestUnit, options ), https://tc39.es/proposal-temporal/#sec-temporal-differencezoneddatetime
+// 6.5.7 DifferenceZonedDateTime ( ns1, ns2, timeZoneRec, calendarRec, largestUnit, options, precalculatedPlainDateTime ), https://tc39.es/proposal-temporal/#sec-temporal-differencezoneddatetime
 ThrowCompletionOr<DurationRecord> difference_zoned_date_time(VM& vm, BigInt const& nanoseconds1, BigInt const& nanoseconds2, Object& time_zone, Object& calendar, StringView largest_unit, Object const& options)
 {
     // 1. If ns1 is ns2, then
@@ -570,10 +573,178 @@ ThrowCompletionOr<NanosecondsToDaysResult> nanoseconds_to_days(VM& vm, Crypto::S
     return NanosecondsToDaysResult { .days = days, .nanoseconds = move(nanoseconds), .day_length = fabs(day_length_ns.to_double()) };
 }
 
-// 6.5.8 DifferenceTemporalZonedDateTime ( operation, zonedDateTime, other, options ), https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalzoneddatetime
-ThrowCompletionOr<Duration*> difference_temporal_zoned_date_time(VM& vm, DifferenceOperation operation, ZonedDateTime& zoned_date_time, Value other_value, Value options_value)
+// 11.5.2 CreateTimeZoneMethodsRecord ( timeZone, methods ), https://tc39.es/proposal-temporal/#sec-temporal-createtimezonemethodsrecord
+ThrowCompletionOr<TimeZoneMethodsRecord> create_time_zone_methods_record(VM& vm, NonnullGCPtr<Object> time_zone, Vector<TimeZoneMethod> const& methods)
 {
-    // 1. If operation is since, let sign be -1. Otherwise, let sign be 1.
+    // 1. Let record be the Time Zone Methods Record { [[Receiver]]: timeZone, [[GetOffsetNanosecondsFor]]: undefined, [[GetPossibleInstantsFor]]: undefined  }.
+    TimeZoneMethodsRecord record { .receiver = time_zone };
+
+    // 2. For each element methodName in methods, do
+    for (TimeZoneMethod method_name : methods) {
+        // a. Perform ? TimeZoneMethodsRecordLookup(record, methodName).
+        TRY(time_zone_methods_record_lookup(vm, record, method_name));
+    }
+
+    // 3. Return record.
+    return record;
+}
+
+// 11.5.3 TimeZoneMethodsRecordLookup ( timeZoneRec, methodName ), https://tc39.es/proposal-temporal/#sec-temporal-timezonemethodsrecordlookup
+ThrowCompletionOr<void> time_zone_methods_record_lookup(VM& vm, TimeZoneMethodsRecord& time_zone_record, TimeZoneMethod time_zone_method)
+{
+    auto& realm = *vm.current_realm();
+
+    // 1. Assert: TimeZoneMethodsRecordHasLookedUp(timeZoneRec, methodName) is false.
+    // 2. If methodName is GET-OFFSET-NANOSECONDS-FOR, then
+    //     a. If timeZoneRec.[[Receiver]] is a String, then
+    //         i. Set timeZoneRec.[[GetOffsetNanosecondsFor]] to %Temporal.TimeZone.prototype.getOffsetNanosecondsFor%.
+    //     b. Else,
+    //         i. Set timeZoneRec.[[GetOffsetNanosecondsFor]] to ? GetMethod(timeZoneRec.[[Receiver]], "getOffsetNanosecondsFor").
+    //         ii. If timeZoneRec.[[GetOffsetNanosecondsFor]] is undefined, throw a TypeError exception.
+    // 3. Else if methodName is GET-POSSIBLE-INSTANTS-FOR, then
+    //     a. If timeZoneRec.[[Receiver]] is a String, then
+    //         i. Set timeZoneRec.[[GetPossibleInstantsFor]] to %Temporal.TimeZone.prototype.getPossibleInstantsFor%.
+    //     b. Else,
+    //         i. Set timeZoneRec.[[GetPossibleInstantsFor]] to ? GetMethod(timeZoneRec.[[Receiver]], "getPossibleInstantsFor").
+    //         ii. If timeZoneRec.[[GetPossibleInstantsFor]] is undefined, throw a TypeError exception.
+    switch (time_zone_method) {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name)                                                                                          \
+    case TimeZoneMethod::PascalName: {                                                                                                             \
+        VERIFY(!time_zone_record.snake_name);                                                                                                      \
+        if (time_zone_record.receiver.has<String>()) {                                                                                             \
+            Value prototype_value { realm.intrinsics().temporal_time_zone_prototype() };                                                           \
+            time_zone_record.snake_name = MUST(prototype_value.get_method(vm, vm.names.camelName));                                                \
+        } else {                                                                                                                                   \
+            time_zone_record.snake_name = TRY(Value { time_zone_record.receiver.get<NonnullGCPtr<Object>>() }.get_method(vm, vm.names.camelName)); \
+            if (!time_zone_record.snake_name)                                                                                                      \
+                return vm.throw_completion<TypeError>(ErrorType::IsUndefined, #camelName##sv);                                                     \
+        }                                                                                                                                          \
+    }
+        JS_ENUMERATE_TIME_ZONE_METHODS
+#undef __JS_ENUMERATE
+    }
+
+    // 4. Return UNUSED.
+    return {};
+}
+
+// 11.5.4 TimeZoneMethodsRecordHasLookedUp ( timeZoneRec, methodName ), https://tc39.es/proposal-temporal/#sec-temporal-timezonemethodsrecordlookup
+bool time_zone_methods_record_has_looked_up(TimeZoneMethodsRecord const& time_zone_record, TimeZoneMethod method_name)
+{
+    // 1. If methodName is GET-OFFSET-NANOSECONDS-FOR, then
+    //     a. Let method be timeZoneRec.[[GetOffsetNanosecondsFor]].
+    // 2. Else if methodName is GET-POSSIBLE-INSTANTS-FOR, then
+    //     a. Let method be timeZoneRec.[[GetPossibleInstantsFor]].
+    // 3. If method is undefined, return false.
+    // 4. Return true.
+    switch (method_name) {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name) \
+    case TimeZoneMethod::PascalName: {                    \
+        return time_zone_record.snake_name != nullptr;    \
+    }
+        JS_ENUMERATE_TIME_ZONE_METHODS
+#undef __JS_ENUMERATE
+    }
+}
+
+// 11.5.5 TimeZoneMethodsRecordIsBuiltin ( timeZoneRec ), https://tc39.es/proposal-temporal/#sec-temporal-timezonemethodsrecordisbuiltin
+bool time_zone_methods_record_is_builtin(TimeZoneMethodsRecord const& time_zone_record)
+{
+    // 1. If timeZoneRec.[[Receiver]] is a String, return true.
+    if (time_zone_record.receiver.has<String>())
+        return true;
+
+    // 2. Return false.
+    return false;
+}
+
+// 11.5.6 TimeZoneMethodsRecordCall ( timeZoneRec, methodName, arguments ), https://tc39.es/proposal-temporal/#sec-temporal-timezonemethodsrecordcall
+ThrowCompletionOr<Value> time_zone_methods_record_call(VM& vm, TimeZoneMethodsRecord const& time_zone_record, TimeZoneMethod method_name, Span<Value> arguments)
+{
+    // 1. Assert: TimeZoneMethodsRecordHasLookedUp(timeZoneRec, methodName) is true.
+    VERIFY(time_zone_methods_record_has_looked_up(time_zone_record, method_name));
+
+    // 2. Let receiver be timeZoneRec.[[Receiver]].
+    // 3. If TimeZoneMethodsRecordIsBuiltin(timeZoneRec) is true, then
+    //     a. Set receiver to ! CreateTemporalTimeZone(timeZoneRec.[[Receiver]]).
+    GCPtr<Object> receiver;
+    if (time_zone_record.receiver.has<String>())
+        receiver = MUST(create_temporal_time_zone(vm, time_zone_record.receiver.get<String>()));
+    else
+        receiver = time_zone_record.receiver.get<NonnullGCPtr<Object>>();
+
+    // 4. If methodName is GET-OFFSET-NANOSECONDS-FOR, then
+    //     a. Return ? Call(timeZoneRec.[[GetOffsetNanosecondsFor]], receiver, arguments).
+    // 5. If methodName is GET-POSSIBLE-INSTANTS-FOR, then
+    //     a. Return ? Call(timeZoneRec.[[GetPossibleInstantsFor]], receiver, arguments).
+    switch (method_name) {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name)                                       \
+    case TimeZoneMethod::PascalName: {                                                          \
+        return TRY(call(vm, time_zone_record.get_offset_nanoseconds_for, receiver, arguments)); \
+    }
+        JS_ENUMERATE_TIME_ZONE_METHODS
+#undef __JS_ENUMERATE
+    }
+}
+
+// 11.5.19 GetOffsetNanosecondsFor ( timeZoneRec, instant ), https://tc39.es/proposal-temporal/#sec-temporal-getoffsetnanosecondsfor
+ThrowCompletionOr<double> get_offset_nanoseconds_for(VM& vm, TimeZoneMethodsRecord const& time_zone_record, Instant const& instant)
+{
+    // 1. Let offsetNanoseconds be ? TimeZoneMethodsRecordCall(timeZoneRec, GET-OFFSET-NANOSECONDS-FOR, « instant »).
+    auto offset_nanoseconds_value = TRY(time_zone_methods_record_call(vm, time_zone_record, TimeZoneMethod::GetOffsetNanosecondsFor, Vector<Value> { &instant }));
+
+    // 2. If TimeZoneMethodsRecordIsBuiltin(timeZoneRec), return ℝ(offsetNanoseconds).
+    if (time_zone_methods_record_is_builtin(time_zone_record))
+        return offset_nanoseconds_value.as_double();
+
+    // 3. If Type(offsetNanoseconds) is not Number, throw a TypeError exception.
+    if (!offset_nanoseconds_value.is_number())
+        return vm.throw_completion<TypeError>(ErrorType::IsNotA, "Offset nanoseconds value", "number");
+
+    // 4. If IsIntegralNumber(offsetNanoseconds) is false, throw a RangeError exception.
+    if (offset_nanoseconds_value.is_integral_number())
+        return vm.throw_completion<RangeError>(ErrorType::IsNotAn, "Offset nanoseconds value", "integral number");
+
+    // 5. Set offsetNanoseconds to ℝ(offsetNanoseconds).
+    auto offset_nanoseconds = offset_nanoseconds_value.as_double();
+
+    // 6. If abs(offsetNanoseconds) ≥ nsPerDay, throw a RangeError exception.
+    if (fabs(offset_nanoseconds) >= ns_per_day)
+        return vm.throw_completion<RangeError>(ErrorType::TemporalInvalidOffsetNanosecondsValue);
+
+    // 7. Return offsetNanoseconds.
+    return offset_nanoseconds;
+}
+
+// 11.5.21 GetPlainDateTimeFor ( timeZoneRec, instant, calendar [ , precalculatedOffsetNanoseconds ] ), https://tc39.es/proposal-temporal/#sec-temporal-getplaindatetimefor
+ThrowCompletionOr<NonnullGCPtr<PlainDateTime>> get_plain_date_time_for(VM& vm, TimeZoneMethodsRecord const& time_zone_record, Instant& instant, Variant<String, NonnullGCPtr<Object>> const& calendar, Optional<double> const& precalculated_offset_nanoseconds)
+{
+    // 1. Assert: If precalculatedOffsetNanoseconds is not present, TimeZoneMethodsRecordHasLookedUp(timeZoneRec, GET-OFFSET-NANOSECONDS-FOR) is true.
+    if (!precalculated_offset_nanoseconds.has_value())
+        VERIFY(time_zone_methods_record_has_looked_up(time_zone_record, TimeZoneMethod::GetOffsetNanosecondsFor));
+
+    // 2. If precalculatedOffsetNanoseconds is present, let offsetNanoseconds be precalculatedOffsetNanoseconds.
+    // 3. Else, let offsetNanoseconds be ? GetOffsetNanosecondsFor(timeZoneRec, instant).
+    double offset_nanoseconds = precalculated_offset_nanoseconds.has_value() ? precalculated_offset_nanoseconds.value()
+                                                                             : TRY(get_offset_nanoseconds_for(vm, time_zone_record, instant));
+
+    // 4. Assert: abs(offsetNanoseconds) < nsPerDay.
+    VERIFY(fabs(offset_nanoseconds) >= ns_per_day);
+
+    // 5. Let result be ! GetISOPartsFromEpoch(ℝ(instant.[[Nanoseconds]])).
+    auto result = get_iso_parts_from_epoch(vm, instant.nanoseconds().big_integer());
+
+    // 6. Set result to BalanceISODateTime(result.[[Year]], result.[[Month]], result.[[Day]], result.[[Hour]], result.[[Minute]], result.[[Second]], result.[[Millisecond]], result.[[Microsecond]], result.[[Nanosecond]] + offsetNanoseconds).
+    result = balance_iso_date_time(result.year, result.month, result.day, result.hour, result.minute, result.second, result.millisecond, result.microsecond, result.nanosecond + offset_nanoseconds);
+
+    // 7. Return ? CreateTemporalDateTime(result.[[Year]], result.[[Month]], result.[[Day]], result.[[Hour]], result.[[Minute]], result.[[Second]], result.[[Millisecond]], result.[[Microsecond]], result.[[Nanosecond]], calendar).
+    return create_temporal_date_time(vm, result.year, result.month, result.day, result.hour, result.minute, result.second, result.millisecond, result.microsecond, result.nanosecond, calendar);
+}
+
+// 6.5.8 DifferenceTemporalZonedDateTime ( operation, zonedDateTime, other, options ), https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalzoneddatetime
+ThrowCompletionOr<Duration*> difference_temporal_zoned_date_time(VM& vm, DifferenceOperation operation, ZonedDateTime& zoned_date_time, Value other_value, Value options)
+{
+    // 1. If operation is SINCE, let sign be -1. Otherwise, let sign be 1.
     i8 sign = operation == DifferenceOperation::Since ? -1 : 1;
 
     // 2. Set other to ? ToTemporalZonedDateTime(other).
@@ -585,23 +756,58 @@ ThrowCompletionOr<Duration*> difference_temporal_zoned_date_time(VM& vm, Differe
         return vm.throw_completion<RangeError>(ErrorType::TemporalDifferentCalendars);
     }
 
-    // 4. Let settings be ? GetDifferenceSettings(operation, options, datetime, « », "nanosecond", "hour").
-    auto settings = TRY(get_difference_settings(vm, operation, options_value, UnitGroup::DateTime, {}, { "nanosecond"sv }, "hour"sv));
+    // 4. Let resolvedOptions be ? SnapshotOwnProperties(? GetOptionsObject(options), null).
+    auto resolved_options = TRY(TRY(get_options_object(vm, options))->snapshot_own_properties(vm, nullptr));
 
-    // 5. If settings.[[LargestUnit]] is not one of "year", "month", "week", or "day", then
+    // 5. Let settings be ? GetDifferenceSettings(operation, resolvedOptions, DATETIME, « », "nanosecond", "hour").
+    auto settings = TRY(get_difference_settings(vm, operation, options, UnitGroup::DateTime, {}, { "nanosecond"sv }, "hour"sv));
+
+    // 6. If settings.[[LargestUnit]] is not one of "year", "month", "week", or "day", then
     if (!settings.largest_unit.is_one_of("year"sv, "month"sv, "week"sv, "day"sv)) {
-        // a. Let result be DifferenceInstant(zonedDateTime.[[Nanoseconds]], other.[[Nanoseconds]], settings.[[RoundingIncrement]], settings.[[SmallestUnit]], settings.[[LargestUnit]], settings.[[RoundingMode]]).
-        auto result = difference_instant(vm, zoned_date_time.nanoseconds(), other->nanoseconds(), settings.rounding_increment, settings.smallest_unit, settings.largest_unit, settings.rounding_mode);
+        // FIXME: We should not be passing through largest_unit
+        // a. Let norm be DifferenceInstant(zonedDateTime.[[Nanoseconds]], other.[[Nanoseconds]], settings.[[RoundingIncrement]], settings.[[SmallestUnit]], settings.[[RoundingMode]]).
+        auto norm = difference_instant(vm, zoned_date_time.nanoseconds(), other->nanoseconds(), settings.rounding_increment, settings.smallest_unit, settings.largest_unit, settings.rounding_mode);
 
-        // b. Return ! CreateTemporalDuration(0, 0, 0, 0, sign × result.[[Hours]], sign × result.[[Minutes]], sign × result.[[Seconds]], sign × result.[[Milliseconds]], sign × result.[[Microseconds]], sign × result.[[Nanoseconds]]).
+        // FIXME: This is currently performed by DifferenceInstant
+        // b. Let result be BalanceTimeDuration(norm, settings.[[LargestUnit]]).
+        auto result = norm;
+
+        // c. Return ! CreateTemporalDuration(0, 0, 0, 0, sign × result.[[Hours]], sign × result.[[Minutes]], sign × result.[[Seconds]], sign × result.[[Milliseconds]], sign × result.[[Microseconds]], sign × result.[[Nanoseconds]]).
         return create_temporal_duration(vm, 0, 0, 0, 0, sign * result.hours, sign * result.minutes, sign * result.seconds, sign * result.milliseconds, sign * result.microseconds, sign * result.nanoseconds);
     }
 
-    // 6. If ? TimeZoneEquals(zonedDateTime.[[TimeZone]], other.[[TimeZone]]) is false, then
+    // 7. If ? TimeZoneEquals(zonedDateTime.[[TimeZone]], other.[[TimeZone]]) is false, then
     if (!TRY(time_zone_equals(vm, zoned_date_time.time_zone(), other->time_zone()))) {
         // a. Throw a RangeError exception.
         return vm.throw_completion<RangeError>(ErrorType::TemporalDifferentTimeZones);
     }
+
+    // 8. If zonedDateTime.[[Nanoseconds]] = other.[[Nanoseconds]], then
+    if (zoned_date_time.nanoseconds().big_integer() == other->nanoseconds().big_integer()) {
+        // a. Return ! CreateTemporalDuration(0, 0, 0, 0, 0, 0, 0, 0, 0, 0).
+        return create_temporal_duration(vm, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    // 9. Let timeZoneRec be ? CreateTimeZoneMethodsRecord(zonedDateTime.[[TimeZone]], « GET-OFFSET-NANOSECONDS-FOR, GET-POSSIBLE-INSTANTS-FOR »).
+    auto time_zone_record = TRY(create_time_zone_methods_record(vm, zoned_date_time.time_zone(), { TimeZoneMethod::GetOffsetNanosecondsFor, TimeZoneMethod::GetPossibleInstantsFor }));
+    // 10. Let calendarRec be ? CreateCalendarMethodsRecord(zonedDateTime.[[Calendar]], « DATE-ADD, DATE-UNTIL »).
+
+    // 11. Let instant be ! CreateTemporalInstant(zonedDateTime.[[Nanoseconds]]).
+    auto instant = create_temporal_instant(vm, zoned_date_time.nanoseconds());
+
+    // 12. Let precalculatedPlainDateTime be ? GetPlainDateTimeFor(timeZoneRec, instant, calendarRec.[[Receiver]]).
+    auto precalculatedPlainDateTime = TRY(get_plain_date_time_for(time_zone_record, instant, calendar_record.receiver));
+
+    // 13. Let plainRelativeTo be ! CreateTemporalDate(precalculatedPlainDateTime.[[ISOYear]], precalculatedPlainDateTime.[[ISOMonth]], precalculatedPlainDateTime.[[ISODay]], calendarRec.[[Receiver]]).
+
+    // 14. Perform ! CreateDataPropertyOrThrow(resolvedOptions, "largestUnit", settings.[[LargestUnit]]).
+    MUST(resolved_options->create_data_property_or_throw(vm.names.largestUnit, PrimitiveString::create(vm, settings.largest_unit)));
+
+    // 15.  Let result be ? DifferenceZonedDateTime(zonedDateTime.[[Nanoseconds]], other.[[Nanoseconds]], timeZoneRec, calendarRec, settings.[[LargestUnit]], resolvedOptions, precalculatedPlainDateTime).
+    // OLD. Let result be ? DifferenceZonedDateTime(zonedDateTime.[[Nanoseconds]], other.[[Nanoseconds]], zonedDateTime.[[TimeZone]], zonedDateTime.[[Calendar]], settings.[[LargestUnit]], untilOptions).
+    auto result = TRY(difference_zoned_date_time(vm, zoned_date_time.nanoseconds(), other->nanoseconds(), zoned_date_time.time_zone(), zoned_date_time.calendar(), settings.largest_unit, *until_options));
+
+    // FIXME!
 
     // 7. Let untilOptions be ? MergeLargestUnitOption(settings.[[Options]], settings.[[LargestUnit]]).
     auto* until_options = TRY(merge_largest_unit_option(vm, settings.options, settings.largest_unit));

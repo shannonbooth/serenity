@@ -25,19 +25,19 @@ public:
     [[nodiscard]] i32 iso_year() const { return m_iso_year; }
     [[nodiscard]] u8 iso_month() const { return m_iso_month; }
     [[nodiscard]] u8 iso_day() const { return m_iso_day; }
-    [[nodiscard]] Object const& calendar() const { return m_calendar; }
-    [[nodiscard]] Object& calendar() { return m_calendar; }
+    [[nodiscard]] Variant<String, NonnullGCPtr<Object>> const& calendar() const { return m_calendar; }
+    [[nodiscard]] Variant<String, NonnullGCPtr<Object>>& calendar() { return m_calendar; }
 
 private:
-    PlainDate(i32 iso_year, u8 iso_month, u8 iso_day, Object& calendar, Object& prototype);
+    PlainDate(i32 iso_year, u8 iso_month, u8 iso_day, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype);
 
     virtual void visit_edges(Visitor&) override;
 
     // 3.4 Properties of Temporal.PlainDate Instances, https://tc39.es/proposal-temporal/#sec-properties-of-temporal-plaindate-instances
-    i32 m_iso_year { 0 };            // [[ISOYear]]
-    u8 m_iso_month { 1 };            // [[ISOMonth]]
-    u8 m_iso_day { 1 };              // [[ISODay]]
-    NonnullGCPtr<Object> m_calendar; // [[Calendar]]
+    i32 m_iso_year { 0 };                             // [[ISOYear]]
+    u8 m_iso_month { 1 };                             // [[ISOMonth]]
+    u8 m_iso_day { 1 };                               // [[ISODay]]
+    Variant<String, NonnullGCPtr<Object>> m_calendar; // [[Calendar]]
 };
 
 // 3.5.1 ISO Date Records, https://tc39.es/proposal-temporal/#sec-temporal-iso-date-records

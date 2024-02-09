@@ -22,18 +22,18 @@ public:
     [[nodiscard]] BigInt const& nanoseconds() const { return m_nanoseconds; }
     [[nodiscard]] Object const& time_zone() const { return m_time_zone; }
     [[nodiscard]] Object& time_zone() { return m_time_zone; }
-    [[nodiscard]] Object const& calendar() const { return m_calendar; }
-    [[nodiscard]] Object& calendar() { return m_calendar; }
+    [[nodiscard]] Variant<String, NonnullGCPtr<Object>> const& calendar() const { return m_calendar; }
+    [[nodiscard]] Variant<String, NonnullGCPtr<Object>>& calendar() { return m_calendar; }
 
 private:
-    ZonedDateTime(BigInt const& nanoseconds, Object& time_zone, Object& calendar, Object& prototype);
+    ZonedDateTime(BigInt const& nanoseconds, Object& time_zone, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype);
 
     virtual void visit_edges(Visitor&) override;
 
     // 6.4 Properties of Temporal.ZonedDateTime Instances, https://tc39.es/proposal-temporal/#sec-properties-of-temporal-zoneddatetime-instances
-    NonnullGCPtr<BigInt const> m_nanoseconds; // [[Nanoseconds]]
-    NonnullGCPtr<Object> m_time_zone;         // [[TimeZone]]
-    NonnullGCPtr<Object> m_calendar;          // [[Calendar]]
+    NonnullGCPtr<BigInt const> m_nanoseconds;         // [[Nanoseconds]]
+    NonnullGCPtr<Object> m_time_zone;                 // [[TimeZone]]
+    Variant<String, NonnullGCPtr<Object>> m_calendar; // [[Calendar]]
 };
 
 struct NanosecondsToDaysResult {

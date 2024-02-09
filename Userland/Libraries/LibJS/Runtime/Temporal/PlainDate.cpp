@@ -26,19 +26,20 @@ namespace JS::Temporal {
 JS_DEFINE_ALLOCATOR(PlainDate);
 
 // 3 Temporal.PlainDate Objects, https://tc39.es/proposal-temporal/#sec-temporal-plaindate-objects
-PlainDate::PlainDate(i32 year, u8 month, u8 day, Object& calendar, Object& prototype)
+PlainDate::PlainDate(i32 year, u8 month, u8 day, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype)
     : Object(ConstructWithPrototypeTag::Tag, prototype)
     , m_iso_year(year)
     , m_iso_month(month)
     , m_iso_day(day)
-    , m_calendar(calendar)
+    , m_calendar(move(calendar))
 {
 }
 
 void PlainDate::visit_edges(Visitor& visitor)
 {
     Base::visit_edges(visitor);
-    visitor.visit(m_calendar);
+    if (auto const* calander = m_calendar.get_pointer<NonnullGCPtr<Object>>())
+        visitor.visit(*calander);
 }
 
 // 3.5.2 CreateISODateRecord ( year, month, day ), https://tc39.es/proposal-temporal/#sec-temporal-create-iso-date-record

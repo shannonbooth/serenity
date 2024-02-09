@@ -366,7 +366,7 @@ ThrowCompletionOr<String> builtin_time_zone_get_offset_string_for(VM& vm, Value 
 }
 
 // 11.6.10 BuiltinTimeZoneGetPlainDateTimeFor ( timeZone, instant, calendar ), https://tc39.es/proposal-temporal/#sec-temporal-builtintimezonegetplaindatetimefor
-ThrowCompletionOr<PlainDateTime*> builtin_time_zone_get_plain_date_time_for(VM& vm, Value time_zone, Instant& instant, Object& calendar)
+ThrowCompletionOr<PlainDateTime*> builtin_time_zone_get_plain_date_time_for(VM& vm, Value time_zone, Instant& instant, Variant<String, NonnullGCPtr<Object>> const& calendar)
 {
     // 1. Assert: instant has an [[InitializedTemporalInstant]] internal slot.
 

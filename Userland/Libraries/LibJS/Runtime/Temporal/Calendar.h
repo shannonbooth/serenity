@@ -38,12 +38,66 @@ struct YearWeekRecord {
     i32 year { 0 };
 };
 
+// https://tc39.es/proposal-temporal/#table-temporal-calendar-methods-record-fields
+struct CalendarMethodsRecord {
+    // The calendar object, or a string indicating a built-in time zone.
+    Variant<String, NonnullGCPtr<Object>> receiver; // [[Reciever]]
+
+    // The calendar's dateAdd method. For a built-in calendar this is always %Temporal.Calendar.prototype.dateAdd%.
+    GCPtr<FunctionObject> date_add; // [[DateAdd]]
+
+    // The calendar's dateFromFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.dateFromFields%.
+    GCPtr<FunctionObject> date_from_fields; // [[DateFromFields]]
+
+    // The calendar's dateUntil method. For a built-in calendar this is always %Temporal.Calendar.prototype.dateUntil%.
+    GCPtr<FunctionObject> date_until; // [[DateUntil]]
+
+    // The calendar's day method. For a built-in calendar this is always %Temporal.Calendar.prototype.day%.
+    GCPtr<FunctionObject> day; // [[Day]]
+
+    // The calendar's fields method. For a built-in calendar this is always %Temporal.Calendar.prototype.fields%.
+    GCPtr<FunctionObject> fields; // [[Fields]]
+
+    // The calendar's mergeFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.mergeFields%.
+    GCPtr<FunctionObject> merge_fields; // [[MergeFields]]
+
+    // The calendar's monthDayFromFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.monthDayFromFields%.
+    GCPtr<FunctionObject> month_day_from_fields; // [[MonthDayFromFields]]
+
+    // The calendar's yearMonthFromFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.yearMonthFromFields%.
+    GCPtr<FunctionObject> year_month_from_fields; // [[YearMonthFromFields]]
+};
+
+#define JS_ENUMERATE_CALENDAR_METHODS                                             \
+    __JS_ENUMERATE(DateAdd, dateAdd, date_add)                                    \
+    __JS_ENUMERATE(DateFromFields, dateFromFields, date_from_fields)              \
+    __JS_ENUMERATE(DateUntil, dateUntil, date_until)                              \
+    __JS_ENUMERATE(Day, day, day)                                                 \
+    __JS_ENUMERATE(Fields, fields, fields)                                        \
+    __JS_ENUMERATE(MergeFields, mergeFields, merge_fields)                        \
+    __JS_ENUMERATE(MonthDayFromFields, monthDayFromFields, month_day_from_fields) \
+    __JS_ENUMERATE(YearMonthFromFields, yearMonthFromFields, year_month_from_fields)
+
+enum class CalendarMethod {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name) \
+    PascalName,
+    JS_ENUMERATE_CALENDAR_METHODS
+#undef __JS_ENUMERATE
+};
+
+ThrowCompletionOr<void> calendar_methods_record_lookup(VM&, CalendarMethodsRecord&, CalendarMethod);
+ThrowCompletionOr<CalendarMethodsRecord> create_calendar_methods_record(VM&, Variant<String, NonnullGCPtr<Object>> const& calendar, Vector<CalendarMethod> const&);
+bool calendar_methods_record_has_looked_up(CalendarMethodsRecord const&, CalendarMethod);
+bool calendar_methods_record_is_builtin(CalendarMethodsRecord const&);
+ThrowCompletionOr<Value> calendar_methods_record_call(VM&, CalendarMethodsRecord const&, CalendarMethod, Span<Value> arguments);
+
 bool is_builtin_calendar(StringView identifier);
 ReadonlySpan<StringView> available_calendars();
 ThrowCompletionOr<Calendar*> create_temporal_calendar(VM&, String const& identifier, FunctionObject const* new_target = nullptr);
 ThrowCompletionOr<Calendar*> get_builtin_calendar(VM&, String const& identifier);
 Calendar* get_iso8601_calendar(VM&);
 ThrowCompletionOr<Vector<String>> calendar_fields(VM&, Object& calendar, Vector<StringView> const& field_names);
+ThrowCompletionOr<Vector<String>> calendar_fields(VM&, CalendarMethodsRecord& calendar, Vector<StringView> const& field_names);
 ThrowCompletionOr<Object*> calendar_merge_fields(VM&, Object& calendar, Object& fields, Object& additional_fields);
 ThrowCompletionOr<PlainDate*> calendar_date_add(VM&, Object& calendar, Value date, Duration&, Object* options = nullptr, FunctionObject* date_add = nullptr);
 ThrowCompletionOr<Duration*> calendar_date_until(VM&, Object const& calendar, Value one, Value two, Object const& options, FunctionObject const* date_until = nullptr);
@@ -64,6 +118,7 @@ ThrowCompletionOr<Value> calendar_era(VM&, Object& calendar, Object& date_like);
 ThrowCompletionOr<Value> calendar_era_year(VM&, Object& calendar, Object& date_like);
 ThrowCompletionOr<Object*> to_temporal_calendar(VM&, Value);
 ThrowCompletionOr<Object*> to_temporal_calendar_with_iso_default(VM&, Value);
+ThrowCompletionOr<Variant<String, NonnullGCPtr<Object>>> get_temporal_calendar_slot_value_with_iso_default(VM&, Object&);
 ThrowCompletionOr<Object*> get_temporal_calendar_with_iso_default(VM&, Object&);
 ThrowCompletionOr<PlainDate*> calendar_date_from_fields(VM&, Object& calendar, Object const& fields, Object const* options = nullptr);
 ThrowCompletionOr<PlainYearMonth*> calendar_year_month_from_fields(VM&, Object& calendar, Object const& fields, Object const* options = nullptr);

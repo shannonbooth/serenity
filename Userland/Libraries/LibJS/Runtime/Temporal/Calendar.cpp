@@ -10,6 +10,7 @@
 #include <LibJS/Runtime/Array.h>
 #include <LibJS/Runtime/Completion.h>
 #include <LibJS/Runtime/GlobalObject.h>
+#include <LibJS/Runtime/Iterator.h>
 #include <LibJS/Runtime/Temporal/AbstractOperations.h>
 #include <LibJS/Runtime/Temporal/Calendar.h>
 #include <LibJS/Runtime/Temporal/CalendarConstructor.h>
@@ -103,6 +104,39 @@ Calendar* get_iso8601_calendar(VM& vm)
 {
     // 1. Return ! GetBuiltinCalendar("iso8601").
     return MUST(get_builtin_calendar(vm, "iso8601"_string));
+}
+
+// 12.2.9 CalendarFields ( calendarRec, fieldNames ), https://tc39.es/proposal-temporal/#sec-temporal-calendarfields
+ThrowCompletionOr<Vector<String>> calendar_fields(VM& vm, CalendarMethodsRecord& calendar_record, Vector<StringView> const& field_names)
+{
+    auto& realm = *vm.current_realm();
+
+    // 1. If CalendarMethodsRecordIsBuiltin(calendarRec) is true, then
+    if (calendar_methods_record_is_builtin(calendar_record)) {
+        // a. NOTE: %Temporal.Calendar.prototype.fields% is not called in this clause in order to avoid an unnecessary observable Array iteration.
+        // FIXME: b. Assert: fieldNames contains no String other than "year", "month", "monthCode", or "day".
+        // FIXME: c. If calendarRec.[[Receiver]] is "iso8601", return fieldNames.
+        // FIXME: d. Let extraFieldDescriptors be CalendarFieldDescriptors(calendarRec.[[Receiver]], fieldNames).
+        // FIXME: e. For each Calendar Field Descriptor Record desc of extraFieldDescriptors, do
+        // FIXME: i. Append desc.[[Property]] to fieldNames.
+
+        // f. Return fieldNames.
+        Vector<String> result;
+        result.ensure_capacity(field_names.size());
+        for (auto const& value : field_names)
+            result.unchecked_append(MUST(String::from_utf8(value)));
+        return field_names;
+    }
+
+    // 2. Let fieldsArray be ? CalendarMethodsRecordCall(calendarRec, FIELDS, « CreateArrayFromList(fieldNames) »).
+    auto field_names_value = Array::create_from<StringView>(realm, field_names, [&vm](auto field_name) { return PrimitiveString::create(vm, field_name); });
+    auto fields_array = TRY(calendar_methods_record_call(vm, calendar_record, CalendarMethod::Fields, Vector<Value> { field_names_value }));
+
+    // 3. Let iteratorRecord be ? GetIterator(fieldsArray, SYNC).
+    auto iterator_record = TRY(get_iterator(vm, fields_array, IteratorHint::Sync));
+
+    // 4. Return ? IteratorToListOfType(iteratorRecord, « String »).
+    return TRY(iterator_to_list(vm,
 }
 
 // 12.2.4 CalendarFields ( calendar, fieldNames ), https://tc39.es/proposal-temporal/#sec-temporal-calendarfields
@@ -494,8 +528,8 @@ ThrowCompletionOr<Object*> to_temporal_calendar_with_iso_default(VM& vm, Value t
     return to_temporal_calendar(vm, temporal_calendar_like);
 }
 
-// 12.2.23 GetTemporalCalendarWithISODefault ( item ), https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarwithisodefault
-ThrowCompletionOr<Object*> get_temporal_calendar_with_iso_default(VM& vm, Object& item)
+// 12.2.28 GetTemporalCalendarSlotValueWithISODefault ( item ), https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
+ThrowCompletionOr<Variant<String, NonnullGCPtr<Object>>> get_temporal_calendar_slot_value_with_iso_default(VM& vm, Object& item)
 {
     // 1. If item has an [[InitializedTemporalDate]], [[InitializedTemporalDateTime]], [[InitializedTemporalMonthDay]], [[InitializedTemporalTime]], [[InitializedTemporalYearMonth]], or [[InitializedTemporalZonedDateTime]] internal slot, then
     // a. Return item.[[Calendar]].
@@ -505,8 +539,6 @@ ThrowCompletionOr<Object*> get_temporal_calendar_with_iso_default(VM& vm, Object
         return &static_cast<PlainDateTime&>(item).calendar();
     if (is<PlainMonthDay>(item))
         return &static_cast<PlainMonthDay&>(item).calendar();
-    if (is<PlainTime>(item))
-        return &static_cast<PlainTime&>(item).calendar();
     if (is<PlainYearMonth>(item))
         return &static_cast<PlainYearMonth&>(item).calendar();
     if (is<ZonedDateTime>(item))

@@ -21,19 +21,20 @@ namespace JS::Temporal {
 JS_DEFINE_ALLOCATOR(PlainMonthDay);
 
 // 10 Temporal.PlainMonthDay Objects, https://tc39.es/proposal-temporal/#sec-temporal-plainmonthday-objects
-PlainMonthDay::PlainMonthDay(u8 iso_month, u8 iso_day, i32 iso_year, Object& calendar, Object& prototype)
+PlainMonthDay::PlainMonthDay(u8 iso_month, u8 iso_day, i32 iso_year, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype)
     : Object(ConstructWithPrototypeTag::Tag, prototype)
     , m_iso_year(iso_year)
     , m_iso_month(iso_month)
     , m_iso_day(iso_day)
-    , m_calendar(calendar)
+    , m_calendar(move(calendar))
 {
 }
 
 void PlainMonthDay::visit_edges(Visitor& visitor)
 {
     Base::visit_edges(visitor);
-    visitor.visit(m_calendar);
+    if (auto const* calander = m_calendar.get_pointer<NonnullGCPtr<Object>>())
+        visitor.visit(*calander);
 }
 
 // 10.5.1 ToTemporalMonthDay ( item [ , options ] ), https://tc39.es/proposal-temporal/#sec-temporal-totemporalmonthday

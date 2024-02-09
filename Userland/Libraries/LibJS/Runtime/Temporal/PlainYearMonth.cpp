@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021-2023, Linus Groh <linusg@serenityos.org>
+ * Copyright (c) 2023-2024, Shannon Booth <shannon@serenityos.org>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -14,25 +15,27 @@
 #include <LibJS/Runtime/Temporal/PlainDate.h>
 #include <LibJS/Runtime/Temporal/PlainYearMonth.h>
 #include <LibJS/Runtime/Temporal/PlainYearMonthConstructor.h>
+#include <LibJS/Runtime/Temporal/TimeZone.h>
 
 namespace JS::Temporal {
 
 JS_DEFINE_ALLOCATOR(PlainYearMonth);
 
 // 9 Temporal.PlainYearMonth Objects, https://tc39.es/proposal-temporal/#sec-temporal-plainyearmonth-objects
-PlainYearMonth::PlainYearMonth(i32 iso_year, u8 iso_month, u8 iso_day, Object& calendar, Object& prototype)
+PlainYearMonth::PlainYearMonth(i32 iso_year, u8 iso_month, u8 iso_day, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype)
     : Object(ConstructWithPrototypeTag::Tag, prototype)
     , m_iso_year(iso_year)
     , m_iso_month(iso_month)
     , m_iso_day(iso_day)
-    , m_calendar(calendar)
+    , m_calendar(move(calendar))
 {
 }
 
 void PlainYearMonth::visit_edges(Visitor& visitor)
 {
     Base::visit_edges(visitor);
-    visitor.visit(m_calendar);
+    if (auto const* calander = m_calendar.get_pointer<NonnullGCPtr<Object>>())
+        visitor.visit(*calander);
 }
 
 // 9.5.1 ToTemporalYearMonth ( item [ , options ] ), https://tc39.es/proposal-temporal/#sec-temporal-totemporalyearmonth
@@ -231,55 +234,24 @@ ThrowCompletionOr<String> temporal_year_month_to_string(VM& vm, PlainYearMonth& 
     return TRY_OR_THROW_OOM(vm, String::formatted("{}{}", result, calendar_string));
 }
 
-// https://tc39.es/proposal-temporal/#table-temporal-calendar-methods-record-fields
-struct CalendarMethodsRecords {
-    // The calendar object, or a string indicating a built-in time zone.
-    Variant<String, NonnullGCPtr<Object>> receiver; // [[DateAdd]]
+// 12.2.2 CreateCalendarMethodsRecord ( calendar, methods ), https://tc39.es/proposal-temporal/#sec-temporal-createcalendarmethodsrecord
+ThrowCompletionOr<CalendarMethodsRecord> create_calendar_methods_record(VM& vm, Variant<String, NonnullGCPtr<Object>> const& calendar, Vector<CalendarMethod> const& methods)
+{
+    // 1. Let record be the Calendar Methods Record { [[Receiver]]: calendar, [[DateAdd]]: undefined, [[DateFromFields]]: undefined, [[DateUntil]]: undefined, [[Day]]: undefined, [[Fields]]: undefined, [[MergeFields]]: undefined, [[MonthDayFromFields]]: undefined, [[YearMonthFromFields]]: undefined }.
+    CalendarMethodsRecord record { .receiver = calendar };
 
-    // The calendar's dateAdd method. For a built-in calendar this is always %Temporal.Calendar.prototype.dateAdd%.
-    GCPtr<FunctionObject> date_add; // [[DateAdd]]
+    // 2. For each element methodName in methods, do
+    for (auto const& method_name : methods) {
+        // a. Perform ? CalendarMethodsRecordLookup(record, methodName).
+        TRY(calendar_methods_record_lookup(vm, record, method_name));
+    }
 
-    // The calendar's dateFromFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.dateFromFields%.
-    GCPtr<FunctionObject> date_from_fields; // [[DateFromFields]]
-
-    // The calendar's dateUntil method. For a built-in calendar this is always %Temporal.Calendar.prototype.dateUntil%.
-    GCPtr<FunctionObject> date_until; // [[DateUntil]]
-
-    // The calendar's day method. For a built-in calendar this is always %Temporal.Calendar.prototype.day%.
-    GCPtr<FunctionObject> day; // [[Day]]
-
-    // The calendar's fields method. For a built-in calendar this is always %Temporal.Calendar.prototype.fields%.
-    GCPtr<FunctionObject> fields; // [[Fields]]
-
-    // The calendar's mergeFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.mergeFields%.
-    GCPtr<FunctionObject> merge_fields; // [[MergeFields]]
-
-    // The calendar's monthDayFromFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.monthDayFromFields%.
-    GCPtr<FunctionObject> month_day_from_fields; // [[MonthDayFromFields]]
-
-    // The calendar's yearMonthFromFields method. For a built-in calendar this is always %Temporal.Calendar.prototype.yearMonthFromFields%.
-    GCPtr<FunctionObject> year_month_from_fields; // [[YearMonthFromFields]]
-};
-
-#define JS_ENUMERATE_CALENDAR_METHODS                                             \
-    __JS_ENUMERATE(DateAdd, dateAdd, date_add)                                    \
-    __JS_ENUMERATE(DateFromFields, dateFromFields, date_from_fields)              \
-    __JS_ENUMERATE(DateUntil, dateUntil, date_until)                              \
-    __JS_ENUMERATE(Day, day, day)                                                 \
-    __JS_ENUMERATE(Fields, fields, fields)                                        \
-    __JS_ENUMERATE(MergeFields, mergeFields, merge_fields)                        \
-    __JS_ENUMERATE(MonthDayFromFields, monthDayFromFields, month_day_from_fields) \
-    __JS_ENUMERATE(YearMonthFromFields, yearMonthFromFields, year_month_from_fields)
-
-enum class CalendarMethod {
-#define __JS_ENUMERATE(PascalName, camelName, snake_name) \
-    PascalName,
-    JS_ENUMERATE_CALENDAR_METHODS
-#undef __JS_ENUMERATE
-};
+    // 3. Return record.
+    return record;
+}
 
 // 12.2.4 CalendarMethodsRecordLookup ( calendarRec, methodName ), https://tc39.es/proposal-temporal/#sec-temporal-calendarmethodsrecordlookup
-ThrowCompletionOr<void> calendar_methods_record_lookup(VM& vm, CalendarMethodsRecords& calendar_record, CalendarMethod method_name)
+ThrowCompletionOr<void> calendar_methods_record_lookup(VM& vm, CalendarMethodsRecord& calendar_record, CalendarMethod method_name)
 {
     auto& realm = *vm.current_realm();
 
@@ -353,30 +325,87 @@ ThrowCompletionOr<void> calendar_methods_record_lookup(VM& vm, CalendarMethodsRe
     return {};
 }
 
-// 12.2.2 CreateCalendarMethodsRecord ( calendar, methods ), https://tc39.es/proposal-temporal/#sec-temporal-createcalendarmethodsrecord
-ThrowCompletionOr<CalendarMethodsRecords> create_calendar_methods_record(VM& vm, Variant<String, NonnullGCPtr<Object>> const& calendar, Vector<CalendarMethod> const& methods)
+// 12.2.5 CalendarMethodsRecordHasLookedUp ( calendarRec, methodName ), https://tc39.es/proposal-temporal/#sec-temporal-calendarmethodsrecordhaslookedup
+bool calendar_methods_record_has_looked_up(CalendarMethodsRecord const& calendar_record, CalendarMethod method_name)
 {
-    // 1. Let record be the Calendar Methods Record { [[Receiver]]: calendar, [[DateAdd]]: undefined, [[DateFromFields]]: undefined, [[DateUntil]]: undefined, [[Day]]: undefined, [[Fields]]: undefined, [[MergeFields]]: undefined, [[MonthDayFromFields]]: undefined, [[YearMonthFromFields]]: undefined }.
-    CalendarMethodsRecords record {
-        .receiver = calendar,
-        .date_add = nullptr,
-        .date_from_fields = nullptr,
-        .date_until = nullptr,
-        .day = nullptr,
-        .fields = nullptr,
-        .merge_fields = nullptr,
-        .month_day_from_fields = nullptr,
-        .year_month_from_fields = nullptr,
-    };
-
-    // 2. For each element methodName in methods, do
-    for (auto const& method_name : methods) {
-        // a. Perform ? CalendarMethodsRecordLookup(record, methodName).
-        TRY(calendar_methods_record_lookup(vm, record, method_name));
+    // 1. If methodName is DATE-ADD, then
+    //     a. Let method be calendarRec.[[DateAdd]].
+    // 2. Else if methodName is DATE-FROM-FIELDS, then
+    //     a. Let method be calendarRec.[[DateFromFields]].
+    // 3. Else if methodName is DATE-UNTIL, then
+    //     a. Let method be calendarRec.[[DateUntil]].
+    // 4. Else if methodName is DAY, then
+    //     a. Let method be calendarRec.[[Day]].
+    // 5. Else if methodName is FIELDS, then
+    //     a. Let method be calendarRec.[[Fields]].
+    // 6. Else if methodName is MERGE-FIELDS, then
+    //     a. Let method be calendarRec.[[MergeFields]].
+    // 7. Else if methodName is MONTH-DAY-FROM-FIELDS, then
+    //     a. Let method be calendarRec.[[MonthDayFromFields]].
+    // 8. Else if methodName is YEAR-MONTH-FROM-FIELDS, then
+    //     a. Let method be calendarRec.[[YearMonthFromFields]].
+    // 9. If method is undefined, return false.
+    // 10. Return true.
+    switch (method_name) {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name) \
+    case CalendarMethod::PascalName: {                    \
+        return calendar_record.snake_name != nullptr;     \
     }
+        JS_ENUMERATE_CALENDAR_METHODS
+#undef __JS_ENUMERATE
+    }
+}
 
-    // 3. Return record.
-    return record;
+// 12.2.6 CalendarMethodsRecordIsBuiltin ( calendarRec ), https://tc39.es/proposal-temporal/#sec-temporal-calendarmethodsrecordisbuiltin
+bool calendar_methods_record_is_builtin(CalendarMethodsRecord const& calendar_record)
+{
+    // 1. If calendarRec.[[Receiver]] is a String, return true.
+    if (calendar_record.receiver.has<String>())
+        return true;
+
+    // 2. Return false.
+    return false;
+}
+
+// 12.2.7 CalendarMethodsRecordCall ( calendarRec, methodName, arguments ), https://tc39.es/proposal-temporal/#sec-temporal-calendarmethodsrecordcall
+ThrowCompletionOr<Value> calendar_methods_record_call(VM& vm, CalendarMethodsRecord const& calendar_record, CalendarMethod method_name, Span<Value> arguments)
+{
+    // 1. Assert: CalendarMethodsRecordHasLookedUp(calendarRec, methodName) is true.
+    VERIFY(calendar_methods_record_has_looked_up(calendar_record, method_name));
+
+    // 2. Let receiver be calendarRec.[[Receiver]].
+    // 3. If CalendarMethodsRecordIsBuiltin(calendarRec) is true, then
+    //     a. Set receiver to ! CreateTemporalTimeZone(calendarRec.[[Receiver]]).
+    GCPtr<Object> receiver;
+    if (calendar_record.receiver.has<String>())
+        receiver = MUST(create_temporal_time_zone(vm, calendar_record.receiver.get<String>()));
+    else
+        receiver = calendar_record.receiver.get<NonnullGCPtr<Object>>();
+
+    // 4. If methodName is DATE-ADD, then
+    //     a. Return ? Call(calendarRec.[[DateAdd]], receiver, arguments).
+    // 5. If methodName is DATE-FROM-FIELDS, then
+    //     a. Return ? Call(calendarRec.[[DateFromFields]], receiver, arguments).
+    // 6. If methodName is DATE-UNTIL, then
+    //     a. Return ? Call(calendarRec.[[DateUntil]], receiver, arguments).
+    // 7. If methodName is DAY, then
+    //     a. Return ? Call(calendarRec.[[Day]], receiver, arguments).
+    // 8. If methodName is FIELDS, then
+    //     a. Return ? Call(calendarRec.[[Fields]], receiver, arguments).
+    // 9. If methodName is MERGE-FIELDS, then
+    //     a. Return ? Call(calendarRec.[[MergeFields]], receiver, arguments).
+    // 10. If methodName is MONTH-DAY-FROM-FIELDS, then
+    //     a. Return ? Call(calendarRec.[[MonthDayFromFields]], receiver, arguments).
+    // 11. If methodName is YEAR-MONTH-FROM-FIELDS, then
+    //     a. Return ? Call(calendarRec.[[YearMonthFromFields]], receiver, arguments).
+    switch (method_name) {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name)                      \
+    case CalendarMethod::PascalName: {                                         \
+        return TRY(call(vm, calendar_record.snake_name, receiver, arguments)); \
+    }
+        JS_ENUMERATE_CALENDAR_METHODS
+#undef __JS_ENUMERATE
+    }
 }
 
 // 9.5.7 DifferenceTemporalPlainYearMonth ( operation, yearMonth, other, options ), https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalplainyearmonth

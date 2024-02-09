@@ -13,6 +13,28 @@
 
 namespace JS::Temporal {
 
+#define JS_ENUMERATE_TIME_ZONE_METHODS                                                        \
+    __JS_ENUMERATE(GetPossibleInstantsFor, getPossibleInstantsFor, get_possible_instants_for) \
+    __JS_ENUMERATE(GetOffsetNanosecondsFor, getOffsetNanosecondsFor, get_offset_nanoseconds_for)
+
+enum class TimeZoneMethod {
+#define __JS_ENUMERATE(PascalName, camelName, snake_name) \
+    PascalName,
+    JS_ENUMERATE_TIME_ZONE_METHODS
+#undef __JS_ENUMERATE
+};
+
+// 11.5.1 Time Zone Methods Records, https://tc39.es/proposal-temporal/#sec-temporal-time-zone-methods-records
+struct TimeZoneMethodsRecord {
+    // The time zone object, or a string indicating a built-in time zone.
+    Variant<String, NonnullGCPtr<Object>> receiver; // [[Receiver]]
+
+    // The time zone's getOffsetNanosecondsFor method. For a built-in time zone this is always %Temporal.TimeZone.prototype.getOffsetNanosecondsFor%.
+    GCPtr<FunctionObject> get_offset_nanoseconds_for; // [[GetOffsetNanosecondsFor]]
+
+    // The time zone's getPossibleInstantsFor method. For a built-in time zone this is always %Temporal.TimeZone.prototype.getPossibleInstantsFor%.
+    GCPtr<FunctionObject> get_possible_instants_for; // [[GetPossibleInstantsFor]]
+};
 class TimeZone final : public Object {
     JS_OBJECT(TimeZone, Object);
     JS_DECLARE_ALLOCATOR(TimeZone);
@@ -54,4 +76,12 @@ ThrowCompletionOr<Instant*> disambiguate_possible_instants(VM&, MarkedVector<Ins
 ThrowCompletionOr<MarkedVector<Instant*>> get_possible_instants_for(VM&, Value time_zone, PlainDateTime&);
 ThrowCompletionOr<bool> time_zone_equals(VM&, Object& one, Object& two);
 
+ThrowCompletionOr<void> time_zone_methods_record_lookup(VM&, TimeZoneMethodsRecord&, TimeZoneMethod);
+ThrowCompletionOr<TimeZoneMethodsRecord> create_time_zone_methods_record(VM&, NonnullGCPtr<Object> time_zone, Vector<TimeZoneMethod> const&);
+bool time_zone_methods_record_has_looked_up(TimeZoneMethodsRecord const&, TimeZoneMethod);
+bool time_zone_methods_record_is_builtin(TimeZoneMethodsRecord const&);
+ThrowCompletionOr<Value> time_zone_methods_record_call(VM&, TimeZoneMethodsRecord const&, TimeZoneMethod, Span<Value> arguments);
+
+// FIXME: Wrong place for this one!
+ThrowCompletionOr<NonnullGCPtr<PlainDateTime>> get_plain_date_time_for(VM&, TimeZoneMethodsRecord const&, Instant&, Variant<String, NonnullGCPtr<Object>> const& calendar, Optional<double> const& precalculated_offset_nanoseconds = {});
 }

@@ -21,12 +21,14 @@
 #include <LibJS/Runtime/Temporal/TimeZone.h>
 #include <LibJS/Runtime/Temporal/ZonedDateTime.h>
 
+#include <utility>
+
 namespace JS::Temporal {
 
 JS_DEFINE_ALLOCATOR(PlainDateTime);
 
 // 5 Temporal.PlainDateTime Objects, https://tc39.es/proposal-temporal/#sec-temporal-plaindatetime-objects
-PlainDateTime::PlainDateTime(i32 iso_year, u8 iso_month, u8 iso_day, u8 iso_hour, u8 iso_minute, u8 iso_second, u16 iso_millisecond, u16 iso_microsecond, u16 iso_nanosecond, Object& calendar, Object& prototype)
+PlainDateTime::PlainDateTime(i32 iso_year, u8 iso_month, u8 iso_day, u8 iso_hour, u8 iso_minute, u8 iso_second, u16 iso_millisecond, u16 iso_microsecond, u16 iso_nanosecond, Variant<String, NonnullGCPtr<Object>> calendar, Object& prototype)
     : Object(ConstructWithPrototypeTag::Tag, prototype)
     , m_iso_year(iso_year)
     , m_iso_month(iso_month)
@@ -37,14 +39,15 @@ PlainDateTime::PlainDateTime(i32 iso_year, u8 iso_month, u8 iso_day, u8 iso_hour
     , m_iso_millisecond(iso_millisecond)
     , m_iso_microsecond(iso_microsecond)
     , m_iso_nanosecond(iso_nanosecond)
-    , m_calendar(calendar)
+    , m_calendar(move(calendar))
 {
 }
 
 void PlainDateTime::visit_edges(Visitor& visitor)
 {
     Base::visit_edges(visitor);
-    visitor.visit(m_calendar);
+    if (auto const* calander = m_calendar.get_pointer<NonnullGCPtr<Object>>())
+        visitor.visit(*calander);
 }
 
 // nsMinInstant - nsPerDay
@@ -106,12 +109,14 @@ ThrowCompletionOr<ISODateTime> interpret_temporal_date_time_fields(VM& vm, Objec
 }
 
 // 5.5.3 ToTemporalDateTime ( item [ , options ] ), https://tc39.es/proposal-temporal/#sec-temporal-totemporaldatetime
-ThrowCompletionOr<PlainDateTime*> to_temporal_date_time(VM& vm, Value item, Object const* options)
+ThrowCompletionOr<NonnullGCPtr<PlainDateTime>> to_temporal_date_time(VM& vm, Value item, Object const* options)
 {
     // 1. If options is not present, set options to undefined.
-    // 2. Assert: Type(options) is Object or Undefined.
 
-    Object* calendar;
+    // 2. Let resolvedOptions be ? SnapshotOwnProperties(! GetOptionsObject(options), null).
+    auto resolved_options = TRY(TRY(get_options_object(vm, options))->snapshot_own_properties(vm, nullptr));
+
+    Optional<Variant<String, NonnullGCPtr<Object>>> calendar;
     ISODateTime result;
 
     // 3. If Type(item) is Object, then
@@ -134,8 +139,11 @@ ThrowCompletionOr<PlainDateTime*> to_temporal_date_time(VM& vm, Value item, Obje
             // ii. Let instant be ! CreateTemporalInstant(item.[[Nanoseconds]]).
             auto* instant = create_temporal_instant(vm, zoned_date_time.nanoseconds()).release_value();
 
-            // iii. Return ? BuiltinTimeZoneGetPlainDateTimeFor(item.[[TimeZone]], instant, item.[[Calendar]]).
-            return builtin_time_zone_get_plain_date_time_for(vm, &zoned_date_time.time_zone(), *instant, zoned_date_time.calendar());
+            // iii. Let timeZoneRec be ? CreateTimeZoneMethodsRecord(item.[[TimeZone]], « GET-OFFSET-NANOSECONDS-FOR »).
+            auto time_zone_record = TRY(create_time_zone_methods_record(vm, zoned_date_time.time_zone(), { TimeZoneMethod::GetOffsetNanosecondsFor }));
+
+            // iv. Return ? GetPlainDateTimeFor(timeZoneRec, instant, item.[[Calendar]]).
+            return TRY(get_plain_date_time_for(vm, time_zone_record, *instant, zoned_date_time.calendar()));
         }
 
         // c. If item has an [[InitializedTemporalDate]] internal slot, then
@@ -149,8 +157,8 @@ ThrowCompletionOr<PlainDateTime*> to_temporal_date_time(VM& vm, Value item, Obje
             return create_temporal_date_time(vm, plain_date.iso_year(), plain_date.iso_month(), plain_date.iso_day(), 0, 0, 0, 0, 0, 0, plain_date.calendar());
         }
 
-        // d. Let calendar be ? GetTemporalCalendarWithISODefault(item).
-        calendar = TRY(get_temporal_calendar_with_iso_default(vm, item_object));
+        // d. Let calendar be ? GetTemporalCalendarSlotValueWithISODefault(item).
+        calendar = TRY(get_temporal_calendar_slot_value_with_iso_default(vm, item_object));
 
         // e. Let fieldNames be ? CalendarFields(calendar, « "day", "hour", "microsecond", "millisecond", "minute", "month", "monthCode", "nanosecond", "second", "year" »).
         auto field_names = TRY(calendar_fields(vm, *calendar, { "day"sv, "hour"sv, "microsecond"sv, "millisecond"sv, "minute"sv, "month"sv, "monthCode"sv, "nanosecond"sv, "second"sv, "year"sv }));
@@ -205,47 +213,42 @@ ISODateTime balance_iso_date_time(i32 year, u8 month, u8 day, u8 hour, u8 minute
     return ISODateTime { .year = balanced_date.year, .month = balanced_date.month, .day = balanced_date.day, .hour = balanced_time.hour, .minute = balanced_time.minute, .second = balanced_time.second, .millisecond = balanced_time.millisecond, .microsecond = balanced_time.microsecond, .nanosecond = balanced_time.nanosecond };
 }
 
-// 5.5.5 CreateTemporalDateTime ( isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, nanosecond, calendar [ , newTarget ] ), https://tc39.es/proposal-temporal/#sec-temporal-createtemporaldatetime
-ThrowCompletionOr<PlainDateTime*> create_temporal_date_time(VM& vm, i32 iso_year, u8 iso_month, u8 iso_day, u8 hour, u8 minute, u8 second, u16 millisecond, u16 microsecond, u16 nanosecond, Object& calendar, FunctionObject const* new_target)
+// 5.5.6 CreateTemporalDateTime ( isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, nanosecond, calendar [ , newTarget ] ), https://tc39.es/proposal-temporal/#sec-temporal-createtemporaldatetime
+ThrowCompletionOr<NonnullGCPtr<PlainDateTime>> create_temporal_date_time(VM& vm, i32 iso_year, u8 iso_month, u8 iso_day, u8 hour, u8 minute, u8 second, u16 millisecond, u16 microsecond, u16 nanosecond, Variant<String, NonnullGCPtr<Object>> const& calendar, FunctionObject const* new_target)
 {
     auto& realm = *vm.current_realm();
 
-    // 1. Assert: isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, and nanosecond are integers.
-    // 2. Assert: Type(calendar) is Object.
-
-    // 3. If IsValidISODate(isoYear, isoMonth, isoDay) is false, throw a RangeError exception.
+    // 1. If IsValidISODate(isoYear, isoMonth, isoDay) is false, throw a RangeError exception.
     if (!is_valid_iso_date(iso_year, iso_month, iso_day))
         return vm.throw_completion<RangeError>(ErrorType::TemporalInvalidPlainDateTime);
 
-    // 4. If IsValidTime(hour, minute, second, millisecond, microsecond, nanosecond) is false, throw a RangeError exception.
+    // 2. If IsValidTime(hour, minute, second, millisecond, microsecond, nanosecond) is false, throw a RangeError exception.
     if (!is_valid_time(hour, minute, second, millisecond, microsecond, nanosecond))
         return vm.throw_completion<RangeError>(ErrorType::TemporalInvalidPlainDateTime);
 
-    // 5. If ISODateTimeWithinLimits(isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, nanosecond) is false, then
+    // 3. If ISODateTimeWithinLimits(isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, nanosecond) is false, then
     if (!iso_date_time_within_limits(iso_year, iso_month, iso_day, hour, minute, second, millisecond, microsecond, nanosecond)) {
         // a. Throw a RangeError exception.
         return vm.throw_completion<RangeError>(ErrorType::TemporalInvalidPlainDateTime);
     }
 
-    // 6. If newTarget is not present, set newTarget to %Temporal.PlainDateTime%.
+    // 4. If newTarget is not present, set newTarget to %Temporal.PlainDateTime%.
     if (!new_target)
         new_target = realm.intrinsics().temporal_plain_date_time_constructor();
 
-    // 7. Let object be ? OrdinaryCreateFromConstructor(newTarget, "%Temporal.PlainDateTime.prototype%", « [[InitializedTemporalDateTime]], [[ISOYear]], [[ISOMonth]], [[ISODay]], [[ISOHour]], [[ISOMinute]], [[ISOSecond]], [[ISOMillisecond]], [[ISOMicrosecond]], [[ISONanosecond]], [[Calendar]] »).
-    // 8. Set object.[[ISOYear]] to isoYear.
-    // 9. Set object.[[ISOMonth]] to isoMonth.
-    // 10. Set object.[[ISODay]] to isoDay.
-    // 11. Set object.[[ISOHour]] to hour.
-    // 12. Set object.[[ISOMinute]] to minute.
-    // 13. Set object.[[ISOSecond]] to second.
-    // 14. Set object.[[ISOMillisecond]] to millisecond.
-    // 15. Set object.[[ISOMicrosecond]] to microsecond.
-    // 16. Set object.[[ISONanosecond]] to nanosecond.
-    // 17. Set object.[[Calendar]] to calendar.
-    auto object = TRY(ordinary_create_from_constructor<PlainDateTime>(vm, *new_target, &Intrinsics::temporal_plain_date_prototype, iso_year, iso_month, iso_day, hour, minute, second, millisecond, microsecond, nanosecond, calendar));
-
-    // 18. Return object.
-    return object.ptr();
+    // 5. Let object be ? OrdinaryCreateFromConstructor(newTarget, "%Temporal.PlainDateTime.prototype%", « [[InitializedTemporalDateTime]], [[ISOYear]], [[ISOMonth]], [[ISODay]], [[ISOHour]], [[ISOMinute]], [[ISOSecond]], [[ISOMillisecond]], [[ISOMicrosecond]], [[ISONanosecond]], [[Calendar]] »).
+    // 6. Set object.[[ISOYear]] to isoYear.
+    // 7. Set object.[[ISOMonth]] to isoMonth.
+    // 8. Set object.[[ISODay]] to isoDay.
+    // 9. Set object.[[ISOHour]] to hour.
+    // 10. Set object.[[ISOMinute]] to minute.
+    // 11. Set object.[[ISOSecond]] to second.
+    // 12. Set object.[[ISOMillisecond]] to millisecond.
+    // 13. Set object.[[ISOMicrosecond]] to microsecond.
+    // 14. Set object.[[ISONanosecond]] to nanosecond.
+    // 15. Set object.[[Calendar]] to calendar.
+    // 16. Return object.
+    return TRY(ordinary_create_from_constructor<PlainDateTime>(vm, *new_target, &Intrinsics::temporal_plain_date_prototype, iso_year, iso_month, iso_day, hour, minute, second, millisecond, microsecond, nanosecond, calendar));
 }
 
 // 5.5.6 TemporalDateTimeToString ( isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, nanosecond, calendar, precision, showCalendar ), https://tc39.es/proposal-temporal/#sec-temporal-temporaldatetimetostring
