@@ -2,6 +2,7 @@
  * Copyright (c) 2020, Matthew Olsson <mattco@serenityos.org>
  * Copyright (c) 2022-2023, Linus Groh <linusg@serenityos.org>
  * Copyright (c) 2023, Tim Flynn <trflynn89@serenityos.org>
+ * Copyright (c) 2024, Shannon Booth <shannon@serenityos.org>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -349,6 +350,38 @@ ThrowCompletionOr<MarkedVector<Value>> iterator_to_list(VM& vm, IteratorRecord& 
         }
 
         // c. Append next to values.
+        values.append(next.release_value());
+    }
+}
+
+// 13.1 IteratorToListOfType ( iteratorRecord, elementTypes ), https://tc39.es/proposal-temporal/#sec-iteratortolistoftype
+ThrowCompletionOr<MarkedVector<Value>> iterator_to_list_of_type(VM& vm, IteratorRecord& iterator_record, Span<LanguageType> element_types)
+{
+    // 1. Let values be a new empty List.
+    MarkedVector<Value> values(vm.heap());
+
+    // 2. Repeat,
+    while (true) {
+        // a. Let next be ? IteratorStepValue(iteratorRecord).
+        auto next = TRY(iterator_step_value(vm, iterator_record));
+
+        // b. If next is DONE, then
+        if (!next.has_value()) {
+            // i. Return values.
+            return values;
+        }
+
+        // c. If Type(next) is not an element of elementTypes, then
+        if (element_types.contains_slow(next->type())) {
+            // i. Let completion be ThrowCompletion(a newly created TypeError object).
+            auto types_string = MUST(String::join(" or "sv, element_types));
+            auto completion = vm.throw_completion<TypeError>(ErrorType::NotAnObjectOfType, types_string);
+
+            // ii. Return ? IteratorClose(iteratorRecord, completion).
+            return iterator_close(vm, iterator_record, move(completion));
+        }
+
+        // d. Append next to the end of the List values.
         values.append(next.release_value());
     }
 }
