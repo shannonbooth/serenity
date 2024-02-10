@@ -108,6 +108,18 @@ static constexpr u64 SHIFTED_BOOLEAN_TAG = BOOLEAN_TAG << TAG_SHIFT;
 static constexpr u64 SHIFTED_INT32_TAG = INT32_TAG << TAG_SHIFT;
 static constexpr u64 SHIFTED_IS_CELL_PATTERN = IS_CELL_PATTERN << TAG_SHIFT;
 
+// 6.1 ECMAScript Language Types, https://tc39.es/ecma262/#sec-ecmascript-language-types
+enum class LanguageType {
+    Undefined,
+    Null,
+    Boolean,
+    String,
+    Symbol,
+    Number,
+    BigInt,
+    Object,
+};
+
 // Summary:
 // To pack all the different value in to doubles we use the following schema:
 // s = sign, e = exponent, m = mantissa
@@ -147,6 +159,27 @@ public:
     bool is_function() const;
     bool is_constructor() const;
     ThrowCompletionOr<bool> is_regexp(VM&) const;
+
+    LanguageType type() const
+    {
+        if (is_undefined())
+            return LanguageType::Undefined;
+        if (is_null())
+            return LanguageType::Null;
+        if (is_boolean())
+            return LanguageType::Boolean;
+        if (is_string())
+            return LanguageType::String;
+        if (is_symbol())
+            return LanguageType::Symbol;
+        if (is_number())
+            return LanguageType::Number;
+        if (is_bigint())
+            return LanguageType::BigInt;
+        if (is_object())
+            return LanguageType::Object;
+        VERIFY_NOT_REACHED();
+    }
 
     bool is_nan() const
     {
@@ -718,6 +751,32 @@ public:
 
 private:
     JS::Value m_value;
+};
+
+template<>
+struct Formatter<JS::LanguageType> : Formatter<StringView> {
+    ErrorOr<void> format(FormatBuilder& builder, JS::LanguageType type)
+    {
+        switch (type) {
+        case JS::LanguageType::Undefined:
+            return Formatter<StringView>::format(builder, "undefined"sv);
+        case JS::LanguageType::Null:
+            return Formatter<StringView>::format(builder, "null"sv);
+        case JS::LanguageType::Boolean:
+            return Formatter<StringView>::format(builder, "boolean"sv);
+        case JS::LanguageType::String:
+            return Formatter<StringView>::format(builder, "string"sv);
+        case JS::LanguageType::Symbol:
+            return Formatter<StringView>::format(builder, "symbol"sv);
+        case JS::LanguageType::Number:
+            return Formatter<StringView>::format(builder, "number"sv);
+        case JS::LanguageType::BigInt:
+            return Formatter<StringView>::format(builder, "bigint"sv);
+        case JS::LanguageType::Object:
+            return Formatter<StringView>::format(builder, "object"sv);
+        }
+        VERIFY_NOT_REACHED();
+    }
 };
 
 template<>
