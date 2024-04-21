@@ -8,10 +8,10 @@
 
 #include <LibJS/Runtime/Promise.h>
 #include <LibWeb/Bindings/NavigationPrototype.h>
+#include <LibWeb/Bindings/NavigationTypeEnumerations.h>
 #include <LibWeb/DOM/EventTarget.h>
 #include <LibWeb/HTML/HistoryHandlingBehavior.h>
 #include <LibWeb/HTML/Navigable.h>
-#include <LibWeb/HTML/NavigationType.h>
 #include <LibWeb/HTML/StructuredSerialize.h>
 
 namespace Web::HTML {

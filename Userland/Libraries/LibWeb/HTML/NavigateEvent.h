@@ -7,8 +7,8 @@
 #pragma once
 
 #include <LibWeb/Bindings/NavigateEventEnumerations.h>
+#include <LibWeb/Bindings/NavigationTypeEnumerations.h>
 #include <LibWeb/DOM/Event.h>
-#include <LibWeb/HTML/NavigationType.h>
 #include <LibWeb/HTML/StructuredSerialize.h>
 
 namespace Web::HTML {
