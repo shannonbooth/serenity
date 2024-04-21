@@ -122,10 +122,14 @@ endfunction()
 function (generate_js_bindings target)
     set(LIBWEB_INPUT_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}")
     function(libweb_js_bindings class)
-        cmake_parse_arguments(PARSE_ARGV 1 LIBWEB_BINDINGS "NAMESPACE;ITERABLE;GLOBAL" "" "")
+        cmake_parse_arguments(PARSE_ARGV 1 LIBWEB_BINDINGS "NAMESPACE;ITERABLE;GLOBAL;ENUM" "" "")
         get_filename_component(basename "${class}" NAME)
 
-        if (LIBWEB_BINDINGS_NAMESPACE)
+        if(LIBWEB_BINDINGS_ENUM)
+            set(BINDINGS_SOURCES
+                "Bindings/${basename}Enumerations.h"
+            )
+        elseif(LIBWEB_BINDINGS_NAMESPACE)
             set(BINDINGS_SOURCES
                 "Bindings/${basename}Namespace.h"
                 "Bindings/${basename}Namespace.cpp"
@@ -187,8 +191,10 @@ function (generate_js_bindings target)
         list(FILTER BINDINGS_SOURCES INCLUDE REGEX "\.h$")
         install(FILES ${BINDINGS_SOURCES} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LibWeb/Bindings")
 
-        list(APPEND LIBWEB_ALL_IDL_FILES "${LIBWEB_INPUT_FOLDER}/${class}.idl")
-        set(LIBWEB_ALL_IDL_FILES ${LIBWEB_ALL_IDL_FILES} PARENT_SCOPE)
+        if(NOT LIBWEB_BINDINGS_ENUM)
+            list(APPEND LIBWEB_ALL_INTERFACE_FILES "${LIBWEB_INPUT_FOLDER}/${class}.idl")
+            set(LIBWEB_ALL_INTERFACE_FILES ${LIBWEB_ALL_INTERFACE_FILES} PARENT_SCOPE)
+        endif()
     endfunction()
 
     function(generate_exposed_interface_files)
@@ -201,7 +207,7 @@ function (generate_js_bindings target)
         add_custom_command(
             OUTPUT  ${exposed_interface_sources}
             COMMAND "${CMAKE_COMMAND}" -E make_directory "tmp"
-            COMMAND $<TARGET_FILE:Lagom::GenerateWindowOrWorkerInterfaces> -o "${CMAKE_CURRENT_BINARY_DIR}/tmp" -b "${LIBWEB_INPUT_FOLDER}" ${LIBWEB_ALL_IDL_FILES}
+            COMMAND $<TARGET_FILE:Lagom::GenerateWindowOrWorkerInterfaces> -o "${CMAKE_CURRENT_BINARY_DIR}/tmp" -b "${LIBWEB_INPUT_FOLDER}" ${LIBWEB_ALL_INTERFACE_FILES}
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different tmp/Forward.h "Bindings/Forward.h"
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different tmp/IntrinsicDefinitions.cpp "Bindings/IntrinsicDefinitions.cpp"
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different tmp/DedicatedWorkerExposedInterfaces.h "Bindings/DedicatedWorkerExposedInterfaces.h"

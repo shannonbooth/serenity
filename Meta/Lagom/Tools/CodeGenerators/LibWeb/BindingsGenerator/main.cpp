@@ -167,15 +167,17 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
         TRY(write_if_changed(&IDL::generate_namespace_header, namespace_header));
         TRY(write_if_changed(&IDL::generate_namespace_implementation, namespace_implementation));
     } else {
-        constructor_header = TRY(String::formatted("{}Constructor.h", path_prefix));
-        constructor_implementation = TRY(String::formatted("{}Constructor.cpp", path_prefix));
-        prototype_header = TRY(String::formatted("{}Prototype.h", path_prefix));
-        prototype_implementation = TRY(String::formatted("{}Prototype.cpp", path_prefix));
+        if (!interface.name.is_empty()) {
+            constructor_header = TRY(String::formatted("{}Constructor.h", path_prefix));
+            constructor_implementation = TRY(String::formatted("{}Constructor.cpp", path_prefix));
+            prototype_header = TRY(String::formatted("{}Prototype.h", path_prefix));
+            prototype_implementation = TRY(String::formatted("{}Prototype.cpp", path_prefix));
 
-        TRY(write_if_changed(&IDL::generate_constructor_header, constructor_header));
-        TRY(write_if_changed(&IDL::generate_constructor_implementation, constructor_implementation));
-        TRY(write_if_changed(&IDL::generate_prototype_header, prototype_header));
-        TRY(write_if_changed(&IDL::generate_prototype_implementation, prototype_implementation));
+            TRY(write_if_changed(&IDL::generate_constructor_header, constructor_header));
+            TRY(write_if_changed(&IDL::generate_constructor_implementation, constructor_implementation));
+            TRY(write_if_changed(&IDL::generate_prototype_header, prototype_header));
+            TRY(write_if_changed(&IDL::generate_prototype_implementation, prototype_implementation));
+        }
 
         enumeration_header = TRY(String::formatted("{}Enumerations.h", path_prefix));
         TRY(write_if_changed(&IDL::generate_enumerations_header, enumeration_header));
