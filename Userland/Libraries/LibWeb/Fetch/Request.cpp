@@ -6,7 +6,7 @@
 
 #include <LibJS/Runtime/Completion.h>
 #include <LibWeb/Bindings/Intrinsics.h>
-#include <LibWeb/Bindings/RequestPrototype.h>
+#include <LibWeb/Bindings/RequestEnumerations.h>
 #include <LibWeb/DOM/AbortSignal.h>
 #include <LibWeb/DOMURL/DOMURL.h>
 #include <LibWeb/Fetch/Enums.h>

@@ -8,6 +8,7 @@
 
 #include <AK/FlyString.h>
 #include <LibWeb/Animations/KeyframeEffect.h>
+#include <LibWeb/Bindings/KeyframeEffectEnumerations.h>
 
 namespace Web::Animations {
 

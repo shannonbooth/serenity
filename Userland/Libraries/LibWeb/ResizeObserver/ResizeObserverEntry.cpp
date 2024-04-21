@@ -7,7 +7,7 @@
 #include <LibJS/Heap/Heap.h>
 #include <LibWeb/Bindings/ExceptionOrUtils.h>
 #include <LibWeb/Bindings/Intrinsics.h>
-#include <LibWeb/Bindings/ResizeObserverEntryPrototype.h>
+#include <LibWeb/Bindings/ResizeObserverEnumerations.h>
 #include <LibWeb/Painting/PaintableBox.h>
 #include <LibWeb/ResizeObserver/ResizeObserverEntry.h>
 

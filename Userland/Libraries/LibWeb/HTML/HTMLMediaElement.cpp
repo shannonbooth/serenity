@@ -8,7 +8,7 @@
 #include <LibAudio/Loader.h>
 #include <LibJS/Runtime/Promise.h>
 #include <LibVideo/PlaybackManager.h>
-#include <LibWeb/Bindings/HTMLMediaElementPrototype.h>
+#include <LibWeb/Bindings/HTMLMediaElementEnumerations.h>
 #include <LibWeb/Bindings/Intrinsics.h>
 #include <LibWeb/DOM/Document.h>
 #include <LibWeb/DOM/DocumentObserver.h>

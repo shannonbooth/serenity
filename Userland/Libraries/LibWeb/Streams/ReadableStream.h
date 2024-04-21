@@ -10,7 +10,7 @@
 #include <AK/Forward.h>
 #include <LibJS/Forward.h>
 #include <LibWeb/Bindings/PlatformObject.h>
-#include <LibWeb/Bindings/ReadableStreamPrototype.h>
+#include <LibWeb/Bindings/ReadableStreamEnumerations.h>
 #include <LibWeb/Forward.h>
 #include <LibWeb/Streams/QueuingStrategy.h>
 

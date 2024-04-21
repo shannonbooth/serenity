@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <LibWeb/Bindings/WindowEnumerations.h>
 #include <LibWeb/Bindings/WindowGlobalMixin.h>
 
 namespace Web::HTML {

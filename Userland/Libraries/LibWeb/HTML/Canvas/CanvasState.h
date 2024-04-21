@@ -13,7 +13,7 @@
 #include <LibGfx/Color.h>
 #include <LibGfx/PaintStyle.h>
 #include <LibGfx/PathClipper.h>
-#include <LibWeb/Bindings/CanvasRenderingContext2DPrototype.h>
+#include <LibWeb/Bindings/CanvasRenderingContext2DEnumerations.h>
 #include <LibWeb/HTML/CanvasGradient.h>
 #include <LibWeb/HTML/CanvasPattern.h>
 

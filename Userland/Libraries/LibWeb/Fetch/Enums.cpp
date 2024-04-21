@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <LibWeb/Bindings/RequestPrototype.h>
-#include <LibWeb/Bindings/ResponsePrototype.h>
+#include <LibWeb/Bindings/RequestEnumerations.h>
+#include <LibWeb/Bindings/ResponseEnumerations.h>
 #include <LibWeb/Fetch/Enums.h>
 #include <LibWeb/Fetch/Infrastructure/HTTP/Requests.h>
 #include <LibWeb/ReferrerPolicy/ReferrerPolicy.h>

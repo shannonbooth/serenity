@@ -2645,8 +2645,6 @@ static void generate_prototype_or_global_mixin_declarations(IDL::Interface const
 };
 
 )~~~");
-
-    generate_enumerations(interface.enumerations, builder);
 }
 
 // https://webidl.spec.whatwg.org/#create-an-inheritance-stack
@@ -3939,6 +3937,7 @@ void generate_constructor_implementation(IDL::Interface const& interface, String
     SourceGenerator generator { builder };
 
     generator.set("name", interface.name);
+    generator.set("implemented_name", interface.implemented_name);
     generator.set("namespaced_name", interface.namespaced_name);
     generator.set("prototype_class", interface.prototype_class);
     generator.set("constructor_class", interface.constructor_class);
@@ -3954,6 +3953,7 @@ void generate_constructor_implementation(IDL::Interface const& interface, String
 #include <LibJS/Runtime/ValueInlines.h>
 #include <LibJS/Runtime/TypedArray.h>
 #include <LibWeb/Bindings/@constructor_class@.h>
+#include <LibWeb/Bindings/@implemented_name@Enumerations.h>
 #include <LibWeb/Bindings/@prototype_class@.h>
 #include <LibWeb/Bindings/ExceptionOrUtils.h>
 #include <LibWeb/Bindings/Intrinsics.h>
@@ -4177,6 +4177,28 @@ JS_DEFINE_NATIVE_FUNCTION(@constructor_class@::@attribute.getter_callback@)
 )~~~");
 }
 
+void generate_enumerations_header(IDL::Interface const& interface, StringBuilder& builder)
+{
+    SourceGenerator generator { builder };
+
+    generator.set("prototype_class", interface.prototype_class);
+
+    generator.append(R"~~~(
+#pragma once
+
+#include <AK/String.h>
+
+namespace Web::Bindings {
+
+)~~~");
+
+    generate_enumerations(interface.enumerations, builder);
+
+    generator.append(R"~~~(
+} // namespace Web::Bindings
+    )~~~");
+}
+
 void generate_prototype_header(IDL::Interface const& interface, StringBuilder& builder)
 {
     SourceGenerator generator { builder };
@@ -4222,6 +4244,7 @@ void generate_prototype_implementation(IDL::Interface const& interface, StringBu
 {
     SourceGenerator generator { builder };
 
+    generator.set("implemented_name", interface.implemented_name);
     generator.set("parent_name", interface.parent_name);
     generator.set("prototype_class", interface.prototype_class);
     generator.set("prototype_base_class", interface.prototype_base_class);
@@ -4240,6 +4263,7 @@ void generate_prototype_implementation(IDL::Interface const& interface, StringBu
 #include <LibJS/Runtime/Value.h>
 #include <LibJS/Runtime/ValueInlines.h>
 #include <LibWeb/Bindings/@prototype_class@.h>
+#include <LibWeb/Bindings/@implemented_name@Enumerations.h>
 #include <LibWeb/Bindings/ExceptionOrUtils.h>
 #include <LibWeb/Bindings/Intrinsics.h>
 #include <LibWeb/DOM/Element.h>

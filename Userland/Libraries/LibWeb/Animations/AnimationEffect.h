@@ -10,7 +10,7 @@
 #include <AK/String.h>
 #include <AK/Variant.h>
 #include <LibWeb/Animations/TimingFunction.h>
-#include <LibWeb/Bindings/AnimationEffectPrototype.h>
+#include <LibWeb/Bindings/AnimationEffectEnumerations.h>
 #include <LibWeb/Bindings/PlatformObject.h>
 #include <LibWeb/CSS/Enums.h>
 

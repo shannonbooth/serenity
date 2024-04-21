@@ -10,7 +10,7 @@
 #include <AK/HashTable.h>
 #include <AK/String.h>
 #include <LibJS/Heap/Cell.h>
-#include <LibWeb/Bindings/NavigationPrototype.h>
+#include <LibWeb/Bindings/NavigationEnumerations.h>
 #include <LibWeb/DOM/DocumentLoadEventDelayer.h>
 #include <LibWeb/Forward.h>
 #include <LibWeb/HTML/ActivateTab.h>

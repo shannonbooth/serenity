@@ -11,7 +11,7 @@
 #include <LibGfx/Quad.h>
 #include <LibGfx/Rect.h>
 #include <LibUnicode/Segmentation.h>
-#include <LibWeb/Bindings/CanvasRenderingContext2DPrototype.h>
+#include <LibWeb/Bindings/CanvasRenderingContext2DEnumerations.h>
 #include <LibWeb/Bindings/Intrinsics.h>
 #include <LibWeb/HTML/CanvasRenderingContext2D.h>
 #include <LibWeb/HTML/HTMLCanvasElement.h>

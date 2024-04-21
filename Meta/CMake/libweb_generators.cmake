@@ -136,6 +136,7 @@ function (generate_js_bindings target)
                 "Bindings/${basename}Constructor.cpp"
                 "Bindings/${basename}Prototype.h"
                 "Bindings/${basename}Prototype.cpp"
+                "Bindings/${basename}Enumerations.h"
             )
         endif()
 

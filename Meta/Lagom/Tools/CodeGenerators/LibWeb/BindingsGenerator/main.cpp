@@ -29,6 +29,7 @@ void generate_iterator_prototype_header(IDL::Interface const&, StringBuilder&);
 void generate_iterator_prototype_implementation(IDL::Interface const&, StringBuilder&);
 void generate_global_mixin_header(IDL::Interface const&, StringBuilder&);
 void generate_global_mixin_implementation(IDL::Interface const&, StringBuilder&);
+void generate_enumerations_header(IDL::Interface const&, StringBuilder&);
 }
 
 ErrorOr<int> serenity_main(Main::Arguments arguments)
@@ -155,6 +156,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     String iterator_prototype_implementation;
     String global_mixin_header;
     String global_mixin_implementation;
+    String enumeration_header;
 
     auto path_prefix = LexicalPath::join(output_path, lexical_path.basename(LexicalPath::StripExtension::Yes));
 
@@ -174,6 +176,9 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
         TRY(write_if_changed(&IDL::generate_constructor_implementation, constructor_implementation));
         TRY(write_if_changed(&IDL::generate_prototype_header, prototype_header));
         TRY(write_if_changed(&IDL::generate_prototype_implementation, prototype_implementation));
+
+        enumeration_header = TRY(String::formatted("{}Enumerations.h", path_prefix));
+        TRY(write_if_changed(&IDL::generate_enumerations_header, enumeration_header));
     }
 
     if (interface.pair_iterator_types.has_value()) {
@@ -196,7 +201,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
         auto depfile = TRY(Core::File::open_file_or_standard_stream(depfile_path, Core::File::OpenMode::Write));
 
         StringBuilder depfile_builder;
-        for (StringView s : { constructor_header, constructor_implementation, prototype_header, prototype_implementation, namespace_header, namespace_implementation, iterator_prototype_header, iterator_prototype_implementation, global_mixin_header, global_mixin_implementation }) {
+        for (StringView s : { constructor_header, constructor_implementation, prototype_header, prototype_implementation, namespace_header, namespace_implementation, iterator_prototype_header, iterator_prototype_implementation, global_mixin_header, global_mixin_implementation, enumeration_header }) {
             if (s.is_empty())
                 continue;
 

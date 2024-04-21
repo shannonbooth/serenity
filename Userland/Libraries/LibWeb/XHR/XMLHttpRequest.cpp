@@ -17,7 +17,7 @@
 #include <LibJS/Runtime/FunctionObject.h>
 #include <LibJS/Runtime/GlobalObject.h>
 #include <LibTextCodec/Decoder.h>
-#include <LibWeb/Bindings/XMLHttpRequestPrototype.h>
+#include <LibWeb/Bindings/XMLHttpRequestEnumerations.h>
 #include <LibWeb/DOM/Document.h>
 #include <LibWeb/DOM/DocumentLoading.h>
 #include <LibWeb/DOM/Event.h>

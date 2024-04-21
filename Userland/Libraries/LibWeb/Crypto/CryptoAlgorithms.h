@@ -11,7 +11,7 @@
 #include <LibCrypto/BigInt/UnsignedBigInteger.h>
 #include <LibJS/Forward.h>
 #include <LibJS/Heap/GCPtr.h>
-#include <LibWeb/Bindings/SubtleCryptoPrototype.h>
+#include <LibWeb/Bindings/SubtleCryptoEnumerations.h>
 #include <LibWeb/Crypto/CryptoBindings.h>
 #include <LibWeb/Crypto/CryptoKey.h>
 #include <LibWeb/WebIDL/Buffers.h>

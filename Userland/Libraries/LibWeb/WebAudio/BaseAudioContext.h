@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <LibWeb/Bindings/BaseAudioContextPrototype.h>
+#include <LibWeb/Bindings/BaseAudioContextEnumerations.h>
 #include <LibWeb/DOM/EventTarget.h>
 
 namespace Web::WebAudio {

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <LibGfx/Forward.h>
-#include <LibWeb/Bindings/ImageDataPrototype.h>
+#include <LibWeb/Bindings/ImageDataEnumerations.h>
 #include <LibWeb/Bindings/PlatformObject.h>
 
 namespace Web::HTML {

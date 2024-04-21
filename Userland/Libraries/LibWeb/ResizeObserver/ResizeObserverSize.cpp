@@ -5,7 +5,8 @@
  */
 
 #include <LibJS/Heap/Heap.h>
-#include <LibWeb/Bindings/ResizeObserverSizePrototype.h>
+#include <LibWeb/Bindings/ResizeObserverEnumerations.h>
+#include <LibWeb/Bindings/ResizeObserverSizeEnumerations.h>
 #include <LibWeb/HTML/Window.h>
 #include <LibWeb/Painting/PaintableBox.h>
 #include <LibWeb/ResizeObserver/ResizeObserverSize.h>

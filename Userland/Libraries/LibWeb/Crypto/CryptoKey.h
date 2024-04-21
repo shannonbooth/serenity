@@ -9,7 +9,7 @@
 #include <LibCrypto/PK/RSA.h>
 #include <LibJS/Forward.h>
 #include <LibJS/Heap/GCPtr.h>
-#include <LibWeb/Bindings/CryptoKeyPrototype.h>
+#include <LibWeb/Bindings/CryptoKeyEnumerations.h>
 #include <LibWeb/Bindings/Intrinsics.h>
 #include <LibWeb/Bindings/PlatformObject.h>
 #include <LibWeb/Bindings/Serializable.h>

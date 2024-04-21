@@ -7,7 +7,7 @@
 #pragma once
 
 #include <LibJS/Runtime/PromiseCapability.h>
-#include <LibWeb/Bindings/AnimationPrototype.h>
+#include <LibWeb/Bindings/AnimationEnumerations.h>
 #include <LibWeb/DOM/EventTarget.h>
 
 namespace Web::Animations {
