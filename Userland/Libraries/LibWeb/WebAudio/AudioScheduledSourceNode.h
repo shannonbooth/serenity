@@ -23,7 +23,7 @@ public:
     WebIDL::ExceptionOr<void> start(double when = 0);
     WebIDL::ExceptionOr<void> stop(double when = 0);
 
-private:
+protected:
     virtual void initialize(JS::Realm&) override;
     virtual void visit_edges(Cell::Visitor&) override;
 };

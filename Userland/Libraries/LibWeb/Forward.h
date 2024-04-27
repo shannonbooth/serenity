@@ -684,6 +684,8 @@ class AudioContext;
 class AudioParam;
 class BaseAudioContext;
 class OfflineAudioContext;
+class OscillatorNode;
+class PeriodicWave;
 
 enum class AudioContextState;
 

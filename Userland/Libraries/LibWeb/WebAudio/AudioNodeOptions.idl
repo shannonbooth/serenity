@@ -1,0 +1,10 @@
+#import <WebAudio/ChannelCountMode.idl>
+#import <WebAudio/ChannelInterpretation.idl>
+
+// https://webaudio.github.io/web-audio-api/#AudioNodeOptions
+dictionary AudioNodeOptions {
+    unsigned long channelCount;
+    ChannelCountMode channelCountMode;
+    ChannelInterpretation channelInterpretation;
+};
+

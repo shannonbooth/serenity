@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <AK/Optional.h>
 #include <LibJS/Forward.h>
 #include <LibWeb/Bindings/AudioNodePrototype.h>
 #include <LibWeb/Bindings/PlatformObject.h>
@@ -13,6 +14,12 @@
 #include <LibWeb/WebIDL/Types.h>
 
 namespace Web::WebAudio {
+
+struct AudioNodeOptions {
+    Optional<WebIDL::UnsignedLong> channel_count;
+    Bindings::ChannelCountMode channel_count_mode;
+    Bindings::ChannelInterpretation channel_interpretation;
+};
 
 class AudioNode : public DOM::EventTarget {
     WEB_PLATFORM_OBJECT(AudioNode, DOM::EventTarget);

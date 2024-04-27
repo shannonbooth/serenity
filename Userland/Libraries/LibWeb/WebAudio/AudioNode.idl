@@ -14,6 +14,12 @@ enum ChannelInterpretation {
     "discrete"
 };
 
+dictionary AudioNodeOptions {
+    unsigned long channelCount;
+    ChannelCountMode channelCountMode;
+    ChannelInterpretation channelInterpretation;
+};
+
 [Exposed=Window]
 interface AudioNode : EventTarget {
     AudioNode connect(AudioNode destinationNode,
