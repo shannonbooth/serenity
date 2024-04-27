@@ -33,6 +33,8 @@ static bool is_platform_object(Type const& type)
         "AnimationEffect"sv,
         "AnimationTimeline"sv,
         "Attr"sv,
+        "AudioNode"sv,
+        "AudioParam"sv,
         "AudioTrack"sv,
         "Blob"sv,
         "CanvasGradient"sv,
