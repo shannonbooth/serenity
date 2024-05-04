@@ -2133,10 +2133,10 @@ void Element::scroll(HTML::ScrollToOptions const&)
     dbgln("FIXME: Implement Element::scroll(ScrollToOptions)");
 }
 
-// https://drafts.csswg.org/cssom-view/#dom-window-scrollby
+// https://drafts.csswg.org/cssom-view/#dom-element-scrollby
 void Element::scroll_by(double x, double y)
 {
-    dbgln("FIXME: Implement Element::scroll_by({}, {})", x, y);
+    scroll_by(HTML::ScrollToOptions { .left = x, .top = y });
 }
 
 // https://drafts.csswg.org/cssom-view/#dom-window-scrollby
