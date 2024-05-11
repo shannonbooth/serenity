@@ -30,11 +30,17 @@ public:
     static WebIDL::ExceptionOr<JS::NonnullGCPtr<DynamicsCompressorNode>> create(JS::Realm&, JS::NonnullGCPtr<BaseAudioContext>, DynamicsCompressorOptions const& = {});
     static WebIDL::ExceptionOr<JS::NonnullGCPtr<DynamicsCompressorNode>> construct_impl(JS::Realm&, JS::NonnullGCPtr<BaseAudioContext>, DynamicsCompressorOptions const& = {});
 
+    JS::NonnullGCPtr<AudioParam const> threshold() const { return m_threshold; }
+
 protected:
     DynamicsCompressorNode(JS::Realm&, JS::NonnullGCPtr<BaseAudioContext>, DynamicsCompressorOptions const& = {});
 
     virtual void initialize(JS::Realm&) override;
     virtual void visit_edges(Cell::Visitor&) override;
+
+private:
+    // https://webaudio.github.io/web-audio-api/#dom-dynamicscompressornode-threshold
+    JS::NonnullGCPtr<AudioParam> m_threshold;
 };
 
 }

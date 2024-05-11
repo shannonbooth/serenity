@@ -6,6 +6,7 @@
 
 #include <LibWeb/Bindings/DynamicsCompressorNodePrototype.h>
 #include <LibWeb/Bindings/Intrinsics.h>
+#include <LibWeb/WebAudio/AudioParam.h>
 #include <LibWeb/WebAudio/DynamicsCompressorNode.h>
 
 namespace Web::WebAudio {
@@ -26,8 +27,9 @@ WebIDL::ExceptionOr<JS::NonnullGCPtr<DynamicsCompressorNode>> DynamicsCompressor
     return realm.vm().heap().allocate<DynamicsCompressorNode>(realm, realm, context, options);
 }
 
-DynamicsCompressorNode::DynamicsCompressorNode(JS::Realm& realm, JS::NonnullGCPtr<BaseAudioContext> context, DynamicsCompressorOptions const&)
+DynamicsCompressorNode::DynamicsCompressorNode(JS::Realm& realm, JS::NonnullGCPtr<BaseAudioContext> context, DynamicsCompressorOptions const& options)
     : AudioNode(realm, context)
+    , m_threshold(AudioParam::create(realm, options.threshold, -100, 0, Bindings::AutomationRate::KRate))
 {
 }
 
@@ -40,6 +42,7 @@ void DynamicsCompressorNode::initialize(JS::Realm& realm)
 void DynamicsCompressorNode::visit_edges(Cell::Visitor& visitor)
 {
     Base::visit_edges(visitor);
+    visitor.visit(m_threshold);
 }
 
 }
