@@ -33,6 +33,7 @@ DynamicsCompressorNode::DynamicsCompressorNode(JS::Realm& realm, JS::NonnullGCPt
     , m_knee(AudioParam::create(realm, options.knee, 0, 40, Bindings::AutomationRate::KRate))
     , m_ratio(AudioParam::create(realm, options.ratio, 1, 20, Bindings::AutomationRate::KRate))
     , m_attack(AudioParam::create(realm, options.attack, 0, 1, Bindings::AutomationRate::KRate))
+    , m_release(AudioParam::create(realm, options.release, 0, 1, Bindings::AutomationRate::KRate))
 {
 }
 
@@ -49,6 +50,7 @@ void DynamicsCompressorNode::visit_edges(Cell::Visitor& visitor)
     visitor.visit(m_knee);
     visitor.visit(m_ratio);
     visitor.visit(m_attack);
+    visitor.visit(m_release);
 }
 
 }
