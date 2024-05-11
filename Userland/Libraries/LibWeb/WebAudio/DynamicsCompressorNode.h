@@ -32,6 +32,7 @@ public:
 
     JS::NonnullGCPtr<AudioParam const> threshold() const { return m_threshold; }
     JS::NonnullGCPtr<AudioParam const> knee() const { return m_knee; }
+    JS::NonnullGCPtr<AudioParam const> ratio() const { return m_ratio; }
 
 protected:
     DynamicsCompressorNode(JS::Realm&, JS::NonnullGCPtr<BaseAudioContext>, DynamicsCompressorOptions const& = {});
@@ -45,6 +46,9 @@ private:
 
     // https://webaudio.github.io/web-audio-api/#dom-dynamicscompressornode-knee
     JS::NonnullGCPtr<AudioParam> m_knee;
+
+    // https://webaudio.github.io/web-audio-api/#dom-dynamicscompressornode-ratio
+    JS::NonnullGCPtr<AudioParam> m_ratio;
 };
 
 }
