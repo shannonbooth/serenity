@@ -3,3 +3,4 @@ AudioNode
 EventTarget
 Object
 [object AudioParam] current: -24, default: -24, min: -100, max: 0, rate: k-rate
+[object AudioParam] current: 30, default: 30, min: 0, max: 40, rate: k-rate

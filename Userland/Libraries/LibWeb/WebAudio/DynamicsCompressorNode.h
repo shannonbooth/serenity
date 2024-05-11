@@ -31,6 +31,7 @@ public:
     static WebIDL::ExceptionOr<JS::NonnullGCPtr<DynamicsCompressorNode>> construct_impl(JS::Realm&, JS::NonnullGCPtr<BaseAudioContext>, DynamicsCompressorOptions const& = {});
 
     JS::NonnullGCPtr<AudioParam const> threshold() const { return m_threshold; }
+    JS::NonnullGCPtr<AudioParam const> knee() const { return m_knee; }
 
 protected:
     DynamicsCompressorNode(JS::Realm&, JS::NonnullGCPtr<BaseAudioContext>, DynamicsCompressorOptions const& = {});
@@ -41,6 +42,9 @@ protected:
 private:
     // https://webaudio.github.io/web-audio-api/#dom-dynamicscompressornode-threshold
     JS::NonnullGCPtr<AudioParam> m_threshold;
+
+    // https://webaudio.github.io/web-audio-api/#dom-dynamicscompressornode-knee
+    JS::NonnullGCPtr<AudioParam> m_knee;
 };
 
 }

@@ -17,7 +17,7 @@ interface DynamicsCompressorNode : AudioNode {
     constructor(BaseAudioContext context,
                 optional DynamicsCompressorOptions options = {});
     readonly attribute AudioParam threshold;
-    // FIXME: readonly attribute AudioParam knee;
+    readonly attribute AudioParam knee;
     // FIXME: readonly attribute AudioParam ratio;
     // FIXME: readonly attribute float reduction;
     // FIXME: readonly attribute AudioParam attack;
