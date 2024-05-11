@@ -20,6 +20,6 @@ interface DynamicsCompressorNode : AudioNode {
     readonly attribute AudioParam knee;
     readonly attribute AudioParam ratio;
     // FIXME: readonly attribute float reduction;
-    // FIXME: readonly attribute AudioParam attack;
+    readonly attribute AudioParam attack;
     // FIXME: readonly attribute AudioParam release;
 };
