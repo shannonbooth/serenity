@@ -500,6 +500,8 @@ class Performance;
 
 namespace Web::IndexedDB {
 class IDBFactory;
+class IDBOpenDBRequest;
+class IDBRequest;
 }
 
 namespace Web::Internals {
