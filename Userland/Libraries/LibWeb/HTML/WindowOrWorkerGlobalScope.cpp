@@ -16,7 +16,6 @@
 #include <LibTextCodec/Decoder.h>
 #include <LibWeb/Bindings/MainThreadVM.h>
 #include <LibWeb/Fetch/FetchMethod.h>
-#include <LibWeb/Forward.h>
 #include <LibWeb/HTML/CanvasRenderingContext2D.h>
 #include <LibWeb/HTML/EventLoop/EventLoop.h>
 #include <LibWeb/HTML/ImageBitmap.h>
@@ -30,6 +29,7 @@
 #include <LibWeb/HTML/WindowOrWorkerGlobalScope.h>
 #include <LibWeb/HighResolutionTime/Performance.h>
 #include <LibWeb/HighResolutionTime/SupportedPerformanceTypes.h>
+#include <LibWeb/IndexedDB/IDBFactory.h>
 #include <LibWeb/Infra/Base64.h>
 #include <LibWeb/PerformanceTimeline/EntryTypes.h>
 #include <LibWeb/PerformanceTimeline/PerformanceObserver.h>
@@ -687,6 +687,16 @@ JS::NonnullGCPtr<HighResolutionTime::Performance> WindowOrWorkerGlobalScopeMixin
     if (!m_performance)
         m_performance = this_impl().heap().allocate<HighResolutionTime::Performance>(realm, realm);
     return JS::NonnullGCPtr { *m_performance };
+}
+
+JS::NonnullGCPtr<IndexedDB::IDBFactory> WindowOrWorkerGlobalScopeMixin::indexed_db()
+{
+    auto& vm = this_impl().vm();
+    auto& realm = this_impl().realm();
+
+    if (!m_indexed_db)
+        m_indexed_db = vm.heap().allocate<IndexedDB::IDBFactory>(realm, realm);
+    return *m_indexed_db;
 }
 
 // https://w3c.github.io/performance-timeline/#dfn-frozen-array-of-supported-entry-types
