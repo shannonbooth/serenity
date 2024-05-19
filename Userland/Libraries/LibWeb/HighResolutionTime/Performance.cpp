@@ -340,6 +340,14 @@ WebIDL::ExceptionOr<Vector<JS::Handle<PerformanceTimeline::PerformanceEntry>>> P
     return TRY_OR_THROW_OOM(vm, window_or_worker().filter_buffer_map_by_name_and_type(name, type));
 }
 
+// https://w3c.github.io/resource-timing/#dom-performance-clearresourcetimings
+void Performance::clear_resource_timings()
+{
+    // 1. Remove all PerformanceResourceTiming objects in the performance entry buffer.
+    // 2. Set resource timing buffer current size to 0.
+    window_or_worker().clear_performance_entry_buffer({});
+}
+
 HTML::WindowOrWorkerGlobalScopeMixin& Performance::window_or_worker()
 {
     auto* window_or_worker = dynamic_cast<HTML::WindowOrWorkerGlobalScopeMixin*>(&realm().global_object());

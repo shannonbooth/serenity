@@ -53,6 +53,7 @@ public:
 
     PerformanceTimeline::PerformanceEntryTuple& relevant_performance_entry_tuple(FlyString const& entry_type);
     void queue_performance_entry(JS::NonnullGCPtr<PerformanceTimeline::PerformanceEntry> new_entry);
+    void clear_performance_entry_buffer(Badge<HighResolutionTime::Performance>);
     void clear_performance_entry_buffer(Badge<HighResolutionTime::Performance>, FlyString const& entry_type);
     void remove_entries_from_performance_entry_buffer(Badge<HighResolutionTime::Performance>, FlyString const& entry_type, String entry_name);
 

@@ -28,4 +28,7 @@ interface Performance : EventTarget {
     PerformanceEntryList getEntries();
     PerformanceEntryList getEntriesByType(DOMString type);
     PerformanceEntryList getEntriesByName(DOMString name, optional DOMString type);
+
+    // https://w3c.github.io/resource-timing/#sec-extensions-performance-interface
+    undefined clearResourceTimings();
 };

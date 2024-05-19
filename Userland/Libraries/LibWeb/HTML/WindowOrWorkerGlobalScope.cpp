@@ -479,6 +479,11 @@ void WindowOrWorkerGlobalScopeMixin::queue_performance_entry(JS::NonnullGCPtr<Pe
     queue_the_performance_observer_task();
 }
 
+void WindowOrWorkerGlobalScopeMixin::clear_performance_entry_buffer(Badge<HighResolutionTime::Performance>)
+{
+    m_performance_entry_buffer_map.clear();
+}
+
 void WindowOrWorkerGlobalScopeMixin::clear_performance_entry_buffer(Badge<HighResolutionTime::Performance>, FlyString const& entry_type)
 {
     auto& tuple = relevant_performance_entry_tuple(entry_type);
