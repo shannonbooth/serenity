@@ -39,6 +39,7 @@
 #include <LibWeb/HTML/TagNames.h>
 #include <LibWeb/HTML/Window.h>
 #include <LibWeb/HTML/WindowProxy.h>
+#include <LibWeb/HighResolutionTime/EventNames.h>
 #include <LibWeb/MathML/TagNames.h>
 #include <LibWeb/Namespace.h>
 #include <LibWeb/NavigationTiming/EntryNames.h>
@@ -91,6 +92,7 @@ ErrorOr<void> initialize_main_thread_vm()
 
     // These strings could potentially live on the VM similar to CommonPropertyNames.
     DOM::MutationType::initialize_strings();
+    HighResolutionTime::EventNames::initialize_strings();
     HTML::AttributeNames::initialize_strings();
     HTML::CustomElementReactionNames::initialize_strings();
     HTML::EventNames::initialize_strings();

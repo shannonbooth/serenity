@@ -441,6 +441,7 @@ set(SOURCES
     HTML/WorkerGlobalScope.cpp
     HTML/WorkerLocation.cpp
     HTML/WorkerNavigator.cpp
+    HighResolutionTime/EventNames.cpp
     HighResolutionTime/Performance.cpp
     HighResolutionTime/TimeOrigin.cpp
     Infra/Base64.cpp
