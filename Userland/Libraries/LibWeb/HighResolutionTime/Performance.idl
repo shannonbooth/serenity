@@ -31,4 +31,5 @@ interface Performance : EventTarget {
 
     // https://w3c.github.io/resource-timing/#sec-extensions-performance-interface
     undefined clearResourceTimings();
+    attribute EventHandler onresourcetimingbufferfull;
 };

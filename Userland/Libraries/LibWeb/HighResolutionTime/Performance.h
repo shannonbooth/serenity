@@ -38,6 +38,9 @@ public:
 
     void clear_resource_timings();
 
+    void set_onresourcetimingbufferfull(JS::GCPtr<WebIDL::CallbackType>);
+    JS::GCPtr<WebIDL::CallbackType> onresourcetimingbufferfull();
+
 private:
     explicit Performance(JS::Realm&);
 

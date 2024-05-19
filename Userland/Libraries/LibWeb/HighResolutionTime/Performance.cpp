@@ -11,6 +11,7 @@
 #include <LibWeb/DOM/EventDispatcher.h>
 #include <LibWeb/HTML/StructuredSerialize.h>
 #include <LibWeb/HTML/Window.h>
+#include <LibWeb/HighResolutionTime/EventNames.h>
 #include <LibWeb/HighResolutionTime/Performance.h>
 #include <LibWeb/HighResolutionTime/TimeOrigin.h>
 #include <LibWeb/NavigationTiming/EntryNames.h>
@@ -346,6 +347,18 @@ void Performance::clear_resource_timings()
     // 1. Remove all PerformanceResourceTiming objects in the performance entry buffer.
     // 2. Set resource timing buffer current size to 0.
     window_or_worker().clear_performance_entry_buffer({});
+}
+
+// https://w3c.github.io/resource-timing/#dom-performance-onresourcetimingbufferfull
+void Performance::set_onresourcetimingbufferfull(JS::GCPtr<WebIDL::CallbackType> value)
+{
+    set_event_handler_attribute(HighResolutionTime::EventNames::resourcetimingbufferfull, value);
+}
+
+// https://w3c.github.io/resource-timing/#dom-performance-onresourcetimingbufferfull
+JS::GCPtr<WebIDL::CallbackType> Performance::onresourcetimingbufferfull()
+{
+    return event_handler_attribute(HighResolutionTime::EventNames::resourcetimingbufferfull);
 }
 
 HTML::WindowOrWorkerGlobalScopeMixin& Performance::window_or_worker()
